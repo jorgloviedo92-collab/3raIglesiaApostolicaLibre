@@ -390,6 +390,88 @@
       tr { page-break-inside: avoid; }
     }
     .print-only { display: none; }
+
+    /* ═══════════ Capa empresarial II ═══════════
+       Diálogos propios, barras de herramientas de tablas, encabezados ordenables
+       y formato institucional de documentos impresos. */
+    /* Diálogo de confirmación */
+    .ent-dialog-backdrop { position: fixed; inset: 0; z-index: 2100; display: flex; align-items: center; justify-content: center; padding: 16px;
+      background: rgba(11, 37, 64, .45); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); animation: entFade .14s ease-out; }
+    .ent-dialog-backdrop.ent-leaving { animation: entFadeOut .14s ease-in forwards; }
+    .ent-dialog { width: 100%; max-width: 440px; background: #fff; border-radius: 14px; border: 1px solid #d7e5f2;
+      box-shadow: 0 24px 60px -20px rgba(11, 37, 64, .55); padding: 20px 20px 16px; animation: entPop .16s ease-out; }
+    .ent-dialog-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .ent-dialog-head h3 { font-size: 16px; font-weight: 600; color: #0b2540; margin: 0; }
+    .ent-dialog-icon { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: #e6f1fb; color: #0f5fa8; font-size: 15px; }
+    .ent-tone-danger .ent-dialog-icon { background: #fdecee; color: #be123c; }
+    .ent-tone-warning .ent-dialog-icon { background: #fff4e0; color: #b45309; }
+    .ent-dialog-msg { font-size: 14px; line-height: 1.55; color: #334155; white-space: pre-line; margin: 0 0 18px 44px; }
+    .ent-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .ent-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      border: 1px solid transparent; cursor: pointer; transition: background-color .15s ease, border-color .15s ease, color .15s ease; white-space: nowrap; }
+    .ent-btn-primary { background: #0f5fa8; color: #fff; }
+    .ent-btn-primary:hover { background: #0c4f8f; }
+    .ent-btn-danger { background: #be123c; color: #fff; }
+    .ent-btn-danger:hover { background: #9f1239; }
+    .ent-btn-ghost { background: #fff; color: #334155; border-color: #cbd5e1; }
+    .ent-btn-ghost:hover { background: #f1f5f9; }
+    .ent-btn-sm { padding: 6px 10px; font-size: 12px; }
+    @keyframes entFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes entFadeOut { to { opacity: 0; } }
+    @keyframes entPop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+    @media (max-width: 480px) { .ent-dialog-msg { margin-left: 0; } .ent-dialog-actions .ent-btn { flex: 1; } }
+
+    /* Barra de herramientas de tablas (buscar, exportar, imprimir) */
+    .ent-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .ent-search { position: relative; flex: 1 1 200px; min-width: 0; }
+    .ent-search i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 12px; pointer-events: none; }
+    .ent-search input { width: 100%; padding: 7px 10px 7px 30px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; background: #fff; }
+    .ent-toolbar-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    #view-directorio .ent-toolbar-actions { justify-content: flex-end; }
+
+    /* Campos: borde y halo de enfoque uniformes en todo el sistema */
+    #view-registro input:focus, #view-registro select:focus, #view-registro textarea:focus,
+    #view-directorio input:focus, #view-directorio select:focus,
+    #view-contribuciones input:focus, #view-contribuciones select:focus,
+    #view-caja input:focus, #view-caja select:focus,
+    #view-reportes input:focus, #view-reportes select:focus,
+    #configModal input:focus, #aiSuiteModal input:focus, #aiSuiteModal select:focus, .ent-search input:focus {
+      outline: none; border-color: #1b82d1 !important; box-shadow: 0 0 0 3px rgba(27, 130, 209, .16);
+    }
+
+    /* Libros de Contribuciones y Caja: encabezado fijo, filas alternas y orden por columna */
+    #view-contribuciones table thead th, #view-caja table thead th { position: sticky; top: 0; z-index: 1; background: #f1f5f9; color: #475569; }
+    #contributionsTableBody tr:nth-child(even), #cashTableBody tr:nth-child(even) { background-color: #fafcff; }
+    #contributionsTableBody tr:hover, #cashTableBody tr:hover { background-color: #eef6ff; }
+    th[data-sort] { cursor: pointer; user-select: none; white-space: nowrap; }
+    th[data-sort]:hover { color: #0f5fa8 !important; }
+    th[data-sort]::after { content: "\2195"; margin-left: 5px; font-size: 10px; opacity: .35; }
+    th[data-sort][aria-sort="ascending"]::after { content: "\2191"; opacity: .9; }
+    th[data-sort][aria-sort="descending"]::after { content: "\2193"; opacity: .9; }
+
+    /* ── Documentos impresos ── */
+    @page { size: letter; margin: 14mm 12mm 16mm 12mm;
+      @bottom-left { content: "EcclesiaSoft Pro · Documento institucional"; font-size: 7.5pt; color: #64748b; }
+      @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 7.5pt; color: #64748b; }
+    }
+    @page certificado { margin: 12mm; @bottom-left { content: none; } @bottom-right { content: none; } }
+    .cert-doc { page: certificado; }
+    .doc-head { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px; color: #0f172a; }
+    .doc-head img { width: 54px; height: 54px; object-fit: contain; flex-shrink: 0; }
+    .doc-head .doc-org { font-size: 11pt; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; margin: 0; }
+    .doc-head .doc-sub { font-size: 7.5pt; color: #475569; margin: 1px 0 0; }
+    .doc-head .doc-meta { margin-left: auto; text-align: right; font-size: 7.5pt; color: #334155; line-height: 1.45; }
+    .doc-title { font-size: 13pt; font-weight: 700; margin: 4px 0 2px; color: #0f172a; }
+    .doc-filtros { font-size: 7.5pt; color: #475569; margin: 0 0 8px; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 8pt; color: #0f172a; }
+    .doc-table th { background: #e2e8f0; text-align: left; padding: 4px 6px; border: 1px solid #cbd5e1; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .doc-table td { padding: 3px 6px; border: 1px solid #cbd5e1; vertical-align: top; }
+    .doc-table .num { text-align: right !important; white-space: nowrap; }
+    .doc-table tfoot td { font-weight: 700; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .doc-table thead { display: table-header-group; }
+    .doc-firmas { margin-top: 42px; display: flex; justify-content: space-around; text-align: center; font-size: 8pt; break-inside: avoid; }
+    .doc-firmas div { width: 200px; border-top: 1px solid #0f172a; padding-top: 4px; font-weight: 600; }
   </style>
   <link rel="icon" type="image/webp" href="data:image/webp;base64,UklGRsQIAABXRUJQVlA4WAoAAAAQAAAALwAALwAAQUxQSBwCAAABoLRtmyHJVv9GRGFs27Zte2uuuLNte/a2eWysbNt2dXzxvYc5WRERE4DEJgOg4ZTDj3/wY6Hw0wePH5rcEEDGIG0HVJp1+wcm/vHOnEqAS8c4VFz1CckgQZVUDRJIfra2MqxJwQKT3ydFlIlVhPxoBmDvy6HiCdIrU1RPnq0Cdx8ZtH6VEphy8HyzHTKJHHp+Q88ien7XF5kEDl1+pLCowp97wP2PRd3PKCyy8MuGsP9hXOYpehbd8/msM/9y2EjPCEu4FQ6ANe28aAwq0hEOsLhLYZTCB2Dh0J/CSAP7wzlcoY/F8zIc6v2hGovqn/WBefSM1nMecE0lHuF1lPuEGo/y0/JdA6MO3aYyxBQ4dSUlJuGqvbHtOxbb8cOxHd4c29Z5sS0aTo1JOaruT9R4lL82wvOUeAJfsNilPh6vB4B+DPEEDoHJvKUhlqDv50wGi+lj8VyJjDGVv9EQh/Lb6sbAYQklDs+dyADG5l9jiOSAyQCweIQShfAxWMCg7JcqWrwQRD/MwcCiPUmGYgWSlOawcOhT+OXzryjFEX78xpe/FLrAATCN6pSv/jBLND0t4eNVXPnaDQ0S5k9TJS1RXiyDxNYYCyzzlJBG8JTVgIUx9n/+bSx6PU0G0WQqQj7bB9YgRQcz8yWSKkGVVA2iJF+da5FBuhZw409/wcRfnZuUBSxSzwCoPmHnA+/8WCj58d2Hdk2qCSBjkBhWUDggggYAAHAfAJ0BKjAAMAA+PRaIRCIhIR40ACADxLYATplCPCZAlgfsmsIkj6zsdPqA5WD1F+YD9jfWq9AH956KP2AP2O9gDy3/Yr/cP9nfgI/aX//3ih9H8C/A95A9pfTCw71m/uF+H8c+8H3zZJv755gfsH6QdwVWn0AvXH5//i+MD6geaR/r/R/+8eAN4l/jvcA/lX87/zH25fR9+/f8//J/lB7Kfy3+3f9f7VfsC/lP9C/z39p/dH/Af//6evWx+x/syfsq6YPf0rzYvQPyA02DrbZ/FImBTjxS8jMbhIfSSl7fzjW/+OYgQ5HD2wL2zCgwK6GSCjriAmjkrXqLDLNlF2+75VqAAP7/sNbiCOPl/cbQ3j5T2ZbH67z/lM/otphQgP0Lj4QNogRBZEFlMYGsdtZn+8Y69NGzZ33X/C252A2B9rXkZgetb+mFWVyUafEwtbX6sdyGrvr5n4EreIko47b1M6RZZ6QHYrZHOjYj0FGMCjuXahqKndcybnn6+RabK2Sipkr3WRJUaJ/ZRhtocmxvcCbqduE6gLlRf8lZ8s7ukl/Ta/pOoqaz54/RIvPE2UplUzSiT2XjK3kOmAvXxOYgJ8qrNeLRQV2UpXT90e0OayyfTavXX78uEsjNCxpX73udgEkPdM/NmXuz+Pqb4B1flH6V0+HlR/Mdaeb/DFuHNm0JukJ9PEUrmakpvxdpALHA1unKO7H02re9WKKKwYYtxsggouI7o1rstWDOFrH5e9pXltlnF8J2xqvE67JcJ4E3sT1I7faUKafnnifnKealKnCBM56WO2xxFuEBiCca4GBJwfRLGIFXuHDV+9xDVc4DoQeo9pTbCMVV8cKa+4HpSQRBbrDUpFP+UCl7FS3mLvyDZS7XmdllUfEqZgat9fiGq72WBUM3rNLde+tHQnoeIutoNGC2nPMykFxg+Exu4OufSTAmC7DmxfTv1tIaPQYeVR5yoqMUla/oNC33vYkKbeFiJjj2UiJN+ioM5JFRvwB/Ud9LivixNcQe8LH66I/EDNiW2e8cvynE6m8IE3NDMY1NWvbsvJ5cU/u/QMKte3XGVnOZiHT9/kybk1VwJx1fJwFUZ/V6fbte2FJQQEYFcHsFe2EQtwzyXJQsz0RWr6bQOS0Y58c2cPqYTida7eCF+o3/lOGuq1FykQfW3KoWrnMfSotWHhUfClS83ben+/LcgL4fREropKaEbdP36bScHW9p/OsRWFEb6wgJaqOtJhoMVYgsRVA7NKiknjjwn/COr5zq/vPcxlcKAYIJsZZRfvJw5gDhFQh5V0p5YbOKDw64sR6M+qvMgUrzemXByQipR5z4NpTC48rK9aFoJitPPsVDKQeF160Ta0tU9AmP8Kb6+npFMPgXT/jD2jBpHvmxKbhe8GZgUjcgsLKZO8iMhDrFT7KecMIgt4VF3x3fx4DK7eDmurwB5UZTknlcnG7Y7t3D45VCPxYhfx/+N2UZRKVSKzSxsdKp9XR7T/mlgjZeq5b2WOUOyF9+cYI5UkrkzdEl+laTplJj7q0Ubj+5hhTowJiGRXYQvCKKeRa/A3uWr0quT2qKVIfeaWTZZqlsf5cXAlgSpfCfumfMLkNu+qZRuVAiZ2PeP3xlYZbu1nXPOsMt6LOSAvjm9B3mL4j8Zo/zgOLnZkA5+WH17300EEn+2EzojyR4uiqri2mSjDq5f7DywxWSFMWXkmh94yOkaaQlLaVLipIYjYczlxVd6tuW61kSx6GWRBMtZYX/Qyf4xl5XcILb1ou3uK32Ikub+O0v8WCrJf2VGk5P71UgGRWP2z0iVH4lDcS6e3O1l+/kmr+QyxYlrdJyVv9Y+yd9vPeM3lm9ocnZmi5ndmmudwHcr0Lh/f6xbgDgoFj/O43lQdy8fZp9jh/6vosMnZ+4z02GQvc+fxtApsSHsc4XtNb/+tT3VmwJntE3b008FoC82YxWaunMCecPdnyx2Fw+bRQm0W2LsTzdAnwt3kGWwM5X+hDspz+YCFAbByeorcJcwmyl2zMiB74n1Mvorw36mcNT6uIL2giJOBWIvjdFgRCEyrmaSxioS3R+CYpHO1XtKykwBW5cXfmNa3I6/5NLffLqCWuNP64/kYjSlSV/3a5DNbOS6wrighnYB5NVxyf6/kRREPsx8b3dww5vUqRtb/+ihI1KG55LIPMmpz3YDZBfp6okJFQls/DwrQIxySF0+FumbZ/RIgdz/IlAAAA=" />
   <meta name="theme-color" content="#0f5fa8" />
@@ -1985,6 +2067,10 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
               <option value="Femenino">Femenino</option>
             </select>
           </div>
+          <div class="ent-toolbar-actions no-print">
+            <button type="button" id="btnDirCsv" class="ent-btn ent-btn-ghost ent-btn-sm" title="Descargar la lista filtrada en formato CSV (Excel)"><i class="fa-solid fa-file-csv"></i> Exportar lista</button>
+            <button type="button" id="btnDirPrint" class="ent-btn ent-btn-ghost ent-btn-sm" title="Imprimir la lista filtrada con formato institucional"><i class="fa-solid fa-print"></i> Imprimir lista</button>
+          </div>
         </div>
       </div>
 
@@ -2062,15 +2148,22 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
               <h3 class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-slate-600 mr-1.5"></i> Libro de Contribuciones Asentadas</h3>
               <span class="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full" id="contribBadgeTotal">Total: C$0.00</span>
             </div>
+            <div class="ent-toolbar no-print">
+              <div class="ent-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" id="contribSearch" placeholder="Buscar por miembro, tipo, método o nota..." aria-label="Buscar en el libro de contribuciones" /></div>
+              <div class="ent-toolbar-actions">
+                <button type="button" id="btnContribCsv" class="ent-btn ent-btn-ghost ent-btn-sm" title="Descargar en formato CSV (Excel)"><i class="fa-solid fa-file-csv"></i> Exportar</button>
+                <button type="button" id="btnContribPrint" class="ent-btn ent-btn-ghost ent-btn-sm" title="Imprimir el libro con formato institucional"><i class="fa-solid fa-print"></i> Imprimir</button>
+              </div>
+            </div>
             <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
               <table class="w-full text-left border-collapse text-xs min-w-[500px]">
                 <thead>
                   <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
-                    <th class="py-2.5 px-3">Fecha</th>
-                    <th class="py-2.5 px-3">Miembro</th>
-                    <th class="py-2.5 px-3">Tipo</th>
-                    <th class="py-2.5 px-3">Método</th>
-                    <th class="py-2.5 px-3 text-right">Monto</th>
+                    <th class="py-2.5 px-3" data-sort="date">Fecha</th>
+                    <th class="py-2.5 px-3" data-sort="member">Miembro</th>
+                    <th class="py-2.5 px-3" data-sort="type">Tipo</th>
+                    <th class="py-2.5 px-3" data-sort="method">Método</th>
+                    <th class="py-2.5 px-3 text-right" data-sort="amount">Monto</th>
                     <th class="py-2.5 px-3 text-right no-print">Acción</th>
                   </tr>
                 </thead>
@@ -2188,16 +2281,23 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
                 </select>
               </div>
             </div>
+            <div class="ent-toolbar no-print">
+              <div class="ent-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" id="cfSearch" placeholder="Buscar por recibo, concepto o detalle..." aria-label="Buscar en el libro de caja" /></div>
+              <div class="ent-toolbar-actions">
+                <button type="button" id="btnCashCsv" class="ent-btn ent-btn-ghost ent-btn-sm" title="Descargar en formato CSV (Excel)"><i class="fa-solid fa-file-csv"></i> Exportar</button>
+                <button type="button" id="btnCashPrint" class="ent-btn ent-btn-ghost ent-btn-sm" title="Imprimir el libro con formato institucional"><i class="fa-solid fa-print"></i> Imprimir</button>
+              </div>
+            </div>
             <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
               <table class="w-full text-left border-collapse text-xs min-w-[540px]">
                 <thead>
                   <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
-                    <th class="py-2.5 px-3">Fecha</th>
-                    <th class="py-2.5 px-3">Tipo</th>
-                    <th class="py-2.5 px-3">Recibo</th>
-                    <th class="py-2.5 px-3">Concepto</th>
-                    <th class="py-2.5 px-3">Detalle</th>
-                    <th class="py-2.5 px-3 text-right">Monto (C$)</th>
+                    <th class="py-2.5 px-3" data-sort="date">Fecha</th>
+                    <th class="py-2.5 px-3" data-sort="type">Tipo</th>
+                    <th class="py-2.5 px-3" data-sort="receipt">Recibo</th>
+                    <th class="py-2.5 px-3" data-sort="concept">Concepto</th>
+                    <th class="py-2.5 px-3" data-sort="notes">Detalle</th>
+                    <th class="py-2.5 px-3 text-right" data-sort="amount">Monto (C$)</th>
                     <th class="py-2.5 px-3 text-right no-print">Acción</th>
                   </tr>
                 </thead>
@@ -2531,6 +2631,61 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       return `${Math.max(0, years)} años${months > 0 ? `, ${months} m` : ''}`;
     }
 
+    // Diálogo de confirmación propio (reemplaza confirm() del navegador).
+    // appConfirm({ title, message, confirmText, cancelText, tone: 'danger' | 'primary' | 'warning' }) → Promise<boolean>
+    function appConfirm(opts) {
+      const o = Object.assign({ title: 'Confirmar acción', message: '', confirmText: 'Confirmar', cancelText: 'Cancelar', tone: 'primary' }, opts || {});
+      return new Promise(resolve => {
+        const previo = document.activeElement;
+        const capa = document.createElement('div');
+        capa.className = 'ent-dialog-backdrop';
+        const icono = o.tone === 'danger' ? 'fa-triangle-exclamation' : (o.tone === 'warning' ? 'fa-circle-exclamation' : 'fa-circle-question');
+        capa.innerHTML = `
+          <div class="ent-dialog ent-tone-${esc(o.tone)}" role="alertdialog" aria-modal="true" aria-labelledby="entDlgTitle" aria-describedby="entDlgMsg">
+            <div class="ent-dialog-head">
+              <span class="ent-dialog-icon"><i class="fa-solid ${icono}"></i></span>
+              <h3 id="entDlgTitle"></h3>
+            </div>
+            <p id="entDlgMsg" class="ent-dialog-msg"></p>
+            <div class="ent-dialog-actions">
+              <button type="button" class="ent-btn ent-btn-ghost" data-r="0"></button>
+              <button type="button" class="ent-btn ent-btn-${o.tone === 'danger' ? 'danger' : 'primary'}" data-r="1"></button>
+            </div>
+          </div>`;
+        capa.querySelector('#entDlgTitle').textContent = o.title;
+        capa.querySelector('#entDlgMsg').textContent = o.message;
+        capa.querySelector('[data-r="0"]').textContent = o.cancelText;
+        capa.querySelector('[data-r="1"]').textContent = o.confirmText;
+        let cerrado = false;
+        const cerrar = (r) => {
+          if (cerrado) return;
+          cerrado = true;
+          document.removeEventListener('keydown', teclas, true);
+          capa.classList.add('ent-leaving');
+          setTimeout(() => capa.remove(), 140);
+          if (previo && previo.focus) { try { previo.focus(); } catch (e) {} }
+          resolve(r);
+        };
+        const teclas = (e) => {
+          if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrar(false); }
+          else if (e.key === 'Tab') {
+            const bs = capa.querySelectorAll('button');
+            if (e.shiftKey && document.activeElement === bs[0]) { e.preventDefault(); bs[1].focus(); }
+            else if (!e.shiftKey && document.activeElement === bs[1]) { e.preventDefault(); bs[0].focus(); }
+          }
+        };
+        capa.addEventListener('click', (e) => {
+          const b = e.target.closest('button[data-r]');
+          if (b) cerrar(b.getAttribute('data-r') === '1');
+          else if (e.target === capa) cerrar(false);
+        });
+        document.addEventListener('keydown', teclas, true);
+        document.body.appendChild(capa);
+        // En acciones peligrosas el foco inicial queda en "Cancelar"
+        capa.querySelector(o.tone === 'danger' ? '[data-r="0"]' : '[data-r="1"]').focus();
+      });
+    }
+
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const isError = type === 'error';
@@ -2734,7 +2889,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     }
 
     async function logoutSystem(confirmUser = true, customMessage = null) {
-      if (!confirmUser || confirm("¿Deseas cerrar la sesión de forma segura?")) {
+      if (!confirmUser || await appConfirm({ title: 'Cerrar sesión', message: '¿Deseas cerrar la sesión? Para volver a entrar tendrás que ingresar tu PIN.', confirmText: 'Cerrar sesión' })) {
         if (inactivityTimer) {
           clearTimeout(inactivityTimer);
           inactivityTimer = null;
@@ -3788,7 +3943,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         showToast("Se requiere rol Administrador para eliminar registros.", "error");
         return;
       }
-      if (!confirm(`¿Confirmas la baja de "${name}"? El registro quedará archivado en la Papelera.`)) return;
+      if (!(await appConfirm({ title: 'Dar de baja', message: `¿Confirmas la baja de "${name}"?\n\nEl registro quedará archivado en la Papelera y podrás restaurarlo.`, confirmText: 'Dar de baja', tone: 'danger' }))) return;
 
       showSaving("Registrando baja...");
       try {
@@ -3807,7 +3962,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
     async function executeLogicalRestore(table, id) {
       if (getCurrentRole() !== 'admin') return;
-      if (!confirm("¿Deseas restaurar este registro y devolverlo al sistema activo?")) return;
+      if (!(await appConfirm({ title: 'Restaurar registro', message: '¿Deseas restaurar este registro y devolverlo al sistema activo?', confirmText: 'Restaurar' }))) return;
 
       showSaving("Restaurando registro...");
       try {
@@ -3837,7 +3992,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         caja: { label: 'Movimientos de caja anulados', table: 'cash' }
       }[filter] || { label: 'este módulo', table: '' };
 
-      if (!confirm(`¿Estás completamente seguro de ELIMINAR PERMANENTEMENTE todos los registros de ${filterInfo.label} de la papelera?\n\nEsta acción no se puede deshacer y borrará los datos definitivamente de la base de datos.`)) {
+      if (!(await appConfirm({ title: 'Vaciar papelera', message: `Se eliminarán PERMANENTEMENTE todos los registros de ${filterInfo.label}.\n\nEsta acción no se puede deshacer: los datos se borran definitivamente de la base de datos.`, confirmText: 'Eliminar definitivamente', tone: 'danger' }))) {
         return;
       }
 
@@ -3980,7 +4135,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         if (document.getElementById('cfType').value === 'Salida') {
           const saldo = contributions.reduce((s, c) => s + (parseFloat(c.amount || c.monto) || 0), 0) +
             cashFlow.reduce((s, cf) => s + ((cf.movementType || cf.tipoMovimiento) === 'Entrada' ? 1 : -1) * (parseFloat(cf.amount || cf.monto) || 0), 0);
-          if (amt > saldo && !confirm(`Este egreso de ${fmtMoney(amt)} supera el saldo disponible (${fmtMoney(saldo)}).\nEl saldo quedará en ${fmtMoney(saldo - amt)}.\n\n¿Deseas registrarlo de todas formas?`)) return;
+          if (amt > saldo && !(await appConfirm({ title: 'Saldo insuficiente', message: `Este egreso de ${fmtMoney(amt)} supera el saldo disponible (${fmtMoney(saldo)}).\nEl saldo quedará en ${fmtMoney(saldo - amt)}.\n\n¿Deseas registrarlo de todas formas?`, confirmText: 'Registrar egreso', tone: 'warning' }))) return;
         }
 
         showSaving("Registrando movimiento...");
@@ -4047,6 +4202,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         if (q && !nameVal.toLowerCase().includes(q) && !idVal.toLowerCase().includes(q)) return false;
         return true;
       });
+
+      dirListaFiltrada = filtered; // para Exportar / Imprimir lista
 
       // 2. Paginación visual de 25 registros por página
       const totalItems = filtered.length;
@@ -4394,6 +4551,215 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         </div>`;
     }
 
+    // ── Búsqueda, orden, exportación CSV e impresión institucional de listados ──
+    let dirListaFiltrada = [];
+    const ordenTablas = { contrib: { key: 'date', dir: 'desc' }, cash: { key: 'date', dir: 'desc' } };
+    const normTxt = (v) => String(v == null ? '' : v).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const VALOR_ORDEN = {
+      contrib: {
+        date: c => c.date || c.fecha || '', member: c => normTxt(c.memberName || c.nombreMiembro), type: c => normTxt(c.type || c.tipoContribucion),
+        method: c => normTxt(c.method || c.metodoPago), amount: c => parseFloat(c.amount || c.monto) || 0
+      },
+      cash: {
+        date: c => c.date || c.fecha || '', type: c => c.movementType || c.tipoMovimiento || '', receipt: c => normTxt(c.receipt || c.reciboFactura),
+        concept: c => normTxt(c.category || c.categoriaConcepto), notes: c => normTxt(c.notes || c.descripcionObservacion), amount: c => parseFloat(c.amount || c.monto) || 0
+      }
+    };
+    function ordenarLista(lista, tabla) {
+      const o = ordenTablas[tabla], f = VALOR_ORDEN[tabla][o.key], s = o.dir === 'asc' ? 1 : -1;
+      return lista.map((x, i) => [x, i]).sort((a, b) => {
+        const va = f(a[0]), vb = f(b[0]);
+        return (va < vb ? -1 : va > vb ? 1 : a[1] - b[1]) * s;
+      }).map(p => p[0]);
+    }
+    function listaContribuciones() {
+      const q = normTxt((document.getElementById('contribSearch') || {}).value || '').trim();
+      const palabras = q.split(/\s+/).filter(Boolean);
+      const lista = palabras.length ? contributions.filter(c => {
+        const t = normTxt([c.memberName || c.nombreMiembro, c.type || c.tipoContribucion, c.method || c.metodoPago, c.notes || c.notasReferencia, formatDisplayDate(c.date || c.fecha)].join(' '));
+        return palabras.every(p => t.includes(p));
+      }) : contributions;
+      return ordenarLista(lista, 'contrib');
+    }
+    function listaCaja() {
+      const filter = document.getElementById('cfFilterType').value;
+      const q = normTxt((document.getElementById('cfSearch') || {}).value || '').trim();
+      const palabras = q.split(/\s+/).filter(Boolean);
+      const lista = cashFlow.filter(cf => {
+        if (filter !== 'ALL' && (cf.movementType || cf.tipoMovimiento) !== filter) return false;
+        if (!palabras.length) return true;
+        const t = normTxt([cf.receipt || cf.reciboFactura, cf.category || cf.categoriaConcepto, cf.notes || cf.descripcionObservacion, cf.movementType || cf.tipoMovimiento, formatDisplayDate(cf.date || cf.fecha)].join(' '));
+        return palabras.every(p => t.includes(p));
+      });
+      return ordenarLista(lista, 'cash');
+    }
+    function marcarOrden(tbodyId, o) {
+      const tabla = document.getElementById(tbodyId) && document.getElementById(tbodyId).closest('table');
+      if (!tabla) return;
+      tabla.querySelectorAll('th[data-sort]').forEach(th => {
+        th.setAttribute('aria-sort', th.getAttribute('data-sort') === o.key ? (o.dir === 'asc' ? 'ascending' : 'descending') : 'none');
+        th.tabIndex = 0;
+      });
+    }
+    function activarOrden(tbodyId, tabla, render) {
+      const t = document.getElementById(tbodyId) && document.getElementById(tbodyId).closest('table');
+      if (!t) return;
+      const cambiar = (th) => {
+        const k = th.getAttribute('data-sort');
+        const o = ordenTablas[tabla];
+        if (o.key === k) o.dir = o.dir === 'asc' ? 'desc' : 'asc';
+        else { o.key = k; o.dir = (k === 'date' || k === 'amount') ? 'desc' : 'asc'; }
+        render();
+      };
+      t.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => cambiar(th));
+        th.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cambiar(th); } });
+      });
+    }
+
+    function descargarCSV(nombreBase, encabezados, filas) {
+      const celda = (v) => {
+        let t = v == null ? '' : String(v);
+        if (/^[=+\-@\t\r]/.test(t) && !/^-?\d+(\.\d+)?$/.test(t)) t = "'" + t; // evita fórmulas al abrir en Excel
+        return '"' + t.replace(/"/g, '""') + '"';
+      };
+      const texto = [encabezados, ...filas].map(f => f.map(celda).join(',')).join('\r\n');
+      const blob = new Blob(['﻿' + texto], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${nombreBase}_${getNowLocalNica()}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      showToast(`Se descargó ${filas.length} registro(s) en ${a.download}.`);
+    }
+
+    function logoInstitucional() {
+      try { if (typeof currentCertLogoBase64 === 'string' && currentCertLogoBase64) return currentCertLogoBase64; } catch (e) {}
+      const img = document.getElementById('headerLogo');
+      return img ? img.src : '';
+    }
+    function encabezadoDocumento(titulo, filtrosTexto) {
+      const logo = logoInstitucional();
+      const rol = getCurrentRole() === 'admin' ? 'Administrador' : 'Consulta';
+      return `
+        <div class="doc-head">
+          ${logo ? `<img src="${esc(logo)}" alt="" />` : ''}
+          <div>
+            <p class="doc-org">${esc(churchConfig.name || 'Iglesia Local')}</p>
+            <p class="doc-sub">${esc(churchConfig.address || '')}</p>
+          </div>
+          <div class="doc-meta">
+            <div><strong>Emisión:</strong> ${esc(formatDisplayDate(getNowLocalNica()))}</div>
+            <div><strong>Emitido por:</strong> ${esc(rol)}</div>
+          </div>
+        </div>
+        <p class="doc-title">${esc(titulo)}</p>
+        ${filtrosTexto ? `<p class="doc-filtros">${esc(filtrosTexto)}</p>` : ''}`;
+    }
+    // columnas: [{ t: 'Título', num: true }]; filas: arreglos de texto; pie: arreglo opcional (misma cantidad de columnas)
+    function imprimirListado(titulo, filtrosTexto, columnas, filas, pie, conFirmas) {
+      const printArea = document.getElementById('printOfficialReportArea');
+      const th = columnas.map(c => `<th${c.num ? ' class="num"' : ''}>${esc(c.t)}</th>`).join('');
+      const cuerpo = filas.length
+        ? filas.map(f => '<tr>' + f.map((v, i) => `<td${columnas[i].num ? ' class="num"' : ''}>${esc(v)}</td>`).join('') + '</tr>').join('')
+        : `<tr><td colspan="${columnas.length}" style="text-align:center;color:#64748b;">Sin registros para los filtros aplicados.</td></tr>`;
+      const tfoot = pie ? '<tfoot><tr>' + pie.map((v, i) => `<td${columnas[i].num ? ' class="num"' : ''}>${esc(v)}</td>`).join('') + '</tr></tfoot>' : '';
+      const firmas = conFirmas ? `<div class="doc-firmas"><div>${esc(churchConfig.pastor || 'Pastor General')}</div><div>${esc(churchConfig.secretary || 'Secretaría / Tesorería')}</div></div>` : '';
+      printArea.innerHTML = (window.lgWatermarkHtml ? lgWatermarkHtml() : '') +
+        `<div class="print-content">${encabezadoDocumento(titulo, filtrosTexto)}
+          <table class="doc-table"><thead><tr>${th}</tr></thead><tbody>${cuerpo}</tbody>${tfoot}</table>
+          <p class="doc-filtros" style="margin-top:6px;">Total de registros: ${filas.length}</p>${firmas}</div>`;
+      setTimeout(() => { window.print(); printArea.innerHTML = ''; }, 250);
+    }
+
+    function datosContribuciones() {
+      const lista = listaContribuciones();
+      const filas = lista.map(c => [formatDisplayDate(c.date || c.fecha), c.memberName || c.nombreMiembro || '', c.type || c.tipoContribucion || '',
+        c.method || c.metodoPago || '', c.notes || c.notasReferencia || '', (parseFloat(c.amount || c.monto) || 0)]);
+      const total = lista.reduce((a, c) => a + (parseFloat(c.amount || c.monto) || 0), 0);
+      const q = (document.getElementById('contribSearch') || {}).value || '';
+      return { filas, total, filtros: q.trim() ? `Búsqueda: "${q.trim()}"` : 'Todos los aportes asentados' };
+    }
+    function datosCaja() {
+      const lista = listaCaja();
+      let ent = 0, sal = 0;
+      const filas = lista.map(cf => {
+        const amt = parseFloat(cf.amount || cf.monto) || 0;
+        const tipo = cf.movementType || cf.tipoMovimiento || '';
+        if (tipo === 'Entrada') ent += amt; else sal += amt;
+        return [formatDisplayDate(cf.date || cf.fecha), tipo, cf.receipt || cf.reciboFactura || 'S/N', cf.category || cf.categoriaConcepto || '',
+          cf.notes || cf.descripcionObservacion || '', tipo === 'Entrada' ? amt : -amt];
+      });
+      const sel = document.getElementById('cfFilterType');
+      const q = (document.getElementById('cfSearch') || {}).value || '';
+      const partes = [sel.options[sel.selectedIndex].text];
+      if (q.trim()) partes.push(`Búsqueda: "${q.trim()}"`);
+      return { filas, ent, sal, filtros: partes.join(' · ') };
+    }
+    function datosDirectorio() {
+      const esAdulto = currentDirTab === 'Adultos';
+      const nombreDe = (id) => { const a = adults.find(x => String(x.id) === String(id)); return a ? (a.fullName || a.nombreCompleto) : ''; };
+      const edad = (m) => calculateAgeYears(m.birthDate || m.fechaNacimiento, m.isDeceased || m.fallecido, m.deceasedDate || m.fechaDefuncion);
+      const tutor = (m, n) => (m[`tutor${n}IsMember`] || m[`tutor${n}EsMiembro`]) ? nombreDe(m[`tutor${n}Id`] || m[`idTutor${n}`]) : (m[`tutor${n}Text`] || m[`nombreTutor${n}Texto`] || '');
+      const enc = esAdulto
+        ? ['ID', 'Nombre completo', 'Cédula', 'Género', 'Fecha de nacimiento', 'Edad', 'Estado civil', 'Teléfono', 'Dirección', 'Categoría', 'Bautizado', 'Fecha de bautismo', 'Fecha de ingreso', 'Fallecido']
+        : ['ID', 'Nombre completo', 'Género', 'Fecha de nacimiento', 'Edad', 'Tutor 1', 'Tutor 2', 'Teléfono', 'Dirección', 'Categoría', 'Bautizado', 'Fecha de ingreso', 'Fallecido'];
+      const filas = dirListaFiltrada.map(m => esAdulto
+        ? [m.id, m.fullName || m.nombreCompleto, m.idNumber || m.cedula, m.gender || m.genero, formatDisplayDate(m.birthDate || m.fechaNacimiento), edad(m),
+           m.maritalStatus || m.estadoCivil, m.phone || m.telefono, m.address || m.direccion, m.category || m.categoria, m.isBaptized || m.bautizado,
+           formatDisplayDate(m.baptismDate || m.fechaBautismo), formatDisplayDate(m.joinDate || m.fechaIngreso), m.isDeceased || m.fallecido]
+        : [m.id, m.fullName || m.nombreCompleto, m.gender || m.genero, formatDisplayDate(m.birthDate || m.fechaNacimiento), edad(m), tutor(m, 1), tutor(m, 2),
+           m.phone || m.telefono, m.address || m.direccion, m.category || m.categoria, m.isBaptized || m.bautizado, formatDisplayDate(m.joinDate || m.fechaIngreso), m.isDeceased || m.fallecido]);
+      const etiqueta = { Adultos: 'Adultos', Ninos: 'Niños (0–10)', Adolescentes: 'Adolescentes (11–15)', Jovenes: 'Jóvenes (16+)' }[currentDirTab] || currentDirTab;
+      const cat = document.getElementById('filterCategory'), gen = document.getElementById('filterGender');
+      const q = document.getElementById('searchInput').value.trim();
+      const partes = [etiqueta, cat.options[cat.selectedIndex].text, gen.options[gen.selectedIndex].text];
+      if (q) partes.push(`Búsqueda: "${q}"`);
+      return { esAdulto, enc, filas, etiqueta, filtros: partes.join(' · ') };
+    }
+
+    function iniciarHerramientasTablas() {
+      const reRender = { contrib: () => { currentContribPage = 1; renderContributionsTable(); }, cash: () => { currentCashPage = 1; renderCashTable(); } };
+      let tBusca = null;
+      const conPausa = (fn) => () => { clearTimeout(tBusca); tBusca = setTimeout(fn, 180); };
+      const cs = document.getElementById('contribSearch'); if (cs) cs.addEventListener('input', conPausa(reRender.contrib));
+      const fs = document.getElementById('cfSearch'); if (fs) fs.addEventListener('input', conPausa(reRender.cash));
+      activarOrden('contributionsTableBody', 'contrib', reRender.contrib);
+      activarOrden('cashTableBody', 'cash', reRender.cash);
+
+      document.getElementById('btnContribCsv').addEventListener('click', () => {
+        const d = datosContribuciones();
+        descargarCSV('contribuciones', ['Fecha', 'Miembro', 'Tipo', 'Método', 'Nota / Referencia', 'Monto (C$)'], d.filas.map(f => f.map((v, i) => i === 5 ? v.toFixed(2) : v)));
+      });
+      document.getElementById('btnContribPrint').addEventListener('click', () => {
+        const d = datosContribuciones();
+        imprimirListado('Libro de Contribuciones y Aportes', d.filtros,
+          [{ t: 'Fecha' }, { t: 'Miembro' }, { t: 'Tipo' }, { t: 'Método' }, { t: 'Nota / Referencia' }, { t: 'Monto', num: true }],
+          d.filas.map(f => f.map((v, i) => i === 5 ? fmtMoney(v) : v)), ['', '', '', '', 'TOTAL', fmtMoney(d.total)], true);
+      });
+      document.getElementById('btnCashCsv').addEventListener('click', () => {
+        const d = datosCaja();
+        descargarCSV('caja', ['Fecha', 'Tipo', 'Recibo', 'Concepto', 'Detalle', 'Monto (C$)'], d.filas.map(f => f.map((v, i) => i === 5 ? v.toFixed(2) : v)));
+      });
+      document.getElementById('btnCashPrint').addEventListener('click', () => {
+        const d = datosCaja();
+        imprimirListado('Libro Diario de Caja', d.filtros,
+          [{ t: 'Fecha' }, { t: 'Tipo' }, { t: 'Recibo' }, { t: 'Concepto' }, { t: 'Detalle' }, { t: 'Monto', num: true }],
+          d.filas.map(f => f.map((v, i) => i === 5 ? (v < 0 ? '-' + fmtMoney(-v) : '+' + fmtMoney(v)) : v)),
+          ['', '', '', '', `Entradas ${fmtMoney(d.ent)} · Salidas ${fmtMoney(d.sal)}`, 'Neto ' + fmtMoney(d.ent - d.sal)], true);
+      });
+      document.getElementById('btnDirCsv').addEventListener('click', () => {
+        const d = datosDirectorio();
+        descargarCSV('directorio_' + normTxt(d.etiqueta).replace(/[^a-z]+/g, '_').replace(/^_|_$/g, ''), d.enc, d.filas);
+      });
+      document.getElementById('btnDirPrint').addEventListener('click', () => {
+        const d = datosDirectorio();
+        const idx = d.esAdulto ? [1, 2, 5, 3, 7, 9, 10] : [1, 4, 2, 5, 6, 9, 10];
+        imprimirListado('Directorio de Membresía · ' + d.etiqueta, d.filtros, idx.map(i => ({ t: d.enc[i] })), d.filas.map(f => idx.map(i => f[i])), null, false);
+      });
+    }
+
     function irAPaginaTabla(tbody, render, setPage, page) {
       setPage(page);
       render();
@@ -4409,12 +4775,21 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       const isAdmin = getCurrentRole() === 'admin';
 
       contributions.forEach(c => { sum += parseFloat(c.amount || c.monto) || 0; });
-      const totalPages = Math.max(1, Math.ceil(contributions.length / TABLA_PAGE_SIZE));
+      const lista = listaContribuciones();
+      const buscado = lista.length !== contributions.length;
+      const sumLista = buscado ? lista.reduce((a, c) => a + (parseFloat(c.amount || c.monto) || 0), 0) : sum;
+      const totalPages = Math.max(1, Math.ceil(lista.length / TABLA_PAGE_SIZE));
       currentContribPage = Math.min(Math.max(1, currentContribPage), totalPages);
       const desde = (currentContribPage - 1) * TABLA_PAGE_SIZE;
       const frag = document.createDocumentFragment();
+      marcarOrden('contributionsTableBody', ordenTablas.contrib);
+      if (!lista.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="6" class="py-8 text-center text-slate-400 font-semibold">${contributions.length ? 'Ningún aporte coincide con la búsqueda.' : 'Aún no hay aportes registrados.'}</td>`;
+        frag.appendChild(tr);
+      }
 
-      contributions.slice(desde, desde + TABLA_PAGE_SIZE).forEach(c => {
+      lista.slice(desde, desde + TABLA_PAGE_SIZE).forEach(c => {
         const amt = parseFloat(c.amount || c.monto) || 0;
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition';
@@ -4462,10 +4837,10 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         frag.appendChild(tr);
       });
       tbody.appendChild(frag);
-      renderTablePager(tbody, 'contribPagination', currentContribPage, contributions.length, 'aportes',
+      renderTablePager(tbody, 'contribPagination', currentContribPage, lista.length, 'aportes',
         (p) => irAPaginaTabla(tbody, renderContributionsTable, (v) => { currentContribPage = v; }, p));
 
-      document.getElementById('contribBadgeTotal').textContent = `Total: ${fmtMoney(sum)}`;
+      document.getElementById('contribBadgeTotal').textContent = buscado ? `Total filtrado: ${fmtMoney(sumLista)}` : `Total: ${fmtMoney(sum)}`;
       document.getElementById('statContribTotal').textContent = `${fmtMoney(sum)}`;
     }
 
@@ -4479,19 +4854,23 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
       contributions.forEach(c => { totalIncome += (parseFloat(c.amount || c.monto) || 0); });
 
-      const filas = [];
       cashFlow.forEach(cf => {
         const amt = parseFloat(cf.amount || cf.monto) || 0;
         const movType = cf.movementType || cf.tipoMovimiento;
         if (movType === 'Entrada') totalIncome += amt; else totalExpense += amt;
-        if (filter !== 'ALL' && movType !== filter) return;
-        filas.push(cf);
       });
+      const filas = listaCaja();
       if (filter !== lastCashFilter) { currentCashPage = 1; lastCashFilter = filter; }
       const totalPages = Math.max(1, Math.ceil(filas.length / TABLA_PAGE_SIZE));
       currentCashPage = Math.min(Math.max(1, currentCashPage), totalPages);
       const desde = (currentCashPage - 1) * TABLA_PAGE_SIZE;
       const frag = document.createDocumentFragment();
+      marcarOrden('cashTableBody', ordenTablas.cash);
+      if (!filas.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="7" class="py-8 text-center text-slate-400 font-semibold">${cashFlow.length ? 'Ningún movimiento coincide con el filtro o la búsqueda.' : 'Aún no hay movimientos de caja registrados.'}</td>`;
+        frag.appendChild(tr);
+      }
 
       filas.slice(desde, desde + TABLA_PAGE_SIZE).forEach(cf => {
         const amt = parseFloat(cf.amount || cf.monto) || 0;
@@ -5261,10 +5640,13 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       return `
         <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 12px; color: #0f172a;">
           <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;">
-            <div>
-              <p style="font-size: 8.5pt; font-weight: 600; color: #1d4ed8; text-transform: uppercase;">${esc(churchConfig.name)}</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              ${logoInstitucional() ? `<img src="${esc(logoInstitucional())}" alt="" style="width: 50px; height: 50px; object-fit: contain;" />` : ''}
+              <div>
+              <p style="font-size: 8.5pt; font-weight: 600; color: #1d4ed8; text-transform: uppercase;">${esc(churchConfig.name)}${churchConfig.address ? ` <span style="color:#64748b; text-transform:none; font-weight:500;">· ${esc(churchConfig.address)}</span>` : ''}</p>
               <h1 style="font-size: 15pt; font-weight: 700; color: #0f172a; margin: 2px 0;">Informe Oficial de Gestión Eclesiástica</h1>
               <p style="font-size: 7.5pt; color: #334155;">Corte oficial histórico protegido bajo la Ley de Protección de Datos Personales (Ley 787)</p>
+              </div>
             </div>
             <div style="text-align: right; font-size: 7.5pt; color: #334155;">
               <p><strong>Emisión:</strong> ${getNowLocalNica()}</p>
@@ -5758,7 +6140,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         showToast("Se requiere rol Administrador para levantar una disciplina.", "error");
         return;
       }
-      if (!confirm(`¿Confirmas levantar la disciplina pastoral y reactivar a "${name}"?\n\nEsta acción quedará registrada en la auditoría.`)) {
+      if (!(await appConfirm({ title: 'Levantar disciplina', message: `¿Confirmas levantar la disciplina pastoral y reactivar a "${name}"?\n\nEsta acción quedará registrada en la auditoría.`, confirmText: 'Levantar disciplina' }))) {
         return;
       }
 
@@ -6363,6 +6745,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         setMobileMenu(!document.getElementById('mainHeader').classList.contains('menu-open'));
       });
       document.getElementById('cfFilterType').addEventListener('change', renderCashTable);
+      iniciarHerramientasTablas();
 
       document.getElementById('btnTypeAdult').addEventListener('click', () => {
         if (document.getElementById('memberType').value !== 'Adulto') cancelEditMember('Adulto');
@@ -6886,7 +7269,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
   function printCurrentCertificate() {
     const printArea = document.getElementById('printOfficialReportArea');
-    printArea.innerHTML = buildCertificateHtml();
+    printArea.innerHTML = `<div class="cert-doc">${buildCertificateHtml()}</div>`;
     setTimeout(() => { window.print(); printArea.innerHTML = ''; }, 250);
   }
 </script>
