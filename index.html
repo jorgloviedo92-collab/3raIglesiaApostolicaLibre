@@ -2837,6 +2837,26 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       return syncInFlight;
     }
 
+    // El servidor envía cada campo una sola vez (en español) para que la respuesta pese la mitad;
+    // aquí se rellenan los nombres en inglés que usa el resto de la página. Debe coincidir con COLUMNAS_* de Code.js.
+    const CAMPOS_ESP_ENG = {
+      adults: { nombreCompleto: 'fullName', cedula: 'idNumber', lugarNacimiento: 'birthPlace', genero: 'gender', fechaNacimiento: 'birthDate', estadoCivil: 'maritalStatus', conyugeEsMiembro: 'spouseIsMember', idConyuge: 'spouseId', nombreConyugeTexto: 'spouseText', padreEsMiembro: 'fatherIsMember', idPadre: 'fatherId', nombrePadreTexto: 'fatherText', madreEsMiembro: 'motherIsMember', idMadre: 'motherId', nombreMadreTexto: 'motherText', escolaridad: 'educationLevel', telefono: 'phone', direccion: 'address', categoria: 'category', tipoConversion: 'conversionType', fechaIngreso: 'joinDate', ministerioCargo: 'ministryRole', bautizado: 'isBaptized', fechaBautismo: 'baptismDate', lugarBautismo: 'baptismPlace', fallecido: 'isDeceased', fechaDefuncion: 'deceasedDate', enDisciplina: 'inDiscipline', inicioDisciplina: 'disciplineDate', mesesCastigo: 'disciplineMonths', finDisciplina: 'disciplineEndDate', disciplinaIndefinida: 'disciplineIndefinite', motivoDisciplina: 'disciplineReason', fotoUrl: 'photoBase64', eliminado: 'isDeleted', actualizadoEl: 'updatedAt' },
+      children: { nombreCompleto: 'fullName', cedula: 'idNumber', genero: 'gender', fechaNacimiento: 'birthDate', lugarNacimiento: 'birthPlace', tutor1EsMiembro: 'tutor1IsMember', idTutor1: 'tutor1Id', nombreTutor1Texto: 'tutor1Text', tutor2EsMiembro: 'tutor2IsMember', idTutor2: 'tutor2Id', nombreTutor2Texto: 'tutor2Text', presentado: 'presentedToChurch', presentadoPor: 'presentedBy', fechaPresentacion: 'presentedDate', escolaridad: 'educationLevel', direccion: 'address', telefono: 'phone', categoria: 'category', tipoConversion: 'conversionType', fechaIngreso: 'joinDate', bautizado: 'isBaptized', fechaBautismo: 'baptismDate', lugarBautismo: 'baptismPlace', enDisciplina: 'inDiscipline', inicioDisciplina: 'disciplineDate', mesesCastigo: 'disciplineMonths', finDisciplina: 'disciplineEndDate', disciplinaIndefinida: 'disciplineIndefinite', motivoDisciplina: 'disciplineReason', fallecido: 'isDeceased', fechaDefuncion: 'deceasedDate', fotoUrl: 'photoBase64', eliminado: 'isDeleted', actualizadoEl: 'updatedAt' },
+      contributions: { idMiembro: 'memberId', nombreMiembro: 'memberName', fecha: 'date', tipoContribucion: 'type', monto: 'amount', metodoPago: 'method', notasReferencia: 'notes', eliminado: 'isDeleted', registradoEl: 'createdAt' },
+      cashFlow: { tipoMovimiento: 'movementType', categoriaConcepto: 'category', fecha: 'date', monto: 'amount', formaPago: 'method', reciboFactura: 'receipt', descripcionObservacion: 'notes', eliminado: 'isDeleted', registradoEl: 'createdAt' }
+    };
+    function completarCamposIngles(res) {
+      Object.keys(CAMPOS_ESP_ENG).forEach(clave => {
+        const mapa = CAMPOS_ESP_ENG[clave];
+        const pares = Object.keys(mapa).map(esp => [esp, mapa[esp]]);
+        (res[clave] || []).forEach(r => {
+          for (let i = 0; i < pares.length; i++) {
+            if (r[pares[i][1]] === undefined) r[pares[i][1]] = r[pares[i][0]] === undefined ? '' : r[pares[i][0]];
+          }
+        });
+      });
+    }
+
     async function runSyncFromCloud(showAlert) {
       if (!getSessionToken()) {
         document.getElementById('loginGate').classList.remove('hidden');
@@ -2848,6 +2868,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       try {
         const res = await fetchAPI('sync');
         if (res.status !== 'ok') throw new Error(res.message || 'Error al sincronizar con el servidor.');
+        if (res.soloEsp) completarCamposIngles(res);
 
         const allAdults = res.adults || [];
         adults = allAdults.filter(a => !a.isDeleted && !a.eliminado);
@@ -4327,6 +4348,60 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
     }
 
+    // Paginación de Contribuciones y Caja: solo se dibujan las filas de la página visible
+    // (con miles de registros, dibujar todo hacía lenta cada sincronización).
+    const TABLA_PAGE_SIZE = 50;
+    let currentContribPage = 1;
+    let currentCashPage = 1;
+    let lastCashFilter = null;
+
+    function renderTablePager(tbody, pagerId, page, totalItems, etiqueta, onGo) {
+      let pager = document.getElementById(pagerId);
+      if (!pager) {
+        const tabla = tbody.closest('table');
+        if (!tabla) return;
+        const ancla = tabla.parentElement && tabla.parentElement.classList.contains('overflow-x-auto') ? tabla.parentElement : tabla;
+        pager = document.createElement('div');
+        pager.id = pagerId;
+        pager.className = 'no-print flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-3 text-xs border-t border-slate-100';
+        ancla.insertAdjacentElement('afterend', pager);
+        pager.addEventListener('click', (e) => {
+          const b = e.target.closest('button[data-page]');
+          if (b && !b.disabled) pager._onGo(parseInt(b.getAttribute('data-page'), 10));
+        });
+      }
+      pager._onGo = onGo;
+      const totalPages = Math.max(1, Math.ceil(totalItems / TABLA_PAGE_SIZE));
+      if (totalItems <= TABLA_PAGE_SIZE) {
+        pager.innerHTML = totalItems ? `<div class="text-slate-600 font-medium">Mostrando <strong>${totalItems}</strong> ${etiqueta}</div>` : '';
+        return;
+      }
+      const ini = (page - 1) * TABLA_PAGE_SIZE + 1;
+      const fin = Math.min(page * TABLA_PAGE_SIZE, totalItems);
+      let startPage = Math.max(1, page - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+      const btn = (p, html, title, extra) => `<button type="button" data-page="${p}" ${extra || ''} title="${title}" class="px-2.5 py-1.5 rounded-lg border font-bold transition ${p === page && !extra && /^\d+$/.test(html) ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'} ${extra ? 'opacity-40 cursor-not-allowed' : ''}">${html}</button>`;
+      let nums = '';
+      if (startPage > 1) nums += btn(1, '1', 'Página 1') + (startPage > 2 ? '<span class="px-1 text-slate-400">…</span>' : '');
+      for (let p = startPage; p <= endPage; p++) nums += btn(p, String(p), 'Página ' + p);
+      if (endPage < totalPages) nums += (endPage < totalPages - 1 ? '<span class="px-1 text-slate-400">…</span>' : '') + btn(totalPages, String(totalPages), 'Página ' + totalPages);
+      pager.innerHTML = `
+        <div class="text-slate-600 font-medium">Mostrando <strong>${ini}–${fin}</strong> de <strong>${totalItems}</strong> ${etiqueta} (Página ${page} de ${totalPages})</div>
+        <div class="flex items-center gap-1 flex-wrap">
+          ${btn(page - 1, '<i class="fa-solid fa-chevron-left pointer-events-none"></i>', 'Página anterior', page <= 1 ? 'disabled' : '')}
+          ${nums}
+          ${btn(page + 1, '<i class="fa-solid fa-chevron-right pointer-events-none"></i>', 'Página siguiente', page >= totalPages ? 'disabled' : '')}
+        </div>`;
+    }
+
+    function irAPaginaTabla(tbody, render, setPage, page) {
+      setPage(page);
+      render();
+      const tabla = tbody.closest('table');
+      if (tabla) window.scrollTo({ top: Math.max(0, tabla.getBoundingClientRect().top + window.scrollY - 120), behavior: 'smooth' });
+    }
+
     function renderContributionsTable() {
       const tbody = document.getElementById('contributionsTableBody');
       if (!tbody) return;
@@ -4334,9 +4409,14 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       let sum = 0;
       const isAdmin = getCurrentRole() === 'admin';
 
-      contributions.forEach(c => {
+      contributions.forEach(c => { sum += parseFloat(c.amount || c.monto) || 0; });
+      const totalPages = Math.max(1, Math.ceil(contributions.length / TABLA_PAGE_SIZE));
+      currentContribPage = Math.min(Math.max(1, currentContribPage), totalPages);
+      const desde = (currentContribPage - 1) * TABLA_PAGE_SIZE;
+      const frag = document.createDocumentFragment();
+
+      contributions.slice(desde, desde + TABLA_PAGE_SIZE).forEach(c => {
         const amt = parseFloat(c.amount || c.monto) || 0;
-        sum += amt;
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition';
 
@@ -4380,8 +4460,11 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         tr.appendChild(tdMethod);
         tr.appendChild(tdAmt);
         tr.appendChild(tdAct);
-        tbody.appendChild(tr);
+        frag.appendChild(tr);
       });
+      tbody.appendChild(frag);
+      renderTablePager(tbody, 'contribPagination', currentContribPage, contributions.length, 'aportes',
+        (p) => irAPaginaTabla(tbody, renderContributionsTable, (v) => { currentContribPage = v; }, p));
 
       document.getElementById('contribBadgeTotal').textContent = `Total: ${fmtMoney(sum)}`;
       document.getElementById('statContribTotal').textContent = `${fmtMoney(sum)}`;
@@ -4397,12 +4480,23 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
       contributions.forEach(c => { totalIncome += (parseFloat(c.amount || c.monto) || 0); });
 
+      const filas = [];
       cashFlow.forEach(cf => {
         const amt = parseFloat(cf.amount || cf.monto) || 0;
         const movType = cf.movementType || cf.tipoMovimiento;
         if (movType === 'Entrada') totalIncome += amt; else totalExpense += amt;
         if (filter !== 'ALL' && movType !== filter) return;
+        filas.push(cf);
+      });
+      if (filter !== lastCashFilter) { currentCashPage = 1; lastCashFilter = filter; }
+      const totalPages = Math.max(1, Math.ceil(filas.length / TABLA_PAGE_SIZE));
+      currentCashPage = Math.min(Math.max(1, currentCashPage), totalPages);
+      const desde = (currentCashPage - 1) * TABLA_PAGE_SIZE;
+      const frag = document.createDocumentFragment();
 
+      filas.slice(desde, desde + TABLA_PAGE_SIZE).forEach(cf => {
+        const amt = parseFloat(cf.amount || cf.monto) || 0;
+        const movType = cf.movementType || cf.tipoMovimiento;
         const isIncome = movType === 'Entrada';
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition';
@@ -4452,8 +4546,11 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         tr.appendChild(tdNotes);
         tr.appendChild(tdAmt);
         tr.appendChild(tdAct);
-        tbody.appendChild(tr);
+        frag.appendChild(tr);
       });
+      tbody.appendChild(frag);
+      renderTablePager(tbody, 'cashPagination', currentCashPage, filas.length, 'movimientos',
+        (p) => irAPaginaTabla(tbody, renderCashTable, (v) => { currentCashPage = v; }, p));
 
       const netBalance = totalIncome - totalExpense;
       document.getElementById('cashIncomeTotal').textContent = `${fmtMoney(totalIncome)}`;
