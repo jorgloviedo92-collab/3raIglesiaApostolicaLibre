@@ -2778,7 +2778,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       const btnTabCaja = document.getElementById('tabBtn-caja');
       const btnTabContrib = document.getElementById('tabBtn-contribuciones');
       const btnPapelera = document.getElementById('tabBtn-papelera');
-      const btnAiFinanzas = document.getElementById('btnAiQuickFinanzas');
 
       const cardBalance = document.getElementById('cardBalance');
       const cardCashFlow = document.getElementById('cardCashFlowChart');
@@ -2799,7 +2798,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         (!isConsulta ? 'bg-emerald-800 text-emerald-100 border-emerald-600' : 'bg-slate-700 text-slate-200 border-slate-600');
       roleBadge.classList.remove('hidden');
 
-      [btnRegistro, btnConfig, btnTabCaja, btnTabContrib, btnPapelera, contribForm, cashForm, cardBalance, cardCashFlow, cardDiscipline, diagBadge, btnAiFinanzas].forEach(el => {
+      [btnRegistro, btnConfig, btnTabCaja, btnTabContrib, btnPapelera, contribForm, cashForm, cardBalance, cardCashFlow, cardDiscipline, diagBadge].forEach(el => {
         if (el) el.classList.toggle('hidden', isConsulta);
       });
 
