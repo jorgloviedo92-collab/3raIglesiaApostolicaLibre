@@ -1381,11 +1381,11 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
             </div>
           </div>
 
-          <!-- Botón IA integrado en cabecera para Celular y Tablet (no estorba encima de opciones) -->
+          <!-- Botón Certificados en cabecera para Celular y Tablet -->
           <div class="flex items-center gap-1.5 lg:hidden shrink-0">
-            <button type="button" onclick="toggleAiAssistantModal(true)" title="Centro IA & Certificados" class="h-8 px-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-[11px] shadow-md border border-blue-400/40 flex items-center gap-1.5 transition cursor-pointer">
-              <i class="fa-solid fa-wand-magic-sparkles text-[#f6dc92] text-xs"></i>
-              <span>IA</span>
+            <button type="button" onclick="toggleCertificatesModal(true)" title="Certificados" class="h-8 px-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-[11px] shadow-md border border-blue-400/40 flex items-center gap-1.5 transition cursor-pointer">
+              <i class="fa-solid fa-award text-[#f6dc92] text-xs"></i>
+              <span>Certificados</span>
             </button>
             <button type="button" id="btnMobileMenu" aria-expanded="false" aria-controls="navSection" title="Abrir menú" class="h-8 px-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[11px] flex items-center gap-1.5 transition cursor-pointer">
               <i class="fa-solid fa-bars text-xs"></i>
@@ -1433,7 +1433,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         </div>
       </div>
 
-      <!-- Barra de Estado y Controles (VISIBLE EN CELULAR, TABLET Y ESCRITORIO: ADMIN, En Línea, Ajustes, PDF, IA y Salir) -->
+      <!-- Barra de Estado y Controles (VISIBLE EN CELULAR, TABLET Y ESCRITORIO: ADMIN, En Línea, Ajustes, PDF, Certificados y Salir) -->
       <div id="sidebarControls" class="flex flex-row lg:flex-col items-center lg:items-stretch justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 lg:py-3.5 border-t border-white/10 bg-[#050d1f]/95 overflow-x-auto no-scrollbar">
         <div class="ctl-row flex items-center gap-1.5 sm:gap-2 shrink-0 lg:w-full">
           <span id="roleIndicator" class="hidden text-[10px] font-extrabold px-2.5 py-1 rounded-lg border items-center shrink-0"></span>
@@ -1458,10 +1458,10 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
           </button>
         </div>
 
-        <!-- Acceso directo a IA & Certificados integrado limpiamente en el Sidebar de Escritorio -->
-        <button type="button" onclick="toggleAiAssistantModal(true)" class="hidden lg:flex w-full h-9 px-3 rounded-xl bg-gradient-to-r from-blue-600/30 to-indigo-600/30 hover:from-blue-600/45 hover:to-indigo-600/45 border border-blue-400/30 text-blue-100 font-bold text-xs items-center justify-center gap-2 transition cursor-pointer">
-          <i class="fa-solid fa-wand-magic-sparkles text-[#f6dc92] text-xs"></i>
-          <span class="ctl-label">Centro IA & Certificados</span>
+        <!-- Acceso directo a Certificados en el Sidebar de Escritorio -->
+        <button type="button" onclick="toggleCertificatesModal(true)" class="hidden lg:flex w-full h-9 px-3 rounded-xl bg-gradient-to-r from-blue-600/30 to-indigo-600/30 hover:from-blue-600/45 hover:to-indigo-600/45 border border-blue-400/30 text-blue-100 font-bold text-xs items-center justify-center gap-2 transition cursor-pointer">
+          <i class="fa-solid fa-award text-[#f6dc92] text-xs"></i>
+          <span class="ctl-label">Certificados</span>
         </button>
       </div>
     </aside>
@@ -1479,9 +1479,9 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
           <h2 class="text-xl font-extrabold text-slate-900 tracking-tight" id="studioTopGreeting">Bienvenido al Centro de Analítica Eclesiástica</h2>
         </div>
         </div>
-        <button type="button" onclick="toggleAiAssistantModal(true)" class="px-4 py-2.5 rounded-xl bg-[#0f5fa8] hover:bg-[#0c4f8f] text-white font-bold text-sm shadow-md flex items-center gap-2 transition cursor-pointer">
-          <i class="fa-solid fa-wand-magic-sparkles text-[#e9bf63]"></i>
-          <span>IA y certificados</span>
+        <button type="button" onclick="toggleCertificatesModal(true)" class="px-4 py-2.5 rounded-xl bg-[#0f5fa8] hover:bg-[#0c4f8f] text-white font-bold text-sm shadow-md flex items-center gap-2 transition cursor-pointer">
+          <i class="fa-solid fa-award text-[#e9bf63]"></i>
+          <span>Certificados</span>
         </button>
       </div>
 
@@ -2752,8 +2752,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         localStorage.removeItem('SAVED_GEMINI_KEY');
         photoMemoryCache.clear();
 
-        const apiKeyField = document.getElementById('geminiApiKeyField');
-        if (apiKeyField) apiKeyField.value = '';
 
         adults = []; children = []; contributions = []; cashFlow = [];
         deletedAdults = []; deletedChildren = []; deletedContributions = []; deletedCashFlow = [];
@@ -6479,74 +6477,24 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     });
   </script>
   <!-- ====================================================================
-     MÓDULO PLUG-IN V9.5: GEMINI AI, CERTIFICADOS Y FILTROS DE REPORTES
+     MÓDULO PLUG-IN V9.5: CERTIFICADOS Y FILTROS DE REPORTES
      ==================================================================== -->
-<!-- MODAL MULTIFUNCIÓN: ASISTENTE IA, REDACCIÓN Y CERTIFICADOS -->
+<!-- MODAL DE EMISIÓN DE CERTIFICADOS -->
 <div id="aiSuiteModal" class="fixed inset-0 bg-slate-900/70 hidden items-center justify-center z-[1300] p-3 sm:p-5 no-print backdrop-blur-sm">
   <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
     <!-- Encabezado -->
     <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center shrink-0">
       <div class="flex items-center gap-2.5">
-        <i class="fa-solid fa-wand-magic-sparkles text-amber-400 text-lg"></i>
-        <h3 class="font-extrabold text-sm sm:text-base">Centro Inteligente Gemini AI & Emisión de Certificados</h3>
+        <i class="fa-solid fa-award text-amber-400 text-lg"></i>
+        <h3 class="font-extrabold text-sm sm:text-base">Emisión de Certificados</h3>
       </div>
-      <button type="button" onclick="toggleAiAssistantModal(false)" class="text-slate-400 hover:text-white cursor-pointer p-1">
+      <button type="button" onclick="toggleCertificatesModal(false)" class="text-slate-400 hover:text-white cursor-pointer p-1">
         <i class="fa-solid fa-xmark text-xl pointer-events-none"></i>
       </button>
     </div>
 
-    <!-- Barra de API Key y Sub-pestañas (Adaptable a Celular y Tablet) -->
-    <div class="bg-slate-100 px-3 sm:px-5 py-2.5 border-b border-slate-200 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-2 shrink-0 text-xs">
-      <div class="flex flex-wrap gap-1.5">
-        <button type="button" onclick="switchAiSubTab('chat')" id="subTabAiChat" class="flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white text-center">
-          <i class="fa-solid fa-comments mr-1"></i>Consultas y Cartas
-        </button>
-        <button type="button" onclick="switchAiSubTab('cert')" id="subTabAiCert" class="flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold bg-white text-slate-700 border border-slate-300 text-center">
-          <i class="fa-solid fa-award text-amber-600 mr-1"></i>Certificados
-        </button>
-      </div>
-      <div class="flex items-center gap-1.5 w-full sm:w-auto">
-        <input type="password" id="geminiApiKeyField" placeholder="Tu Gemini API Key (AIzaSy...)" class="flex-1 sm:w-48 px-2.5 py-1.5 rounded-lg border border-slate-300 font-mono text-xs" />
-        <button type="button" onclick="saveGeminiKeyToServer()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg shrink-0">
-          Guardar Key
-        </button>
-      </div>
-    </div>
-
-    <!-- SUB-VISTA 1: ASISTENTE IA, ANÁLISIS DEL DASHBOARD Y CARTAS -->
-    <div id="aiSubViewChat" class="p-5 overflow-y-auto space-y-4 flex-grow text-xs sm:text-sm">
-      <div class="flex flex-wrap gap-2">
-        <button type="button" onclick="runAiQuickAction('dashboard')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 rounded-xl font-bold text-xs">
-          <i class="fa-solid fa-chart-pie mr-1"></i> Analizar Métricas del Dashboard
-        </button>
-        <button type="button" onclick="runAiQuickAction('carta_recom')" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl font-bold text-xs">
-          <i class="fa-solid fa-file-signature mr-1"></i> Redactar Carta de Recomendación
-        </button>
-        <button type="button" id="btnAiQuickFinanzas" onclick="runAiQuickAction('finanzas')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl font-bold text-xs">
-          <i class="fa-solid fa-coins mr-1"></i> Auditar Aportes y Caja C$
-        </button>
-      </div>
-
-      <div class="flex gap-2">
-        <input type="text" id="aiPromptText" placeholder="Pregunta en lenguaje natural (ej. ¿Cuántos bautizados activos hay? o Redacta una convocatoria...)" class="flex-grow px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
-        <button type="button" onclick="sendCustomAiQuery()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl shrink-0">
-          Consultar IA
-        </button>
-      </div>
-
-      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 min-h-[220px] whitespace-pre-line leading-relaxed text-slate-800" id="aiOutputBox">
-        Aquí aparecerán tus respuestas estadísticas, análisis del Dashboard o borradores de cartas listos para imprimir...
-      </div>
-
-      <div class="flex justify-end">
-        <button type="button" onclick="printAiOutputContent()" class="bg-[#0f5fa8] hover:bg-[#0c4f8f] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5">
-          <i class="fa-solid fa-print"></i> Imprimir Respuesta / Carta Oficial
-        </button>
-      </div>
-    </div>
-
-    <!-- SUB-VISTA 2: GENERADOR DE CERTIFICADOS DE BAUTISMO Y MATRIMONIO -->
-    <div id="aiSubViewCert" class="hidden p-5 overflow-y-auto space-y-4 flex-grow text-xs">
+    <!-- GENERADOR DE CERTIFICADOS DE BAUTISMO Y MATRIMONIO -->
+    <div id="aiSubViewCert" class="p-5 overflow-y-auto space-y-4 flex-grow text-xs">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-amber-50/70 p-4 rounded-2xl border border-amber-200">
         <div>
           <label class="font-bold text-slate-700 block mb-1">Tipo de Certificado</label>
@@ -6570,11 +6518,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         <div>
           <label class="font-bold text-slate-700 block mb-1">Lugar / Templo</label>
           <input type="text" id="certPlaceInput" oninput="renderCertificatePreview()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white" />
-        </div>
-        <div class="flex items-end">
-          <button type="button" onclick="generateSolemnVerseWithAi()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Redactar Dedicatoria IA
-          </button>
         </div>
         <div class="sm:col-span-3">
           <label class="font-bold text-slate-700 block mb-1">Texto Solemne / Versículo Bíblico</label>
@@ -6610,7 +6553,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 </div>
 
 <script>
-  // ── 1. INYECCIÓN AUTOMÁTICA DE AUTOCOMPLETADO IA EN FORMULARIO Y FILTROS EN REPORTES ──
+  // ── 1. FILTROS AVANZADOS EN REPORTES ──
   window.addEventListener('DOMContentLoaded', () => {
     
     // B. Inyectar controles de Filtro Avanzado en la pestaña de Reportes
@@ -6693,190 +6636,18 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     }
   });
 
-  // ── 2. FUNCIONES DEL ASISTENTE GEMINI AI ──
-  function toggleAiAssistantModal(show) {
+  // ── 2. VENTANA DE CERTIFICADOS ──
+  function toggleCertificatesModal(show) {
     const m = document.getElementById('aiSuiteModal');
     if (show) {
       m.classList.replace('hidden', 'flex');
-      const savedKey = sessionStorage.getItem('TEMP_GEMINI_KEY') || '';
-      if (savedKey) document.getElementById('geminiApiKeyField').value = savedKey;
       updateCertificateSelectors();
     } else {
       m.classList.replace('flex', 'hidden');
     }
   }
 
-  function switchAiSubTab(tab) {
-    const isChat = (tab === 'chat');
-    document.getElementById('aiSubViewChat').classList.toggle('hidden', !isChat);
-    document.getElementById('aiSubViewCert').classList.toggle('hidden', isChat);
-    document.getElementById('subTabAiChat').className = isChat ? 'px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white' : 'px-3 py-1.5 rounded-xl font-bold bg-white text-slate-700 border border-slate-300';
-    document.getElementById('subTabAiCert').className = !isChat ? 'px-3 py-1.5 rounded-xl font-bold bg-amber-600 text-white' : 'px-3 py-1.5 rounded-xl font-bold bg-white text-slate-700 border border-slate-300';
-    if (!isChat) updateCertificateSelectors();
-  }
-
-  async function saveGeminiKeyToServer() {
-    const key = document.getElementById('geminiApiKeyField').value.trim();
-    if (!key) { showToast('Escribe tu API Key de Gemini primero.', 'error'); return; }
-    sessionStorage.setItem('TEMP_GEMINI_KEY', key);
-    if (getCurrentRole() === 'admin') {
-      showSaving('Guardando API Key en servidor...');
-      try {
-        const res = await fetchAPI('saveGeminiKey', { apiKey: key });
-        if (res.status === 'ok') showToast('API Key guardada en el servidor correctamente.');
-        else showToast(res.message, 'error');
-      } catch (e) {
-        showToast('Key activa para esta sesión.', 'success');
-      } finally { hideSaving(); }
-    } else {
-      showToast('API Key configurada para tu sesión actual.');
-    }
-  }
-
-  // Motor directo ultrarrápido desde el navegador (con respaldo al servidor)
-  async function callGeminiDirectOrServer(task, prompt, context) {
-    const apiKeyEl = document.getElementById('geminiApiKeyField');
-    const apiKey = (apiKeyEl ? apiKeyEl.value.trim() : '') || sessionStorage.getItem('TEMP_GEMINI_KEY') || '';  
-    
-    // Si tenemos la API Key en sesión, llamamos directo a Google en < 1.5 seg
-    if (apiKey) {
-      sessionStorage.setItem('TEMP_GEMINI_KEY', apiKey);
-      const sys = (task === 'draft')
-        ? 'Eres un Secretario Eclesiástico experto. Redacta el documento solicitado de forma solemne, formal y lista para imprimir.'
-        : 'Eres el asistente pastoral, estadístico y administrativo de EcclesiaSoft Pro en Nicaragua. Responde en español claro, conciso y profesional.';
-
-      const fullPrompt = context ? ('DATOS DEL SISTEMA:\n' + context + '\n\nSOLICITUD:\n' + prompt) : prompt;
-      const body = {
-        system_instruction: { parts: [{ text: sys }] },
-        contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 4096 }
-      };
-
-      // Modelos en orden de preferencia: si Google retira uno, se usa el siguiente
-      const MODELOS_IA = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
-      let lastError = null;
-      for (const modelo of MODELOS_IA) {
-        // La API key viaja en cabecera, no en la URL
-        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-          body: JSON.stringify(body)
-        });
-        if (resp.ok) {
-          const data = await resp.json();
-          const parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
-          if (!parts || !parts.length) throw new Error('La IA devolvió una respuesta vacía o bloqueada por filtros.');
-          return parts[0].text;
-        }
-        const err = await resp.json().catch(() => ({}));
-        const msg = (err.error && err.error.message) || ('Error de Gemini ' + resp.status);
-        lastError = new Error(msg);
-        // Solo se prueba otro modelo si este no existe o fue retirado; otros errores (clave, cuota) se informan
-        const modeloNoDisponible = resp.status === 404 || /no longer available|not found|deprecated|not supported/i.test(msg);
-        if (!modeloNoDisponible) break;
-      }
-      throw lastError;
-    }
-
-    // Sin key local: el servidor usa la key guardada por el Administrador
-    const res = await fetchAPI('askGemini', { task, prompt, context });
-    if (res.status === 'ok') return res.result;
-    throw new Error(res.message || 'Error al consultar la IA.');
-  }
-
-  // Contexto ligero y filtrado por rol para que la IA procese en milisegundos
-  function buildSystemContextSummary() {
-    const isAdmin = getCurrentRole() === 'admin';
-    const aliveAdults = adults.filter(a => a.isDeceased !== 'Sí' && a.fallecido !== 'Sí');
-    const aliveKids = children.filter(c => c.isDeceased !== 'Sí' && c.fallecido !== 'Sí');
-
-    const estadisticas = {
-      adultosVivos: aliveAdults.length,
-      menoresVivos: aliveKids.length,
-      ninosVivos: aliveKids.filter(c => calculateAgeYears(c.birthDate || c.fechaNacimiento, 'No', '') <= 10).length,
-      adolescentesVivos: aliveKids.filter(c => { const y = calculateAgeYears(c.birthDate || c.fechaNacimiento, 'No', ''); return y >= 11 && y <= 15; }).length,
-      jovenesVivos: aliveKids.filter(c => calculateAgeYears(c.birthDate || c.fechaNacimiento, 'No', '') >= 16).length,
-      activos: aliveAdults.filter(a => (a.category || a.categoria) === 'Activo').length,
-      directivos: aliveAdults.filter(a => (a.category || a.categoria) === 'Directivo').length,
-      inactivos: aliveAdults.filter(a => (a.category || a.categoria) === 'Inactivo').length,
-      bautizados: aliveAdults.filter(a => (a.isBaptized || a.bautizado) === 'Sí').length,
-      noBautizados: aliveAdults.filter(a => (a.isBaptized || a.bautizado) !== 'Sí').length
-    };
-
-    if (isAdmin) {
-      const totalContrib = contributions.reduce((acc, c) => acc + (parseFloat(c.amount || c.monto) || 0), 0);
-      let cIn = 0, cOut = 0;
-      cashFlow.forEach(cf => {
-        const amt = parseFloat(cf.amount || cf.monto) || 0;
-        if ((cf.movementType || cf.tipoMovimiento) === 'Entrada') cIn += amt; else cOut += amt;
-      });
-      estadisticas.enDisciplina = aliveAdults.filter(a => (a.category || a.categoria) !== 'Inactivo' && (a.inDiscipline || a.enDisciplina) === 'Sí').length;
-      estadisticas.totalContribucionesCordobas = totalContrib;
-      estadisticas.entradasCajaCordobas = cIn;
-      estadisticas.gastosCajaCordobas = cOut;
-      estadisticas.saldoNetoCordobas = (totalContrib + cIn) - cOut;
-    }
-
-    return JSON.stringify({ iglesia: churchConfig, estadisticas: estadisticas });
-  }
-
-  async function sendCustomAiQuery(customPrompt, customTask = 'chat') {
-    const promptVal = customPrompt || document.getElementById('aiPromptText').value.trim();
-    if (!promptVal) return;
-    const outBox = document.getElementById('aiOutputBox');
-    outBox.textContent = 'Generando respuesta rápida...';
-
-    try {
-      const context = (customTask === 'draft') ? JSON.stringify({ iglesia: churchConfig }) : buildSystemContextSummary();
-      const respuesta = await callGeminiDirectOrServer(customTask, promptVal, context);
-      outBox.textContent = respuesta;
-    } catch (err) {
-      outBox.textContent = 'Error: ' + err.message;
-    }
-  }
-
-  function runAiQuickAction(type) {
-    if (type === 'dashboard') {
-      const promptDash = getCurrentRole() === 'admin'
-        ? 'Analiza detalladamente las métricas del Dashboard (demografía, bautismos, disciplina y finanzas) y dame 3 recomendaciones pastorales.'
-        : 'Analiza detalladamente las métricas demográficas y de bautismos del Dashboard y dame 3 recomendaciones pastorales.';
-      sendCustomAiQuery(promptDash, 'chat');
-    } else if (type === 'carta_recom') {
-      sendCustomAiQuery('Redacta una Carta de Recomendación Pastoral solemne de parte de la iglesia firmada por el Pastor General y Secretario.', 'draft');
-    } else if (type === 'finanzas') {
-      if (getCurrentRole() !== 'admin') {
-        showToast('La auditoría financiera es exclusiva para Administradores.', 'error');
-        return;
-      }
-      sendCustomAiQuery('Analiza los ingresos por contribuciones, entradas de caja, egresos y el saldo neto actual en Córdobas (C$).', 'chat');
-    }
-  }
-
-  function printAiOutputContent() {
-    const text = document.getElementById('aiOutputBox').textContent;
-    const printArea = document.getElementById('printOfficialReportArea');
-    printArea.innerHTML = `
-      ${window.lgWatermarkHtml ? lgWatermarkHtml() : ''}
-      <div class="print-content" style="padding: 25px; font-family: Georgia, serif; line-height: 1.6;">
-        <div style="border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 20px; text-align: center;">
-          <h1 style="font-size: 16pt; font-weight: 600; text-transform: uppercase;">${esc(churchConfig.name || 'Iglesia Local')}</h1>
-          <p style="font-size: 9pt; color: #475569;">${esc(churchConfig.address || '')} | Fecha: ${getNowLocalNica()}</p>
-        </div>
-        <div style="white-space: pre-line; font-size: 11pt;">${esc(text)}</div>
-        <div style="margin-top: 60px; display: flex; justify-content: space-around; text-align: center;">
-          <div style="width: 200px; border-top: 1px solid #000; padding-top: 5px; font-weight: 600; font-size: 9pt;">
-            ${esc(churchConfig.pastor || 'Pastor General')}
-          </div>
-          <div style="width: 200px; border-top: 1px solid #000; padding-top: 5px; font-weight: 600; font-size: 9pt;">
-            ${esc(churchConfig.secretary || 'Secretaría General')}
-          </div>
-        </div>
-      </div>
-    `;
-    setTimeout(() => { window.print(); printArea.innerHTML = ''; }, 250);
-  }
-
-  // ── 4. GENERADOR E IMPRESIÓN DE CERTIFICADOS (BAUTISMO Y MATRIMONIO) ──
+  // ── 3. GENERADOR E IMPRESIÓN DE CERTIFICADOS (BAUTISMO Y MATRIMONIO) ──
   function updateCertificateSelectors() {
     const type = document.getElementById('certTypeSelect').value;
     const isMarriage = (type === 'MATRIMONIO');
@@ -7021,22 +6792,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     const printArea = document.getElementById('printOfficialReportArea');
     printArea.innerHTML = buildCertificateHtml();
     setTimeout(() => { window.print(); printArea.innerHTML = ''; }, 250);
-  }
-  async function generateSolemnVerseWithAi() {
-    const type = document.getElementById('certTypeSelect').value;
-    const verseInput = document.getElementById('certVerseInput');
-    verseInput.value = 'Generando dedicatoria solemne con IA...';
-    try {
-      const prompt = type === 'MATRIMONIO'
-        ? 'Escribe una breve dedicatoria pastoral solemne (máximo 25 palabras) acompañada de una cita bíblica corta para un Certificado de Matrimonio.'
-        : 'Escribe una breve dedicatoria pastoral solemne (máximo 25 palabras) acompañada de una cita bíblica corta para un Certificado de Bautismo en Agua.';
-      const res = await callGeminiDirectOrServer('draft', prompt, '');
-      verseInput.value = res.replace(/\n+/g, ' ').trim();
-      renderCertificatePreview();
-    } catch (err) {
-      showToast('Error al generar dedicatoria: ' + err.message, 'error');
-      updateCertificateSelectors();
-    }
   }
 </script>
 
