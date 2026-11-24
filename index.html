@@ -391,100 +391,6 @@
       tr { page-break-inside: avoid; }
     }
     .print-only { display: none; }
-
-    /* ═══════════ Menú de cristal animado ═══════════
-       Barra flotante de vidrio: se contrae a burbujas de íconos con un rebote suave,
-       las etiquetas aparecen escalonadas y una píldora blanca se desliza hasta la opción activa. */
-    #navPill, #navRail { display: none; }
-    @media (min-width: 1024px) {
-      #mainHeader {
-        position: sticky; top: 12px !important; height: calc(100vh - 24px) !important;
-        margin: 12px 0 12px 12px; border-radius: 28px; overflow: hidden;
-        background: linear-gradient(165deg, rgba(10, 63, 120, .9) 0%, rgba(15, 95, 168, .82) 50%, rgba(26, 120, 198, .78) 100%) !important;
-        -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
-        border: 1px solid rgba(255, 255, 255, .26) !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 0 40px rgba(255, 255, 255, .05), 0 24px 50px -18px rgba(8, 40, 80, .65) !important;
-        transition: width .6s cubic-bezier(.34, 1.36, .5, 1);
-      }
-      #mainHeader::before {
-        content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0; border-radius: inherit;
-        background: radial-gradient(260px 200px at 0% 0%, rgba(255, 255, 255, .22), transparent 70%);
-      }
-      #mainHeader > * { position: relative; z-index: 1; }
-      #mainHeader nav { position: relative; }
-      #mainHeader .nav-label, #mainHeader .brand-text, #mainHeader .ctl-label, #mainHeader #cloudStatusText {
-        display: inline-block; max-width: 14rem; overflow: hidden; white-space: nowrap; vertical-align: middle;
-        transition: opacity .3s ease .12s, max-width .5s cubic-bezier(.34, 1.2, .5, 1), transform .45s cubic-bezier(.34, 1.4, .5, 1) .08s;
-      }
-      #mainHeader .brand-text { display: block; }
-      body.sidebar-collapsed #mainHeader .nav-label, body.sidebar-collapsed #mainHeader .brand-text,
-      body.sidebar-collapsed #mainHeader .ctl-label, body.sidebar-collapsed #mainHeader #cloudStatusText {
-        display: inline-block; max-width: 0; opacity: 0; transform: translateX(-10px); transition-delay: 0s; pointer-events: none;
-      }
-      body.sidebar-collapsed #mainHeader .brand-text { display: block; }
-      #mainHeader nav button { position: relative; z-index: 1; overflow: hidden;
-        background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .14);
-        transition: background .25s ease, transform .35s cubic-bezier(.34, 1.5, .5, 1), color .25s ease, border-radius .45s ease, padding .45s ease; }
-      #mainHeader nav button:hover { background: rgba(255, 255, 255, .2) !important; transform: translateX(4px); }
-      #mainHeader nav button:active { transform: scale(.96); }
-      body.sidebar-collapsed #mainHeader nav button { border-radius: 16px !important; height: 46px; }
-      body.sidebar-collapsed #mainHeader nav button:hover { transform: scale(1.08); }
-      #mainHeader nav button i { transition: transform .35s cubic-bezier(.34, 1.6, .5, 1), color .25s ease; }
-      #mainHeader nav button:hover i { transform: scale(1.18) rotate(-6deg); }
-      #mainHeader nav button.tab-active { background: transparent !important; box-shadow: none !important; border-color: transparent !important; color: #0b2540 !important; }
-      #mainHeader nav button.tab-active .nav-label, #mainHeader nav button.tab-active span { color: #0b2540 !important; }
-      #mainHeader nav button.tab-active i { color: #0f5fa8 !important; transform: scale(1.1); }
-      #mainHeader nav button.tab-active:hover { background: transparent !important; }
-      #mainHeader nav { overflow: visible !important; padding-right: 36px; transition: padding .45s ease; }
-      body.sidebar-collapsed #mainHeader nav { padding-right: 0; }
-      #navPill {
-        display: block; position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 0; opacity: 0; pointer-events: none;
-        border-radius: 16px 0 0 16px; background: #fff;
-        box-shadow: -6px 8px 22px -10px rgba(5, 30, 70, .55);
-        transition: top .55s cubic-bezier(.34, 1.45, .5, 1), height .45s cubic-bezier(.34, 1.3, .5, 1), opacity .3s ease, border-radius .3s ease;
-      }
-      #navPill.on { opacity: 1; }
-      /* Curvas cóncavas que unen la píldora con el riel blanco (contenedor) */
-      #navPill::before, #navPill::after {
-        content: ""; position: absolute; right: 30px; width: 14px; height: 14px; transition: opacity .3s ease;
-      }
-      #navPill::before { top: -14px; background: radial-gradient(circle at 0 0, transparent 13.5px, #fff 14px); }
-      #navPill::after { bottom: -14px; background: radial-gradient(circle at 0 100%, transparent 13.5px, #fff 14px); }
-      #navRail {
-        display: block; position: absolute; right: -12px; top: -14px; bottom: -14px; width: 30px; z-index: 0; pointer-events: none;
-        border-radius: 16px 0 0 16px; background: #fff; opacity: 1;
-        box-shadow: -4px 0 18px -8px rgba(5, 30, 70, .45);
-        transition: opacity .35s ease .15s, transform .55s cubic-bezier(.34, 1.4, .5, 1);
-      }
-      body.sidebar-collapsed #navRail { opacity: 0; transform: translateX(30px); transition-delay: 0s; }
-      body.sidebar-collapsed #navPill { border-radius: 16px; }
-      body.sidebar-collapsed #navPill::before, body.sidebar-collapsed #navPill::after { opacity: 0; }
-      #mainHeader.nav-intro nav button, #mainHeader.nav-intro .brand-row { animation: navBubbleIn .6s cubic-bezier(.34, 1.4, .5, 1) both; }
-      #mainHeader.nav-intro nav button:nth-of-type(1) { animation-delay: .05s; }
-      #mainHeader.nav-intro nav button:nth-of-type(2) { animation-delay: .12s; }
-      #mainHeader.nav-intro nav button:nth-of-type(3) { animation-delay: .19s; }
-      #mainHeader.nav-intro nav button:nth-of-type(4) { animation-delay: .26s; }
-      #mainHeader.nav-intro nav button:nth-of-type(5) { animation-delay: .33s; }
-      #mainHeader.nav-intro nav button:nth-of-type(6) { animation-delay: .40s; }
-      #mainHeader.nav-intro nav button:nth-of-type(7) { animation-delay: .47s; }
-      #btnSidebarToggle i { transition: transform .5s cubic-bezier(.34, 1.6, .5, 1); }
-      body.sidebar-collapsed #btnSidebarToggle i { transform: rotate(90deg); }
-    }
-    @keyframes navBubbleIn { from { opacity: 0; transform: translateX(-22px) scale(.85); } to { opacity: 1; transform: none; } }
-    @media (max-width: 1023.98px) {
-      #mainHeader.menu-open nav button { animation: navBubbleIn .45s cubic-bezier(.34, 1.4, .5, 1) both; }
-      #mainHeader.menu-open nav button:nth-of-type(2) { animation-delay: .05s; }
-      #mainHeader.menu-open nav button:nth-of-type(3) { animation-delay: .1s; }
-      #mainHeader.menu-open nav button:nth-of-type(4) { animation-delay: .15s; }
-      #mainHeader.menu-open nav button:nth-of-type(5) { animation-delay: .2s; }
-      #mainHeader.menu-open nav button:nth-of-type(6) { animation-delay: .25s; }
-      #mainHeader nav button.tab-active { background: #fff !important; color: #0b2540 !important; }
-      #mainHeader nav button.tab-active span { color: #0b2540 !important; }
-      #mainHeader nav button.tab-active i { color: #0f5fa8 !important; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      #mainHeader, #mainHeader * , #navPill { transition: none !important; animation: none !important; }
-    }
   </style>
   <link rel="icon" type="image/webp" href="data:image/webp;base64,UklGRsQIAABXRUJQVlA4WAoAAAAQAAAALwAALwAAQUxQSBwCAAABoLRtmyHJVv9GRGFs27Zte2uuuLNte/a2eWysbNt2dXzxvYc5WRERE4DEJgOg4ZTDj3/wY6Hw0wePH5rcEEDGIG0HVJp1+wcm/vHOnEqAS8c4VFz1CckgQZVUDRJIfra2MqxJwQKT3ydFlIlVhPxoBmDvy6HiCdIrU1RPnq0Cdx8ZtH6VEphy8HyzHTKJHHp+Q88ien7XF5kEDl1+pLCowp97wP2PRd3PKCyy8MuGsP9hXOYpehbd8/msM/9y2EjPCEu4FQ6ANe28aAwq0hEOsLhLYZTCB2Dh0J/CSAP7wzlcoY/F8zIc6v2hGovqn/WBefSM1nMecE0lHuF1lPuEGo/y0/JdA6MO3aYyxBQ4dSUlJuGqvbHtOxbb8cOxHd4c29Z5sS0aTo1JOaruT9R4lL82wvOUeAJfsNilPh6vB4B+DPEEDoHJvKUhlqDv50wGi+lj8VyJjDGVv9EQh/Lb6sbAYQklDs+dyADG5l9jiOSAyQCweIQShfAxWMCg7JcqWrwQRD/MwcCiPUmGYgWSlOawcOhT+OXzryjFEX78xpe/FLrAATCN6pSv/jBLND0t4eNVXPnaDQ0S5k9TJS1RXiyDxNYYCyzzlJBG8JTVgIUx9n/+bSx6PU0G0WQqQj7bB9YgRQcz8yWSKkGVVA2iJF+da5FBuhZw409/wcRfnZuUBSxSzwCoPmHnA+/8WCj58d2Hdk2qCSBjkBhWUDggggYAAHAfAJ0BKjAAMAA+PRaIRCIhIR40ACADxLYATplCPCZAlgfsmsIkj6zsdPqA5WD1F+YD9jfWq9AH956KP2AP2O9gDy3/Yr/cP9nfgI/aX//3ih9H8C/A95A9pfTCw71m/uF+H8c+8H3zZJv755gfsH6QdwVWn0AvXH5//i+MD6geaR/r/R/+8eAN4l/jvcA/lX87/zH25fR9+/f8//J/lB7Kfy3+3f9f7VfsC/lP9C/z39p/dH/Af//6evWx+x/syfsq6YPf0rzYvQPyA02DrbZ/FImBTjxS8jMbhIfSSl7fzjW/+OYgQ5HD2wL2zCgwK6GSCjriAmjkrXqLDLNlF2+75VqAAP7/sNbiCOPl/cbQ3j5T2ZbH67z/lM/otphQgP0Lj4QNogRBZEFlMYGsdtZn+8Y69NGzZ33X/C252A2B9rXkZgetb+mFWVyUafEwtbX6sdyGrvr5n4EreIko47b1M6RZZ6QHYrZHOjYj0FGMCjuXahqKndcybnn6+RabK2Sipkr3WRJUaJ/ZRhtocmxvcCbqduE6gLlRf8lZ8s7ukl/Ta/pOoqaz54/RIvPE2UplUzSiT2XjK3kOmAvXxOYgJ8qrNeLRQV2UpXT90e0OayyfTavXX78uEsjNCxpX73udgEkPdM/NmXuz+Pqb4B1flH6V0+HlR/Mdaeb/DFuHNm0JukJ9PEUrmakpvxdpALHA1unKO7H02re9WKKKwYYtxsggouI7o1rstWDOFrH5e9pXltlnF8J2xqvE67JcJ4E3sT1I7faUKafnnifnKealKnCBM56WO2xxFuEBiCca4GBJwfRLGIFXuHDV+9xDVc4DoQeo9pTbCMVV8cKa+4HpSQRBbrDUpFP+UCl7FS3mLvyDZS7XmdllUfEqZgat9fiGq72WBUM3rNLde+tHQnoeIutoNGC2nPMykFxg+Exu4OufSTAmC7DmxfTv1tIaPQYeVR5yoqMUla/oNC33vYkKbeFiJjj2UiJN+ioM5JFRvwB/Ud9LivixNcQe8LH66I/EDNiW2e8cvynE6m8IE3NDMY1NWvbsvJ5cU/u/QMKte3XGVnOZiHT9/kybk1VwJx1fJwFUZ/V6fbte2FJQQEYFcHsFe2EQtwzyXJQsz0RWr6bQOS0Y58c2cPqYTida7eCF+o3/lOGuq1FykQfW3KoWrnMfSotWHhUfClS83ben+/LcgL4fREropKaEbdP36bScHW9p/OsRWFEb6wgJaqOtJhoMVYgsRVA7NKiknjjwn/COr5zq/vPcxlcKAYIJsZZRfvJw5gDhFQh5V0p5YbOKDw64sR6M+qvMgUrzemXByQipR5z4NpTC48rK9aFoJitPPsVDKQeF160Ta0tU9AmP8Kb6+npFMPgXT/jD2jBpHvmxKbhe8GZgUjcgsLKZO8iMhDrFT7KecMIgt4VF3x3fx4DK7eDmurwB5UZTknlcnG7Y7t3D45VCPxYhfx/+N2UZRKVSKzSxsdKp9XR7T/mlgjZeq5b2WOUOyF9+cYI5UkrkzdEl+laTplJj7q0Ubj+5hhTowJiGRXYQvCKKeRa/A3uWr0quT2qKVIfeaWTZZqlsf5cXAlgSpfCfumfMLkNu+qZRuVAiZ2PeP3xlYZbu1nXPOsMt6LOSAvjm9B3mL4j8Zo/zgOLnZkA5+WH17300EEn+2EzojyR4uiqri2mSjDq5f7DywxWSFMWXkmh94yOkaaQlLaVLipIYjYczlxVd6tuW61kSx6GWRBMtZYX/Qyf4xl5XcILb1ou3uK32Ikub+O0v8WCrJf2VGk5P71UgGRWP2z0iVH4lDcS6e3O1l+/kmr+QyxYlrdJyVv9Y+yd9vPeM3lm9ocnZmi5ndmmudwHcr0Lh/f6xbgDgoFj/O43lQdy8fZp9jh/6vosMnZ+4z02GQvc+fxtApsSHsc4XtNb/+tT3VmwJntE3b008FoC82YxWaunMCecPdnyx2Fw+bRQm0W2LsTzdAnwt3kGWwM5X+hDspz+YCFAbByeorcJcwmyl2zMiB74n1Mvorw36mcNT6uIL2giJOBWIvjdFgRCEyrmaSxioS3R+CYpHO1XtKykwBW5cXfmNa3I6/5NLffLqCWuNP64/kYjSlSV/3a5DNbOS6wrighnYB5NVxyf6/kRREPsx8b3dww5vUqRtb/+ihI1KG55LIPMmpz3YDZBfp6okJFQls/DwrQIxySF0+FumbZ/RIgdz/IlAAAA=" />
   <meta name="theme-color" content="#0f5fa8" />
@@ -2719,15 +2625,9 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
       let res;
       try {
-        const ctl = new AbortController();
-        const timer = setTimeout(() => ctl.abort(), 60000);
-        try {
-          res = await fetch(url, { method: 'POST', body: JSON.stringify(payload), signal: ctl.signal });
-        } finally { clearTimeout(timer); }
+        res = await fetch(url, { method: 'POST', body: JSON.stringify(payload) });
       } catch (err) {
-        throw new Error(err && err.name === 'AbortError'
-          ? "El servidor tardó demasiado en responder. Inténtalo de nuevo."
-          : "No hay conexión con el servidor. Revisa tu acceso a internet.");
+        throw new Error("No hay conexión con el servidor. Revisa tu acceso a internet.");
       }
 
       if (!res.ok) {
@@ -2783,23 +2683,16 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         
         let authRes;
         try {
-          const ctl = new AbortController();
-          const timer = setTimeout(() => ctl.abort(), 30000);
-          try {
-            authRes = await fetch(urlInput, {
-              method: 'POST',
-              signal: ctl.signal,
-              body: JSON.stringify({
-                action: 'login',
-                pin: pinInput,
-                clientId: getClientId()
-              })
-            });
-          } finally { clearTimeout(timer); }
+          authRes = await fetch(urlInput, {
+            method: 'POST',
+            body: JSON.stringify({ 
+              action: 'login', 
+              pin: pinInput,
+              clientId: getClientId()
+            })
+          });
         } catch (err) {
-          throw new Error(err && err.name === 'AbortError'
-            ? "El servidor tardó más de 30 segundos en responder. Revisa que la implementación de Apps Script esté activa (acceso: Cualquier persona) e inténtalo de nuevo."
-            : "No se pudo conectar con el servidor. Verifica la URL.");
+          throw new Error("No se pudo conectar con el servidor. Verifica la URL.");
         }
 
         let data;
@@ -4413,39 +4306,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         else b.removeAttribute('title');
       });
       try { localStorage.setItem('ecclesia_sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) {}
-      positionNavPill();
-      setTimeout(positionNavPill, 700);
     }
-
-    // Píldora blanca que se desliza hasta la opción activa del menú (escritorio)
-    function positionNavPill() {
-      const nav = document.querySelector('#mainHeader nav');
-      if (!nav) return;
-      let pill = document.getElementById('navPill');
-      if (!pill) { pill = document.createElement('div'); pill.id = 'navPill'; nav.insertBefore(pill, nav.firstChild); }
-      const act = nav.querySelector('button.tab-active');
-      if (!act || window.innerWidth < 1024 || act.offsetHeight === 0) { pill.classList.remove('on'); return; }
-      if (!document.getElementById('navRail')) { const rail = document.createElement('div'); rail.id = 'navRail'; nav.insertBefore(rail, nav.firstChild); }
-      // Expandido: la píldora se extiende hasta el borde para fundirse con el riel blanco
-      const pad = parseFloat(getComputedStyle(nav.parentElement).paddingRight) || 12;
-      const merged = !document.body.classList.contains('sidebar-collapsed');
-      pill.style.left = act.offsetLeft + 'px';
-      pill.style.width = (merged ? nav.clientWidth + pad - act.offsetLeft : act.offsetWidth) + 'px';
-      pill.style.top = act.offsetTop + 'px';
-      pill.style.height = act.offsetHeight + 'px';
-      pill.classList.add('on');
-    }
-    (function () {
-      window.addEventListener('resize', positionNavPill);
-      window.addEventListener('load', () => {
-        const hdr = document.getElementById('mainHeader'), nav = hdr && hdr.querySelector('nav');
-        if (!nav) return;
-        if (window.ResizeObserver) new ResizeObserver(positionNavPill).observe(nav);
-        hdr.classList.add('nav-intro');
-        setTimeout(() => hdr.classList.remove('nav-intro'), 1400);
-        positionNavPill();
-      });
-    })();
 
     // Menú desplegable de la cabecera (celular y tableta)
     function setMobileMenu(open) {
@@ -5633,7 +5494,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
       const ab = document.getElementById('tabBtn-' + tab);
       if (ab) ab.classList.add('tab-active');
-      positionNavPill();
 
       const tabTitles = {
         dashboard: { sub: 'Panel de Control Pastoral', title: 'Resumen y Analítica en Tiempo Real' },
