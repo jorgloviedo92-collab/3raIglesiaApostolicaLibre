@@ -2798,8 +2798,9 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         throw new Error("Respuesta inválida del servidor. Verifica la URL o vuelve a desplegar el script.");
       }
       if (result.status === 'session_expired') {
-        // El propio logout no debe volver a cerrar sesión (evita un bucle infinito)
-        if (action !== 'logout') logoutSystem(false);
+        // El propio logout no debe volver a cerrar sesión (evita un bucle infinito), y una
+        // petición hecha con una sesión anterior no debe cerrar la sesión actual.
+        if (action !== 'logout' && token && token === getSessionToken()) logoutSystem(false);
         throw new Error(result.message);
       }
       return result;
@@ -2900,6 +2901,11 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         // aquí de inmediato aunque Apps Script tarde o no responda. fetchAPI lee el token
         // antes de su primera espera, por eso se llama antes de borrarlo.
         if (getSessionToken()) fetchAPI('logout').catch(() => {});
+        sesionGen++;
+        syncInFlight = null;
+        syncAgain = false;
+        setBackgroundBusy(false);
+        document.getElementById('view-dashboard').classList.remove('dash-loading');
 
         sessionStorage.removeItem(SESS_TOKEN_KEY);
         sessionStorage.removeItem(SESS_ROLE_KEY);
@@ -2973,13 +2979,19 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     // se repite una sola vez al terminar.
     let syncInFlight = null;
     let syncAgain = false;
+    // Cambia cada vez que se cierra sesión: una sincronización iniciada en una sesión
+    // anterior se descarta en lugar de hacer esperar (y repetir la descarga) a la nueva.
+    let sesionGen = 0;
+    let syncGen = -1;
     function syncFromCloud(showAlert = false) {
-      if (syncInFlight) {
+      if (syncInFlight && syncGen === sesionGen) {
         syncAgain = true;
         return syncInFlight;
       }
       setBackgroundBusy(true);
-      syncInFlight = runSyncFromCloud(showAlert).finally(() => {
+      syncGen = sesionGen;
+      const esta = runSyncFromCloud(showAlert).finally(() => {
+        if (syncInFlight !== esta) return; // ya la reemplazó otra sesión
         setBackgroundBusy(false);
         document.getElementById('view-dashboard').classList.remove('dash-loading');
         syncInFlight = null;
@@ -2988,7 +3000,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
           syncFromCloud(false);
         }
       });
-      return syncInFlight;
+      syncInFlight = esta;
+      return esta;
     }
 
     // El servidor envía cada campo una sola vez (en español) para que la respuesta pese la mitad;
@@ -3018,9 +3031,11 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
       document.getElementById('cloudStatusIcon').className = 'fa-solid fa-arrows-rotate fa-spin text-amber-400';
       document.getElementById('cloudStatusText').textContent = 'Sincronizando';
+      const gen = sesionGen;
 
       try {
         const res = await fetchAPI('sync');
+        if (gen !== sesionGen) return; // la sesión se cerró mientras se descargaba: se descarta
         if (res.status !== 'ok') throw new Error(res.message || 'Error al sincronizar con el servidor.');
         if (res.soloEsp) completarCamposIngles(res);
 
@@ -3051,6 +3066,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         document.getElementById('cloudStatusText').textContent = 'En Línea';
         if (showAlert) showToast("Base de datos sincronizada desde Firestore con éxito.");
       } catch (err) {
+        if (gen !== sesionGen) return;
         document.getElementById('cloudStatusIcon').className = 'fa-solid fa-cloud-bolt text-rose-400';
         document.getElementById('cloudStatusText').textContent = 'Error';
         if (showAlert) showToast(err.message, "error");
