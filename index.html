@@ -3853,6 +3853,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         const savedRecord = saveRes.record || { ...payloadData, id: savedId };
         const lista = (type === 'Adulto') ? adults : children;
         const pos = lista.findIndex(x => String(x.id).trim() === savedId);
+        const fichaAnterior = pos >= 0 ? lista[pos] : null;
+        const afectaOtrasFichas = (type === 'Adulto') && involucraConyuge(fichaAnterior, savedRecord, savedId);
         if (pos >= 0) lista[pos] = savedRecord; else lista.push(savedRecord);
 
         if (isPromoting) {
@@ -3866,7 +3868,9 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         cancelEditMember('Adulto');
         switchTab('directorio');
         updateAllViews();
-        syncFromCloud(false); // segundo plano: trae cambios en vínculos de cónyuge, etc.
+        // El servidor solo modifica OTRAS fichas al cambiar vínculos de cónyuge; en ese caso se
+        // descarga la base para traerlas. En los demás guardados basta el registro devuelto.
+        if (afectaOtrasFichas) syncFromCloud(false);
 
       } catch (err) {
         showToast(err.message, "error");
@@ -3874,6 +3878,13 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       } finally {
         hideSaving();
       }
+    }
+
+    // ¿El guardado de este adulto toca la ficha de su cónyuge (actual, anterior o quien lo tenga como cónyuge)?
+    function involucraConyuge(anterior, nuevo, id) {
+      const conyugeDe = (r) => r ? String(r.idConyuge || r.spouseId || '').trim() : '';
+      if (conyugeDe(anterior) || conyugeDe(nuevo)) return true;
+      return adults.some(a => String(a.id).trim() !== id && conyugeDe(a) === id);
     }
 
     function cancelEditMember(targetType = 'Adulto') {
@@ -3970,7 +3981,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         moveLocalRecord(table, id, true);
         updateAllViews();
         showToast(`"${name}" se movió a la Papelera.`);
-        syncFromCloud(false);
+        if (table === 'adult') syncFromCloud(false); // el servidor limpió sus vínculos en otras fichas
       } catch (err) {
         showToast("Error al dar de baja: " + err.message, "error");
       } finally {
@@ -3989,7 +4000,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         moveLocalRecord(table, id, false);
         updateAllViews();
         showToast("Registro restaurado con éxito.");
-        syncFromCloud(false);
+        if (table === 'adult' || table === 'child') syncFromCloud(false); // puede traer vínculos corregidos por el servidor
       } catch (err) {
         showToast("Error al restaurar: " + err.message, "error");
       } finally {
@@ -4022,7 +4033,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         if (lists) lists.trash.length = 0;
         renderPapelera();
         showToast(res.message || "Papelera vaciada con éxito.");
-        syncFromCloud(false);
       } catch (err) {
         showToast("Error al vaciar papelera: " + err.message, "error");
       } finally {
@@ -4859,7 +4869,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         (p) => irAPaginaTabla(tbody, renderContributionsTable, (v) => { currentContribPage = v; }, p));
 
       document.getElementById('contribBadgeTotal').textContent = buscado ? `Total filtrado: ${fmtMoney(sumLista)}` : `Total: ${fmtMoney(sum)}`;
-      document.getElementById('statContribTotal').textContent = `${fmtMoney(sum)}`;
     }
 
     function renderCashTable() {
@@ -4954,7 +4963,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       const netElem = document.getElementById('cashBalanceNet');
       netElem.textContent = `${fmtMoney(netBalance)}`;
       netElem.className = `cash-amount font-black mt-1 ${netBalance >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
-      animateNumber(document.getElementById('statCashNet'), netBalance, (v) => `${fmtMoney(v)}`);
     }
 
     // ────────────────────────────────────────────────────────────────────
@@ -5938,6 +5946,14 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       return img ? img.src : '';
     }
 
+    // Generar el informe cuesta ~150 ms con bases grandes: en los campos de texto se espera
+    // a que el usuario deje de escribir (300 ms) en lugar de regenerarlo en cada tecla.
+    let pausaReporte = null;
+    function renderReporteConPausa() {
+      clearTimeout(pausaReporte);
+      pausaReporte = setTimeout(renderOnScreenReport, 300);
+    }
+
     function renderOnScreenReport() {
       const year = parseInt(document.getElementById('tabRptYear').value, 10);
       const qVal = document.getElementById('tabRptQuarter').value;
@@ -6004,7 +6020,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (subEl) subEl.textContent = tInfo.sub;
       if (greetEl) greetEl.textContent = tInfo.title;
 
-      if (tab === 'dashboard') renderCharts();
+      vistaActual = tab;
+      if (tab === 'dashboard') renderResumen();
       if (tab === 'registro') { populateSelectors(); toggleDisciplineAvailability(); }
       if (tab === 'directorio') { syncStickyHeaderHeight(); renderDirectory(); }
       if (tab === 'papelera') renderPapelera();
@@ -6020,7 +6037,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         updateCashCategorySelect();
         renderCashTable();
       }
-      if (tab === 'reportes') renderOnScreenReport();
+      if (tab === 'reportes') { populateReportYears(); renderOnScreenReport(); }
     }
 
     function updateCashCategorySelect() {
@@ -6307,7 +6324,29 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (scroller) scroller.scrollTop = 0;
     }
 
+    // Pantalla abierta en este momento (la actualiza switchTab)
+    let vistaActual = 'dashboard';
+
+    // Tras un cambio de datos se redibuja SOLO la pantalla visible: las demás se dibujan
+    // al abrirlas (switchTab). No toca formularios, para no borrar lo que se esté escribiendo.
     function updateAllViews() {
+      document.getElementById('navTotalCount').textContent =
+        adults.filter(isAliveRecord).length + children.filter(isAliveRecord).length;
+      document.getElementById('headerChurchName').textContent = churchConfig.name || 'Iglesia Local';
+      dibujarDatosVista(vistaActual);
+    }
+
+    function dibujarDatosVista(vista) {
+      if (vista === 'dashboard') renderResumen();
+      else if (vista === 'directorio') renderDirectory();
+      else if (vista === 'contribuciones') renderContributionsTable();
+      else if (vista === 'caja') renderCashTable();
+      else if (vista === 'papelera') renderPapelera();
+      else if (vista === 'reportes') populateReportYears();
+    }
+
+    // Resumen: indicadores, alertas de disciplina, totales financieros, gráficos y diagnóstico
+    function renderResumen() {
       const aliveAdults = adults.filter(a => a.isDeceased !== 'Sí' && a.fallecido !== 'Sí');
       const aliveChildren = children.filter(c => c.isDeceased !== 'Sí' && c.fallecido !== 'Sí');
       const totalLive = aliveAdults.length + aliveChildren.length;
@@ -6364,13 +6403,16 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       const heroBapBarEl = document.getElementById('heroBaptizedBar');
       if (heroBapBarEl) heroBapBarEl.style.width = baptizedRate + '%';
 
-      renderDirectory();
-      renderContributionsTable();
-      renderCashTable();
-      renderPapelera();
+      // Totales financieros del Resumen (antes los escribían las tablas de Contribuciones y Caja)
+      const sumaMontos = (lista, filtro) => lista.reduce((t, r) => t + (filtro && !filtro(r) ? 0 : (parseFloat(r.amount || r.monto) || 0)), 0);
+      const totalAportes = sumaMontos(contributions);
+      const entradasCaja = sumaMontos(cashFlow, r => (r.movementType || r.tipoMovimiento) === 'Entrada');
+      const salidasCaja = sumaMontos(cashFlow, r => (r.movementType || r.tipoMovimiento) !== 'Entrada');
+      document.getElementById('statContribTotal').textContent = fmtMoney(totalAportes);
+      animateNumber(document.getElementById('statCashNet'), totalAportes + entradasCaja - salidasCaja, (v) => fmtMoney(v));
+
       renderCharts();
       renderDashboardDiagnostics();
-      populateReportYears();
     }
 
     // ────────────────────────────────────────────────────────────────────
@@ -6427,11 +6469,26 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       document.getElementById('flowTo').value = toIsoLocal(today);
     }
 
+    // Si el gráfico ya existe sobre el mismo lienzo, solo se reemplazan sus datos y opciones
+    // (Chart.js anima la transición); si no, se crea. Evita destruir y recrear en cada refresco.
+    function crearOActualizarGrafico(clave, canvas, config) {
+      const g = chartInstances[clave];
+      if (g && g.canvas === canvas && g.config.type === (config.type || g.config.type) && g.data.datasets.length === config.data.datasets.length) {
+        g.data.labels = config.data.labels;
+        config.data.datasets.forEach((ds, i) => Object.assign(g.data.datasets[i], ds));
+        g.options = config.options;
+        g.update();
+        return g;
+      }
+      if (g) g.destroy();
+      chartInstances[clave] = new Chart(canvas, config);
+      return chartInstances[clave];
+    }
+
     function renderCashFlowChart() {
       if (typeof Chart === 'undefined') return;
       const canvas = document.getElementById('chartCashFlow');
       if (!canvas) return;
-      if (chartInstances.flow) chartInstances.flow.destroy();
 
       const fromInput = document.getElementById('flowFrom');
       const toInput = document.getElementById('flowTo');
@@ -6474,7 +6531,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
           : `Ingresos, egresos y resultado neto del ${formatDisplayDate(fromIso)} al ${formatDisplayDate(toIso)} (C$)`;
       }
 
-      chartInstances.flow = new Chart(canvas, {
+      crearOActualizarGrafico('flow', canvas, {
         data: {
           labels: months.map(m => m.label),
           datasets: [
@@ -6516,7 +6573,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
     function renderCharts() {
       if (typeof Chart === 'undefined') return;
-      ['dem', 'civ'].forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
 
       const aliveAdults = adults.filter(isAliveRecord);
       const aliveKids = children.filter(isAliveRecord);
@@ -6530,7 +6586,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         ['Adolescentes (11-15)', aliveKids.filter(c => minorStageKey(c) === 'Adolescente').length, '#6d28d9'],
         ['Jóvenes (16+)', aliveKids.filter(c => minorStageKey(c) === 'Joven').length, '#0284c7']
       ];
-      chartInstances.dem = new Chart(document.getElementById('chartDemography'), {
+      crearOActualizarGrafico('dem', document.getElementById('chartDemography'), {
         type: 'bar',
         data: {
           labels: demo.map(d => d[0]),
@@ -6557,7 +6613,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         ['Otros', aliveAdults.filter(a => !['Casado(a)', 'Unión de Hecho', 'Soltero(a)'].includes(maritalOf(a))).length, '#94a3b8']
       ];
       const civilTotal = aliveAdults.length;
-      chartInstances.civ = new Chart(document.getElementById('chartCivil'), {
+      crearOActualizarGrafico('civ', document.getElementById('chartCivil'), {
         type: 'doughnut',
         data: {
           labels: civil.map(c => c[0]),
@@ -6861,7 +6917,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       document.getElementById('btnPrintReportScreen').addEventListener('click', printReport);
       document.getElementById('tabRptYear').addEventListener('change', renderOnScreenReport);
       document.getElementById('tabRptQuarter').addEventListener('change', renderOnScreenReport);
-      document.getElementById('tabRptAuthor').addEventListener('input', renderOnScreenReport);
+      document.getElementById('tabRptAuthor').addEventListener('input', renderReporteConPausa);
 
       document.getElementById('cardAdultsTrigger').addEventListener('click', () => {
         document.getElementById('btnDirAdult').click();
@@ -7090,7 +7146,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         </div>
         <div class="flex-grow min-w-[180px]">
           <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Buscar en el Reporte</label>
-          <input type="text" id="rptFilterSearch" oninput="renderOnScreenReport()" placeholder="Filtrar por nombre o cédula..." class="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-xs" />
+          <input type="text" id="rptFilterSearch" oninput="renderReporteConPausa()" placeholder="Filtrar por nombre o cédula..." class="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-xs" />
         </div>
       `;
       filterContainer.appendChild(extraFilters);
