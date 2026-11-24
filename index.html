@@ -2702,9 +2702,15 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
       let res;
       try {
-        res = await fetch(url, { method: 'POST', body: JSON.stringify(payload) });
+        const ctl = new AbortController();
+        const timer = setTimeout(() => ctl.abort(), 60000);
+        try {
+          res = await fetch(url, { method: 'POST', body: JSON.stringify(payload), signal: ctl.signal });
+        } finally { clearTimeout(timer); }
       } catch (err) {
-        throw new Error("No hay conexión con el servidor. Revisa tu acceso a internet.");
+        throw new Error(err && err.name === 'AbortError'
+          ? "El servidor tardó demasiado en responder. Inténtalo de nuevo."
+          : "No hay conexión con el servidor. Revisa tu acceso a internet.");
       }
 
       if (!res.ok) {
@@ -2760,16 +2766,23 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         
         let authRes;
         try {
-          authRes = await fetch(urlInput, {
-            method: 'POST',
-            body: JSON.stringify({ 
-              action: 'login', 
-              pin: pinInput,
-              clientId: getClientId()
-            })
-          });
+          const ctl = new AbortController();
+          const timer = setTimeout(() => ctl.abort(), 30000);
+          try {
+            authRes = await fetch(urlInput, {
+              method: 'POST',
+              signal: ctl.signal,
+              body: JSON.stringify({
+                action: 'login',
+                pin: pinInput,
+                clientId: getClientId()
+              })
+            });
+          } finally { clearTimeout(timer); }
         } catch (err) {
-          throw new Error("No se pudo conectar con el servidor. Verifica la URL.");
+          throw new Error(err && err.name === 'AbortError'
+            ? "El servidor tardó más de 30 segundos en responder. Revisa que la implementación de Apps Script esté activa (acceso: Cualquier persona) e inténtalo de nuevo."
+            : "No se pudo conectar con el servidor. Verifica la URL.");
         }
 
         let data;
