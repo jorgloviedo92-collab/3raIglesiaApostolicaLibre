@@ -6797,7 +6797,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
 <script>
 /* ════════════════════════════════════════════════════════════════════
-   BUSCADOR DE PERSONAS (Cónyuge, Padre, Madre, Tutores, Contribuyente)
+   BUSCADOR DE PERSONAS (Cónyuge, Padre, Madre, Tutores, Contribuyente, Certificados)
    Convierte una lista desplegable en un campo donde se escribe parte del
    nombre o la cédula y se elige entre las coincidencias.
    La <select> original sigue existiendo (oculta) y es la que lee el resto
@@ -6813,14 +6813,16 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   }
 
-  // Índice por ID de los adultos (se rehace solo cuando cambia la lista), para buscar rápido aun con miles de personas
-  var indiceLista = null, indice = new Map();
+  // Índice por ID de adultos y menores (se rehace solo cuando cambian las listas), para buscar rápido aun con miles de personas
+  var indiceAdultos = null, indiceMenores = null, indiceTam = -1, indice = new Map();
   function personaPorId(id) {
-    var lista = (typeof adults !== 'undefined' && Array.isArray(adults)) ? adults : [];
-    if (lista !== indiceLista || indice.size !== lista.length) {
+    var la = (typeof adults !== 'undefined' && Array.isArray(adults)) ? adults : [];
+    var lm = (typeof children !== 'undefined' && Array.isArray(children)) ? children : [];
+    if (la !== indiceAdultos || lm !== indiceMenores || indiceTam !== la.length + lm.length) {
       indice = new Map();
-      lista.forEach(function (a) { indice.set(String(a.id).trim(), a); });
-      indiceLista = lista;
+      lm.forEach(function (c) { indice.set(String(c.id).trim(), c); });
+      la.forEach(function (a) { indice.set(String(a.id).trim(), a); });
+      indiceAdultos = la; indiceMenores = lm; indiceTam = la.length + lm.length;
     }
     return indice.get(String(id).trim());
   }
@@ -7016,7 +7018,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     sincronizar();
   }
 
-  ['spouseSelect', 'fatherSelect', 'motherSelect', 'tutor1Select', 'tutor2Select', 'contribMemberSelect']
+  ['spouseSelect', 'fatherSelect', 'motherSelect', 'tutor1Select', 'tutor2Select', 'contribMemberSelect', 'certMemberSelect']
     .forEach(function (id) { crearBuscador(document.getElementById(id)); });
   window.crearBuscadorPersonas = crearBuscador;
 })();
