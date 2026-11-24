@@ -2741,12 +2741,10 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         }
         if (isLoggingOut) return;
         isLoggingOut = true;
-        try {
-          if (getSessionToken()) await fetchAPI('logout');
-        } catch (e) {
-        } finally {
-          isLoggingOut = false;
-        }
+        // El aviso al servidor (anular el token) va en segundo plano: la sesión se cierra
+        // aquí de inmediato aunque Apps Script tarde o no responda. fetchAPI lee el token
+        // antes de su primera espera, por eso se llama antes de borrarlo.
+        if (getSessionToken()) fetchAPI('logout').catch(() => {});
 
         sessionStorage.removeItem(SESS_TOKEN_KEY);
         sessionStorage.removeItem(SESS_ROLE_KEY);
@@ -2761,10 +2759,10 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         document.getElementById('loginInputPin').value = '';
         const statusBox = document.getElementById('loginStatusBox');
         statusBox.className = "p-3 rounded-xl text-xs font-bold bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center gap-2";
-        statusBox.textContent = customMessage || "Sesión finalizada con éxito. Token invalidado.";
+        statusBox.textContent = customMessage || "Sesión finalizada con éxito.";
         statusBox.classList.remove('hidden');
         document.getElementById('loginGate').classList.remove('hidden');
-        updateAllViews();
+        try { updateAllViews(); } finally { isLoggingOut = false; }
       }
     }
 
