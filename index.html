@@ -8865,7 +8865,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
         const adminButtons = isAdmin ? `
           <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
-            ${ev.status !== 'Realizado' ? `<button type="button" class="ev-act-done px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Marcar como realizado"><i class="fa-solid fa-check mr-1 pointer-events-none"></i>Realizado</button>` : ''}
+            ${(ev.status !== 'Realizado' && !getEventNotDoneReason(ev.date, ev.startTime)) ? `<button type="button" class="ev-act-done px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Marcar como realizado"><i class="fa-solid fa-check mr-1 pointer-events-none"></i>Realizado</button>` : ''}
             <button type="button" class="ev-act-edit px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Editar evento"><i class="fa-solid fa-pen mr-1 pointer-events-none"></i>Editar</button>
             <button type="button" class="ev-act-del px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition ml-auto" data-id="${escapeHtml(ev.id)}" title="Eliminar evento"><i class="fa-solid fa-trash mr-1 pointer-events-none"></i>Eliminar</button>
           </div>` : '';
@@ -8966,6 +8966,10 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         showToast(`La fecha del evento debe estar entre 1900 y ${maxEvYear}.`, 'error');
         return;
       }
+      if (status === 'Realizado') {
+        const notDoneReason = getEventNotDoneReason(date, startTime);
+        if (notDoneReason) { showToast(notDoneReason + ' Cambia el estado o la fecha.', 'error'); return; }
+      }
       if (startTime && endTime && endTime < startTime) {
         showToast('La hora de fin no puede ser anterior a la hora de inicio.', 'error');
         return;
@@ -9053,9 +9057,24 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
     }
 
+    // Devuelve el motivo por el que un evento aún no puede marcarse como Realizado ('' si sí puede).
+    // El servidor aplica la misma regla.
+    function getEventNotDoneReason(date, startTime) {
+      const todayIso = getTodayLocalIsoDate();
+      if (!date || date > todayIso) return 'No se puede marcar como Realizado un evento cuya fecha aún no ha llegado.';
+      if (date === todayIso && startTime) {
+        const now = new Date();
+        const nowHhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        if (startTime > nowHhmm) return 'No se puede marcar como Realizado un evento que todavía no ha comenzado.';
+      }
+      return '';
+    }
+
     async function markEventDone(id) {
       const ev = eventsList.find(e => e.id === id);
       if (!ev) return;
+      const notDoneReason = getEventNotDoneReason(ev.date, ev.startTime);
+      if (notDoneReason) { showToast(notDoneReason, 'error'); return; }
       const updatedPayload = { ...ev, status: 'Realizado' };
       try {
         if (typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl()) {
