@@ -3038,6 +3038,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
             <option value="menores">Menores Eliminados</option>
             <option value="contribuciones">Contribuciones Anuladas</option>
             <option value="caja">Movimientos de Caja Anulados</option>
+            <option value="eventos">Eventos Eliminados</option>
           </select>
           <button type="button" id="btnEmptyTrash" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center gap-1.5">
             <i class="fa-solid fa-trash-can"></i> <span>Vaciar Papelera (Eliminar Todo)</span>
@@ -3241,6 +3242,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     let deletedChildren = [];
     let deletedContributions = [];
     let deletedCashFlow = [];
+    let deletedEvents = [];
     
     let currentPhotoBase64 = '';
     let churchConfig = { name: 'Iglesia Local', pastor: '', secretary: '', address: '' };
@@ -3570,6 +3572,9 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       cashFlow = allCash.filter(cf => !cf.isDeleted && !cf.eliminado);
       deletedCashFlow = allCash.filter(cf => cf.isDeleted || cf.eliminado);
 
+      // Eventos dados de baja (solo llegan al Administrador); los activos los maneja la agenda
+      deletedEvents = (Array.isArray(res.events) ? res.events : []).filter(ev => ev && (ev.isDeleted || ev.eliminado));
+
       if (res.churchConfig) {
         churchConfig = { ...churchConfig, ...res.churchConfig };
       }
@@ -3714,7 +3719,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         resetPhotoQueues();
 
         adults = []; children = []; contributions = []; cashFlow = [];
-        deletedAdults = []; deletedChildren = []; deletedContributions = []; deletedCashFlow = [];
+        deletedAdults = []; deletedChildren = []; deletedContributions = []; deletedCashFlow = []; deletedEvents = [];
         if (typeof window.clearEventsState === 'function') window.clearEventsState();
         
         document.getElementById('accessPinInput').value = '';
@@ -4736,6 +4741,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (table === 'child') return { active: children, trash: deletedChildren };
       if (table === 'contribution') return { active: contributions, trash: deletedContributions };
       if (table === 'cash') return { active: cashFlow, trash: deletedCashFlow };
+      if (table === 'event') return { active: [], trash: deletedEvents };
       return null;
     }
 
@@ -4749,6 +4755,12 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       const [rec] = from.splice(idx, 1);
       rec.eliminado = toTrash;
       rec.isDeleted = toTrash;
+      // Los eventos activos viven en la agenda: al restaurar se devuelven allí
+      if (table === 'event') {
+        if (!toTrash && typeof window.restoreEventToAgenda === 'function') window.restoreEventToAgenda(rec);
+        else if (toTrash) to.push(rec);
+        return;
+      }
       to.push(rec);
     }
 
@@ -4803,7 +4815,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         adultos: { label: 'Adultos eliminados', table: 'adult' },
         menores: { label: 'Menores/Jóvenes eliminados', table: 'child' },
         contribuciones: { label: 'Contribuciones anuladas', table: 'contribution' },
-        caja: { label: 'Movimientos de caja anulados', table: 'cash' }
+        caja: { label: 'Movimientos de caja anulados', table: 'cash' },
+        eventos: { label: 'Eventos eliminados', table: 'event' }
       }[filter] || { label: 'este módulo', table: '' };
 
       if (!(await showConfirmDialog({ title: 'Vaciar papelera', message: `Se eliminarán PERMANENTEMENTE todos los registros de ${filterInfo.label}.\n\nEsta acción no se puede deshacer: los datos se borran definitivamente de la base de datos.`, confirmText: 'Eliminar definitivamente', tone: 'danger' }))) {
@@ -4836,6 +4849,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (filter === 'menores') { dataset = deletedChildren; tipoStr = 'Menor'; tableKey = 'child'; }
       if (filter === 'contribuciones') { dataset = deletedContributions; tipoStr = 'Contribución'; tableKey = 'contribution'; }
       if (filter === 'caja') { dataset = deletedCashFlow; tipoStr = 'Caja/Gasto'; tableKey = 'cash'; }
+      if (filter === 'eventos') { dataset = deletedEvents; tipoStr = 'Evento'; tableKey = 'event'; }
 
       if (dataset.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-slate-400 font-bold">La papelera está vacía para este módulo.</td></tr>';
@@ -4854,6 +4868,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         tdDetalle.className = 'py-3 px-4 font-bold text-slate-700 text-sm';
         if (filter === 'adultos' || filter === 'menores') {
           tdDetalle.textContent = item.fullName || item.nombreCompleto;
+        } else if (filter === 'eventos') {
+          tdDetalle.textContent = `${item.title || item.titulo || 'Evento'} — ${formatDisplayDate(item.date || item.fecha)}`;
         } else if (filter === 'contribuciones') {
           tdDetalle.textContent = `Aporte ${formatCurrency(item.amount || item.monto)} -${item.memberName || item.nombreMiembro}`;
         } else {
@@ -8591,6 +8607,16 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
     };
 
+    window.restoreEventToAgenda = function (rec) {
+      const restored = normalizeClientEvent(rec);
+      if (!restored || !restored.id || !restored.title || !restored.date) return;
+      eventsList = eventsList.filter(e => e.id !== restored.id);
+      eventsList.push(restored);
+      saveEventsLocal();
+      updateEventsNavBadge();
+      if (typeof vistaActual !== 'undefined' && vistaActual === 'eventos') renderEventsModule();
+    };
+
     window.clearEventsState = function () {
       eventsList = [];
       selectedDateIso = '';
@@ -9031,7 +9057,9 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (!ev) return;
       const ok = await showConfirmDialog({
         title: 'Eliminar evento',
-        message: `¿Deseas eliminar "${ev.title}" (${formatDisplayDate(ev.date)}) de la agenda?`,
+        message: `¿Deseas eliminar "${ev.title}" (${formatDisplayDate(ev.date)}) de la agenda?
+
+El evento quedará en la Papelera y podrás restaurarlo o eliminarlo definitivamente.`,
         confirmText: 'Eliminar',
         tone: 'danger'
       });
@@ -9045,11 +9073,17 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
             throw new Error((res && res.message) || 'No se pudo eliminar el evento en Firestore.');
           }
         }
+        const enServidor = typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl();
         eventsList = eventsList.filter(e => e.id !== id);
         saveEventsLocal();
+        if (enServidor && typeof deletedEvents !== 'undefined') {
+          deletedEvents = deletedEvents.filter(e => String(e.id) !== String(id));
+          deletedEvents.push({ ...ev, eliminado: true, isDeleted: true });
+        }
         if (document.getElementById('evIdInput').value === id) resetEventForm();
+        updateEventsNavBadge();
         renderEventsModule();
-        showToast('Evento eliminado de la agenda.');
+        showToast(enServidor ? `"${ev.title}" se movió a la Papelera.` : 'Evento eliminado de la agenda.');
       } catch (err) {
         showToast(err.message || 'Error al eliminar el evento.', 'error');
       } finally {
