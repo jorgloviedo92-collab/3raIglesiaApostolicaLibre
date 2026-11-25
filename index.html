@@ -1450,6 +1450,181 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     }
   }
   </style>
+
+  <style id="eventsAgendaStyles">
+  /* ═══════════ Módulo Agenda de Eventos ═══════════ */
+  #view-eventos { color: #0f172a; }
+  #view-eventos input:not([type="checkbox"]),
+  #view-eventos select,
+  #view-eventos textarea {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    font-weight: 500;
+  }
+  #view-eventos input::placeholder,
+  #view-eventos textarea::placeholder { color: #64748b !important; opacity: 1; }
+  #view-eventos input:focus,
+  #view-eventos select:focus,
+  #view-eventos textarea:focus {
+    outline: none;
+    border-color: #1b82d1 !important;
+    box-shadow: 0 0 0 3px rgba(27, 130, 209, .16);
+  }
+
+  /* Badge del menú lateral en modo colapsado y activo */
+  #mainHeader nav button.tab-active #navEventsCount {
+    background: #e6f2ff !important;
+    color: #0f5fa8 !important;
+    border-color: #bfdbfe !important;
+  }
+  @media (min-width: 1024px) {
+    body.sidebar-collapsed #navEventsCount {
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      padding: 0 5px;
+      font-size: 9px;
+      line-height: 15px;
+    }
+  }
+
+  /* Calendario mensual interactivo */
+  .ev-cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+  }
+  .ev-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .ev-cal-day {
+    position: relative;
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, transform .12s ease;
+    font-variant-numeric: tabular-nums;
+  }
+  .ev-cal-day:hover {
+    background: #eef6ff;
+    border-color: #bfdbfe;
+  }
+  .ev-cal-day.ev-cal-muted {
+    background: transparent;
+    color: #cbd5e1;
+    cursor: default;
+  }
+  .ev-cal-day.ev-cal-muted:hover {
+    background: transparent;
+    border-color: transparent;
+  }
+  .ev-cal-day.ev-cal-today {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #0f5fa8;
+    font-weight: 700;
+  }
+  .ev-cal-day.ev-cal-selected {
+    background: #0f5fa8 !important;
+    border-color: #0a3f78 !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 14px -8px rgba(15, 95, 168, .75);
+  }
+  .ev-cal-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 6px;
+  }
+  .ev-cal-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .ev-cal-day.ev-cal-selected .ev-cal-dot {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .75);
+  }
+
+  /* Tarjetas cronológicas de eventos */
+  .ev-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  }
+  .ev-card:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 10px 24px -18px rgba(15, 95, 168, .45);
+  }
+  .ev-date-box {
+    width: 58px;
+    min-width: 58px;
+    border-radius: 12px;
+    background: linear-gradient(160deg, #0f5fa8 0%, #1b82d1 100%);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    align-self: flex-start;
+  }
+  .ev-date-box.ev-past {
+    background: linear-gradient(160deg, #64748b 0%, #94a3b8 100%);
+  }
+  .ev-date-box.ev-today {
+    background: linear-gradient(160deg, #059669 0%, #10b981 100%);
+  }
+  .ev-date-box.ev-cancelled {
+    background: linear-gradient(160deg, #9f1239 0%, #e11d48 100%);
+  }
+  .ev-date-month {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    opacity: .9;
+    line-height: 1;
+  }
+  .ev-date-day {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 2px 0;
+  }
+  .ev-date-year {
+    font-size: 10px;
+    opacity: .85;
+    line-height: 1;
+  }
+  </style>
+
 </head>
 <body class="min-h-screen flex flex-col text-slate-800 antialiased">
 
@@ -1767,6 +1942,13 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
             <button id="tabBtn-caja" data-tab="caja" class="py-2 lg:py-2.5 px-3 lg:px-3.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 flex items-center gap-2.5 whitespace-nowrap shrink-0 transition border border-transparent">
               <i class="fa-solid fa-wallet w-4 text-center text-emerald-400"></i>
               <span class="nav-label">Caja y Gastos</span>
+            </button>
+            <button id="tabBtn-eventos" data-tab="eventos" class="py-2 lg:py-2.5 px-3 lg:px-3.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 flex items-center justify-between gap-2 whitespace-nowrap shrink-0 transition border border-transparent">
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-calendar-days w-4 text-center text-[#f6dc92]"></i>
+                <span class="nav-label">Agenda de Eventos</span>
+              </span>
+              <span id="navEventsCount" class="hidden bg-white/10 text-slate-100 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-white/15">0</span>
             </button>
             <button id="tabBtn-reportes" data-tab="reportes" class="py-2 lg:py-2.5 px-3 lg:px-3.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 flex items-center gap-2.5 whitespace-nowrap shrink-0 transition border border-transparent">
               <i class="fa-solid fa-chart-simple w-4 text-center text-sky-400"></i>
@@ -2572,6 +2754,235 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       </div>
     </section>
 
+    <!-- VISTA 5B: AGENDA DE EVENTOS -->
+    <section id="view-eventos" class="hidden space-y-5 no-print">
+      <!-- KPIs de Agenda -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="dash-card p-4 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <span class="text-xs font-bold uppercase text-slate-500 block">Próximos Eventos</span>
+            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1" id="evStatUpcoming">0</p>
+            <span class="text-xs text-slate-500">Pendientes en agenda</span>
+          </div>
+          <span class="dash-chip bg-blue-50 text-blue-700"><i class="fa-solid fa-calendar-check"></i></span>
+        </div>
+
+        <div class="dash-card p-4 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <span class="text-xs font-bold uppercase text-slate-500 block">Este Mes</span>
+            <p class="text-2xl sm:text-3xl font-extrabold text-indigo-700 mt-1" id="evStatMonth">0</p>
+            <span class="text-xs text-slate-500" id="evStatMonthName">Mes actual</span>
+          </div>
+          <span class="dash-chip bg-indigo-50 text-indigo-700"><i class="fa-solid fa-calendar-week"></i></span>
+        </div>
+
+        <div class="dash-card p-4 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <span class="text-xs font-bold uppercase text-slate-500 block">Siguiente Actividad</span>
+            <p class="text-sm sm:text-base font-bold text-emerald-700 mt-1 truncate" id="evStatNextTitle">Sin eventos próximos</p>
+            <span class="text-xs text-slate-500 truncate block" id="evStatNextDate">—</span>
+          </div>
+          <span class="dash-chip bg-emerald-50 text-emerald-700"><i class="fa-solid fa-clock"></i></span>
+        </div>
+
+        <div class="dash-card p-4 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <span class="text-xs font-bold uppercase text-slate-500 block">Realizados</span>
+            <p class="text-2xl sm:text-3xl font-extrabold text-slate-700 mt-1" id="evStatCompleted">0</p>
+            <span class="text-xs text-slate-500">Historial completado</span>
+          </div>
+          <span class="dash-chip bg-amber-50 text-amber-700"><i class="fa-solid fa-flag-checkered"></i></span>
+        </div>
+      </div>
+
+      <!-- Contenido Principal: Calendario + Formulario (Izquierda) y Agenda Cronológica (Derecha) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+        <!-- Columna Izquierda -->
+        <div class="space-y-5">
+          <!-- Calendario Mensual -->
+          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <button type="button" id="btnEvCalPrev" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition" title="Mes anterior" aria-label="Mes anterior">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+              </button>
+              <div class="text-center min-w-0">
+                <h3 id="evCalMonthLabel" class="text-sm sm:text-base font-bold text-slate-900 capitalize">Mes Año</h3>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" id="btnEvCalToday" class="px-2.5 h-8 rounded-lg border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-600 transition" title="Ir a hoy">Hoy</button>
+                <button type="button" id="btnEvCalNext" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition" title="Mes siguiente" aria-label="Mes siguiente">
+                  <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="ev-cal-weekdays">
+              <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+            </div>
+            <div id="evCalendarGrid" class="ev-cal-grid"></div>
+
+            <div id="evSelectedDateBar" class="hidden mt-3 pt-3 border-t border-slate-200 flex items-center justify-between gap-2 text-xs">
+              <span class="font-semibold text-blue-700"><i class="fa-solid fa-filter mr-1"></i>Fecha: <strong id="evSelectedDateText"></strong></span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" id="btnEvQuickAddDate" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition">+ Agendar</button>
+                <button type="button" id="btnEvClearDateFilter" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition">Ver todos</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulario de Registro / Edición de Evento -->
+          <div id="eventFormCard" class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <h3 id="evFormHeading" class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-plus text-blue-600"></i>
+                <span>Programar Evento</span>
+              </h3>
+              <button type="button" id="btnEvCancelEdit" class="hidden text-xs font-bold text-rose-600 hover:underline">Cancelar edición</button>
+            </div>
+            <form id="eventForm" class="space-y-3.5 text-sm">
+              <input type="hidden" id="evIdInput" value="" />
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1" for="evTitleInput">Título del Evento *</label>
+                <input type="text" id="evTitleInput" required maxlength="120" placeholder="Ej. Culto de Vigilia, Bautismos en Agua..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1" for="evDateInput">Fecha *</label>
+                  <input type="date" id="evDateInput" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1" for="evCategoryInput">Categoría *</label>
+                  <select id="evCategoryInput" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                    <option value="Culto Especial">Culto Especial</option>
+                    <option value="Bautismo">Bautismo</option>
+                    <option value="Reunión Directiva">Reunión Directiva</option>
+                    <option value="Jóvenes">Jóvenes</option>
+                    <option value="Niños / Escuela">Niños / Escuela</option>
+                    <option value="Evangelismo / Misiones">Evangelismo / Misiones</option>
+                    <option value="Retiro / Congreso">Retiro / Congreso</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1" for="evStartHour">Hora Inicio (12 hrs)</label>
+                  <input type="hidden" id="evStartTimeInput" value="" />
+                  <div class="grid grid-cols-3 gap-1.5">
+                    <select id="evStartHour" aria-label="Hora de inicio" class="px-2.5 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                      <option value="">--</option><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option><option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                    </select>
+                    <select id="evStartMin" aria-label="Minutos de inicio" class="px-2.5 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                      <option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option>
+                    </select>
+                    <select id="evStartAmPm" aria-label="AM o PM inicio" class="px-2.5 py-2 rounded-xl border border-slate-300 text-sm bg-white font-bold">
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1" for="evEndHour">Hora Fin (12 hrs)</label>
+                  <input type="hidden" id="evEndTimeInput" value="" />
+                  <div class="grid grid-cols-3 gap-1.5">
+                    <select id="evEndHour" aria-label="Hora de fin" class="px-2.5 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                      <option value="">--</option><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option><option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                    </select>
+                    <select id="evEndMin" aria-label="Minutos de fin" class="px-2.5 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                      <option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option>
+                    </select>
+                    <select id="evEndAmPm" aria-label="AM o PM fin" class="px-2.5 py-2 rounded-xl border border-slate-300 text-sm bg-white font-bold">
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1" for="evLocationInput">Lugar / Templo</label>
+                  <input type="text" id="evLocationInput" maxlength="120" placeholder="Ej. Templo Principal" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1" for="evResponsibleInput">Responsable / Ministerio</label>
+                  <input type="text" id="evResponsibleInput" maxlength="100" placeholder="Ej. Pastor / Directiva" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1" for="evStatusInput">Estado</label>
+                <select id="evStatusInput" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                  <option value="Programado">Programado</option>
+                  <option value="Confirmado">Confirmado</option>
+                  <option value="Realizado">Realizado</option>
+                  <option value="Cancelado">Cancelado</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1" for="evNotesInput">Descripción / Observaciones</label>
+                <textarea id="evNotesInput" rows="2" maxlength="400" placeholder="Detalles, logística, invitados o notas..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm"></textarea>
+              </div>
+
+              <button type="submit" id="btnEvSubmit" class="w-full bg-[#0f5fa8] hover:bg-[#0c4f8f] text-white font-bold py-2.5 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Guardar en Agenda</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Agenda Cronológica -->
+        <div class="lg:col-span-2 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-list-ul text-blue-600"></i>
+                <span>Agenda Cronológica de Eventos</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5" id="evListSubtitle">Eventos ordenados por fecha</p>
+            </div>
+            <div class="ui-toolbar-actions no-print">
+              <button type="button" id="btnExportEventsCsv" class="ui-btn ui-btn-ghost ui-btn-sm" title="Descargar agenda en CSV (Excel)"><i class="fa-solid fa-file-csv"></i> Exportar</button>
+              <button type="button" id="btnPrintEvents" class="ui-btn ui-btn-ghost ui-btn-sm" title="Imprimir agenda institucional"><i class="fa-solid fa-print"></i> Imprimir</button>
+            </div>
+          </div>
+
+          <!-- Filtros -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
+            <div class="ui-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="search" id="evSearchInput" placeholder="Buscar evento, lugar, responsable..." aria-label="Buscar eventos" />
+            </div>
+            <select id="evPeriodFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-white font-semibold text-slate-700">
+              <option value="UPCOMING">Próximos (Hoy en adelante)</option>
+              <option value="MONTH">Solo mes en calendario</option>
+              <option value="ALL">Todos los eventos</option>
+              <option value="COMPLETED">Realizados</option>
+              <option value="PAST">Pasados / Anteriores</option>
+            </select>
+            <select id="evCategoryFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-white font-semibold text-slate-700">
+              <option value="ALL">Categoría (Todas)</option>
+              <option value="Culto Especial">Culto Especial</option>
+              <option value="Bautismo">Bautismo</option>
+              <option value="Reunión Directiva">Reunión Directiva</option>
+              <option value="Jóvenes">Jóvenes</option>
+              <option value="Niños / Escuela">Niños / Escuela</option>
+              <option value="Evangelismo / Misiones">Evangelismo / Misiones</option>
+              <option value="Retiro / Congreso">Retiro / Congreso</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <!-- Lista de Eventos -->
+          <div id="eventsListContainer" class="space-y-3"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- VISTA 6: PESTAÑA DEDICADA DE REPORTES EN PANTALLA -->
     <section id="view-reportes" class="hidden space-y-6 no-print">
       <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
@@ -3162,6 +3573,9 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (res.churchConfig) {
         churchConfig = { ...churchConfig, ...res.churchConfig };
       }
+      if (Array.isArray(res.events) && typeof window.mergeCloudEvents === 'function') {
+        window.mergeCloudEvents(res.events);
+      }
 
       applyRoleRestrictions();
       updateAllViews();
@@ -3301,6 +3715,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
         adults = []; children = []; contributions = []; cashFlow = [];
         deletedAdults = []; deletedChildren = []; deletedContributions = []; deletedCashFlow = [];
+        if (typeof window.clearEventsState === 'function') window.clearEventsState();
         
         document.getElementById('accessPinInput').value = '';
         const statusBox = document.getElementById('authStatusBanner');
@@ -3346,7 +3761,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         (!isConsulta ? 'bg-emerald-800 text-emerald-100 border-emerald-600' : 'bg-slate-700 text-slate-200 border-slate-600');
       roleBadge.classList.remove('hidden');
 
-      [btnRegistro, btnConfig, btnTabCaja, btnTabContrib, btnPapelera, contributionForm, cashForm, cardBalance, cardCashFlow, cardDiscipline, diagBadge].forEach(el => {
+      const eventFormCard = document.getElementById('eventFormCard');
+      [btnRegistro, btnConfig, btnTabCaja, btnTabContrib, btnPapelera, contributionForm, cashForm, eventFormCard, cardBalance, cardCashFlow, cardDiscipline, diagBadge].forEach(el => {
         if (el) el.classList.toggle('hidden', isConsulta);
       });
 
@@ -3360,6 +3776,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
 
       renderDirectory();
+      if (typeof window.renderEventsModule === 'function') window.renderEventsModule();
     }
 
     // Evita sincronizaciones simultáneas: si se pide otra mientras corre una,
@@ -6354,7 +6771,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         showToast('Acceso restringido: requiere rol Administrador.', 'error');
         return;
       }
-      ['dashboard', 'registro', 'directorio', 'contribuciones', 'caja', 'reportes', 'papelera'].forEach(t => {
+      ['dashboard', 'registro', 'directorio', 'contribuciones', 'caja', 'eventos', 'reportes', 'papelera'].forEach(t => {
         const sec = document.getElementById('view-' + t);
         if (sec) sec.classList.add('hidden');
         const b = document.getElementById('tabBtn-' + t);
@@ -6376,6 +6793,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         registro: { sub: 'Expediente Eclesiástico', title: 'Ficha de Registro y Actualización' },
         contribuciones: { sub: 'Finanzas Congregacionales', title: 'Libro de Contribuciones y Aportes (C$)' },
         caja: { sub: 'Tesorería y Contabilidad', title: 'Flujo de Caja y Gastos Operativos' },
+        eventos: { sub: 'Planificación Pastoral', title: 'Agenda y Calendario de Eventos' },
         reportes: { sub: 'Auditoría e Informes', title: 'Reportes Trimestrales y Comparativas' },
         papelera: { sub: 'Seguridad y Respaldo', title: 'Papelera de Reciclaje y Restauración' }
       };
@@ -6387,6 +6805,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
       vistaActual = tab;
       if (tab === 'dashboard') renderDashboardSummary();
+      if (tab === 'eventos' && typeof window.renderEventsModule === 'function') window.renderEventsModule();
       if (tab === 'registro') { populateSelectors(); toggleDisciplineAvailability(); }
       if (tab === 'directorio') { syncStickyHeaderHeight(); renderDirectory(); }
       if (tab === 'papelera') renderTrashTable();
@@ -6698,6 +7117,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       document.getElementById('navTotalCount').textContent =
         adults.filter(isAliveRecord).length + children.filter(isAliveRecord).length;
       document.getElementById('headerChurchName').textContent = churchConfig.name || 'Iglesia Local';
+      if (typeof window.updateEventsNavBadge === 'function') window.updateEventsNavBadge();
       renderActiveViewData(vistaActual);
     }
 
@@ -6706,6 +7126,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       else if (vista === 'directorio') renderDirectory();
       else if (vista === 'contribuciones') renderContributionsTable();
       else if (vista === 'caja') renderCashTable();
+      else if (vista === 'eventos' && typeof window.renderEventsModule === 'function') window.renderEventsModule();
       else if (vista === 'papelera') renderTrashTable();
       else if (vista === 'reportes') populateReportYears();
     }
@@ -8074,5 +8495,710 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     requestAnimationFrame(() => updatePill(false));
   })();
   </script>
+
+  <script id="eventsAgendaScript">
+  (function () {
+    const STORAGE_EVENTS_KEY = 'ecclesiasoft_events_v1';
+    const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const MONTHS_SHORT = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+    const CATEGORY_META = {
+      'Culto Especial':         { dot: '#0f5fa8', badge: 'bg-blue-50 text-blue-800 border-blue-200' },
+      'Bautismo':               { dot: '#0891b2', badge: 'bg-cyan-50 text-cyan-700 border-sky-200' },
+      'Reunión Directiva':      { dot: '#4f46e5', badge: 'bg-indigo-50 text-indigo-800 border-indigo-200' },
+      'Jóvenes':                { dot: '#059669', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+      'Niños / Escuela':        { dot: '#0d9488', badge: 'bg-teal-50 text-teal-800 border-teal-200' },
+      'Evangelismo / Misiones': { dot: '#d97706', badge: 'bg-amber-50 text-amber-800 border-amber-200' },
+      'Retiro / Congreso':      { dot: '#7c3aed', badge: 'bg-purple-100 text-purple-800 border-purple-200' },
+      'Otro':                   { dot: '#64748b', badge: 'bg-slate-100 text-slate-700 border-slate-200' }
+    };
+
+    const STATUS_BADGE = {
+      'Programado': 'bg-blue-50 text-blue-700 border-blue-200',
+      'Confirmado': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      'Realizado':  'bg-slate-100 text-slate-600 border-slate-200',
+      'Cancelado':  'bg-rose-50 text-rose-700 border-rose-200'
+    };
+
+    let eventsList = [];
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth(); // 0..11
+    let selectedDateIso = ''; // '' significa sin filtro de día específico
+
+    function getStorageKey() {
+      const ep = (typeof getScriptUrl === 'function' ? getScriptUrl() : '') || 'local';
+      let hash = 0;
+      for (let i = 0; i < ep.length; i++) hash = ((hash << 5) - hash + ep.charCodeAt(i)) | 0;
+      return STORAGE_EVENTS_KEY + '_' + Math.abs(hash).toString(36);
+    }
+
+    function loadEventsLocal() {
+      try {
+        const raw = localStorage.getItem(getStorageKey()) || localStorage.getItem(STORAGE_EVENTS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            eventsList = parsed.filter(e => e && e.id && e.title && e.date);
+            return;
+          }
+        }
+      } catch (e) {}
+      eventsList = [];
+    }
+
+    function saveEventsLocal() {
+      try {
+        localStorage.setItem(getStorageKey(), JSON.stringify(eventsList));
+      } catch (e) {}
+    }
+
+    function normalizeClientEvent(raw) {
+      if (!raw) return null;
+      return {
+        id: String(raw.id || ''),
+        title: String(raw.title !== undefined ? raw.title : (raw.titulo || '')),
+        date: String(raw.date !== undefined ? raw.date : (raw.fecha || '')).split('T')[0],
+        startTime: String(raw.startTime !== undefined ? raw.startTime : (raw.horaInicio || '')),
+        endTime: String(raw.endTime !== undefined ? raw.endTime : (raw.horaFin || '')),
+        category: String(raw.category !== undefined ? raw.category : (raw.categoria || 'Otro')),
+        location: String(raw.location !== undefined ? raw.location : (raw.lugar || '')),
+        responsible: String(raw.responsible !== undefined ? raw.responsible : (raw.responsable || '')),
+        status: String(raw.status !== undefined ? raw.status : (raw.estado || 'Programado')),
+        notes: String(raw.notes !== undefined ? raw.notes : (raw.notas || '')),
+        updatedAt: String(raw.updatedAt !== undefined ? raw.updatedAt : (raw.actualizadoEl || ''))
+      };
+    }
+
+    window.mergeCloudEvents = function (cloudEvents) {
+      if (!Array.isArray(cloudEvents)) return;
+      eventsList = cloudEvents
+        .filter(e => e && !e.isDeleted && !e.eliminado)
+        .map(normalizeClientEvent)
+        .filter(e => e && e.id && e.title && e.date);
+      saveEventsLocal();
+      updateEventsNavBadge();
+      if (typeof vistaActual !== 'undefined' && vistaActual === 'eventos') {
+        renderEventsModule();
+      }
+    };
+
+    window.clearEventsState = function () {
+      eventsList = [];
+      selectedDateIso = '';
+      updateEventsNavBadge();
+    };
+
+    function formatTime12h(hhmm) {
+      if (!hhmm || !hhmm.includes(':')) return '';
+      const [hStr, mStr] = hhmm.split(':');
+      let h = parseInt(hStr, 10);
+      if (isNaN(h)) return hhmm;
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${h}:${mStr} ${ampm}`;
+    }
+
+    function readTime12hTo24h(prefix) {
+      const hVal = document.getElementById(prefix + 'Hour')?.value || '';
+      const mVal = document.getElementById(prefix + 'Min')?.value || '00';
+      const ampm = document.getElementById(prefix + 'AmPm')?.value || 'AM';
+      if (!hVal) return '';
+      let h = parseInt(hVal, 10);
+      if (isNaN(h)) return '';
+      if (ampm === 'AM') {
+        h = (h === 12) ? 0 : h;
+      } else {
+        h = (h === 12) ? 12 : h + 12;
+      }
+      return `${String(h).padStart(2, '0')}:${String(mVal).padStart(2, '0')}`;
+    }
+
+    function setTime12hFrom24h(prefix, hhmm) {
+      const hEl = document.getElementById(prefix + 'Hour');
+      const mEl = document.getElementById(prefix + 'Min');
+      const apEl = document.getElementById(prefix + 'AmPm');
+      const hidEl = document.getElementById(prefix + 'TimeInput');
+      if (!hEl || !mEl || !apEl) return;
+      if (!hhmm || !hhmm.includes(':')) {
+        hEl.value = '';
+        mEl.value = '00';
+        apEl.value = 'AM';
+        if (hidEl) hidEl.value = '';
+        return;
+      }
+      const [hStr, mStr] = hhmm.split(':');
+      let h = parseInt(hStr, 10);
+      if (isNaN(h)) {
+        hEl.value = '';
+        mEl.value = '00';
+        apEl.value = 'AM';
+        if (hidEl) hidEl.value = '';
+        return;
+      }
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      hEl.value = String(h);
+      mEl.value = String(mStr || '00').padStart(2, '0');
+      apEl.value = ampm;
+      if (hidEl) hidEl.value = readTime12hTo24h(prefix);
+    }
+
+    function syncTime12hHidden(prefix) {
+      const hidEl = document.getElementById(prefix + 'TimeInput');
+      if (hidEl) hidEl.value = readTime12hTo24h(prefix);
+    }
+
+    function diffDaysFromToday(dateIso) {
+      const todayIso = getTodayLocalIsoDate();
+      const d1 = parseDateSafe(todayIso);
+      const d2 = parseDateSafe(dateIso);
+      if (!d1 || !d2) return 0;
+      return Math.round((d2.getTime() - d1.getTime()) / 86400000);
+    }
+
+    function getRelativeBadge(ev) {
+      if (ev.status === 'Cancelado') return { text: 'Cancelado', cls: 'bg-rose-100 text-rose-800' };
+      if (ev.status === 'Realizado') return { text: 'Realizado', cls: 'bg-slate-200 text-slate-700' };
+      const diff = diffDaysFromToday(ev.date);
+      if (diff === 0) return { text: 'HOY', cls: 'bg-emerald-600 text-white' };
+      if (diff === 1) return { text: 'MAÑANA', cls: 'bg-blue-600 text-white' };
+      if (diff > 1 && diff <= 7) return { text: `En ${diff} días`, cls: 'bg-amber-100 text-amber-800' };
+      if (diff > 7) return { text: `En ${diff} días`, cls: 'bg-blue-50 text-blue-700' };
+      return { text: `Hace ${Math.abs(diff)} d`, cls: 'bg-slate-100 text-slate-500' };
+    }
+
+    function sortEventsChronologically(arr) {
+      return arr.slice().sort((a, b) => {
+        const cmpDate = String(a.date || '').localeCompare(String(b.date || ''));
+        if (cmpDate !== 0) return cmpDate;
+        return String(a.startTime || '99:99').localeCompare(String(b.startTime || '99:99'));
+      });
+    }
+
+    function updateEventsNavBadge() {
+      const badge = document.getElementById('navEventsCount');
+      if (!badge) return;
+      const today = getTodayLocalIsoDate();
+      const upcomingCount = eventsList.filter(e => e.date >= today && e.status !== 'Cancelado' && e.status !== 'Realizado').length;
+      badge.textContent = String(upcomingCount);
+      badge.classList.toggle('hidden', upcomingCount === 0);
+    }
+    window.updateEventsNavBadge = updateEventsNavBadge;
+
+    function getFilteredEvents() {
+      const search = (document.getElementById('evSearchInput')?.value || '').trim().toLowerCase();
+      const period = document.getElementById('evPeriodFilter')?.value || 'UPCOMING';
+      const category = document.getElementById('evCategoryFilter')?.value || 'ALL';
+      const today = getTodayLocalIsoDate();
+      const monthPrefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+
+      let list = eventsList.filter(ev => {
+        if (category !== 'ALL' && ev.category !== category) return false;
+        if (selectedDateIso) {
+          if (ev.date !== selectedDateIso) return false;
+        } else {
+          if (period === 'UPCOMING' && !(ev.date >= today && ev.status !== 'Realizado' && ev.status !== 'Cancelado')) return false;
+          if (period === 'MONTH' && !String(ev.date || '').startsWith(monthPrefix)) return false;
+          if (period === 'COMPLETED' && ev.status !== 'Realizado') return false;
+          if (period === 'PAST' && !(ev.date < today)) return false;
+        }
+        if (search) {
+          const hay = [ev.title, ev.location, ev.responsible, ev.category, ev.notes, ev.date].join(' ').toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+        return true;
+      });
+
+      list = sortEventsChronologically(list);
+      if (period === 'PAST' || period === 'COMPLETED') {
+        list.reverse();
+      }
+      return list;
+    }
+
+    function renderEventsKPIs() {
+      const today = getTodayLocalIsoDate();
+      const nowD = parseDateSafe(today) || new Date();
+      const currentMonthPrefix = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, '0')}`;
+
+      const upcoming = sortEventsChronologically(
+        eventsList.filter(e => e.date >= today && e.status !== 'Cancelado' && e.status !== 'Realizado')
+      );
+      const thisMonth = eventsList.filter(e => String(e.date || '').startsWith(currentMonthPrefix) && e.status !== 'Cancelado');
+      const completed = eventsList.filter(e => e.status === 'Realizado');
+
+      const elUp = document.getElementById('evStatUpcoming');
+      const elMo = document.getElementById('evStatMonth');
+      const elMoName = document.getElementById('evStatMonthName');
+      const elNextTitle = document.getElementById('evStatNextTitle');
+      const elNextDate = document.getElementById('evStatNextDate');
+      const elComp = document.getElementById('evStatCompleted');
+
+      if (elUp) elUp.textContent = String(upcoming.length);
+      if (elMo) elMo.textContent = String(thisMonth.length);
+      if (elMoName) elMoName.textContent = MONTHS_ES[nowD.getMonth()].charAt(0).toUpperCase() + MONTHS_ES[nowD.getMonth()].slice(1) + ' ' + nowD.getFullYear();
+      if (elComp) elComp.textContent = String(completed.length);
+
+      if (upcoming.length > 0) {
+        const nextEv = upcoming[0];
+        const diff = diffDaysFromToday(nextEv.date);
+        const whenTxt = diff === 0 ? 'Hoy' : (diff === 1 ? 'Mañana' : `En ${diff} días`);
+        const timeTxt = nextEv.startTime ? ` · ${formatTime12h(nextEv.startTime)}` : '';
+        if (elNextTitle) { elNextTitle.textContent = nextEv.title; elNextTitle.title = nextEv.title; }
+        if (elNextDate) elNextDate.textContent = `${formatDisplayDate(nextEv.date)}${timeTxt} (${whenTxt})`;
+      } else {
+        if (elNextTitle) elNextTitle.textContent = 'Sin eventos próximos';
+        if (elNextDate) elNextDate.textContent = 'Agenda despejada';
+      }
+      updateEventsNavBadge();
+    }
+
+    function renderEventsCalendar() {
+      const grid = document.getElementById('evCalendarGrid');
+      const label = document.getElementById('evCalMonthLabel');
+      if (!grid || !label) return;
+
+      label.textContent = `${MONTHS_ES[calMonth]} ${calYear}`;
+      const todayIso = getTodayLocalIsoDate();
+
+      // Indexar eventos por fecha ISO para el mes visible
+      const monthPrefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-`;
+      const byDate = {};
+      eventsList.forEach(ev => {
+        if (ev.date && ev.date.startsWith(monthPrefix) && ev.status !== 'Cancelado') {
+          if (!byDate[ev.date]) byDate[ev.date] = [];
+          byDate[ev.date].push(ev);
+        }
+      });
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Dom..6=Sáb
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      let htmlCells = '';
+      for (let i = 0; i < firstDay; i++) {
+        htmlCells += '<div class="ev-cal-day ev-cal-muted" aria-hidden="true"></div>';
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dayEvs = byDate[iso] || [];
+        const classes = ['ev-cal-day'];
+        if (iso === todayIso) classes.push('ev-cal-today');
+        if (iso === selectedDateIso) classes.push('ev-cal-selected');
+
+        let dotsHtml = '<span class="ev-cal-dots">';
+        dayEvs.slice(0, 3).forEach(ev => {
+          const meta = CATEGORY_META[ev.category] || CATEGORY_META['Otro'];
+          dotsHtml += `<span class="ev-cal-dot" style="background:${meta.dot}"></span>`;
+        });
+        dotsHtml += '</span>';
+
+        const tip = dayEvs.length ? `${dayEvs.length} evento(s): ${dayEvs.map(e => e.title).join(', ')}` : formatDisplayDate(iso);
+        htmlCells += `<button type="button" class="${classes.join(' ')}" data-ev-date="${iso}" title="${escapeHtml(tip)}"><span>${d}</span>${dotsHtml}</button>`;
+      }
+      grid.innerHTML = htmlCells;
+
+      const selBar = document.getElementById('evSelectedDateBar');
+      const selTxt = document.getElementById('evSelectedDateText');
+      if (selBar && selTxt) {
+        if (selectedDateIso) {
+          selTxt.textContent = formatDisplayDate(selectedDateIso);
+          selBar.classList.remove('hidden');
+        } else {
+          selBar.classList.add('hidden');
+        }
+      }
+    }
+
+    function renderEventsList() {
+      const container = document.getElementById('eventsListContainer');
+      const subtitle = document.getElementById('evListSubtitle');
+      if (!container) return;
+
+      const filtered = getFilteredEvents();
+      const isAdmin = getCurrentRole() !== 'consulta';
+
+      if (subtitle) {
+        if (selectedDateIso) {
+          subtitle.textContent = `Mostrando ${filtered.length} evento(s) del ${formatDisplayDate(selectedDateIso)}`;
+        } else {
+          subtitle.textContent = `${filtered.length} evento(s) encontrado(s) · ordenados por fecha`;
+        }
+      }
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="text-center py-10 px-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50">
+            <i class="fa-solid fa-calendar-xmark text-3xl text-slate-400 mb-2"></i>
+            <p class="text-sm font-bold text-slate-700">No hay eventos para mostrar con este filtro</p>
+            <p class="text-xs text-slate-500 mt-1">${isAdmin ? 'Usa el formulario de la izquierda o haz clic en un día del calendario para agendar uno nuevo.' : 'Cambia el período o la categoría para consultar otros eventos.'}</p>
+          </div>`;
+        return;
+      }
+
+      const today = getTodayLocalIsoDate();
+      container.innerHTML = filtered.map(ev => {
+        const dObj = parseDateSafe(ev.date);
+        const mon = dObj ? MONTHS_SHORT[dObj.getMonth()] : '---';
+        const day = dObj ? String(dObj.getDate()).padStart(2, '0') : '--';
+        const yr = dObj ? dObj.getFullYear() : '';
+        const catMeta = CATEGORY_META[ev.category] || CATEGORY_META['Otro'];
+        const stCls = STATUS_BADGE[ev.status] || STATUS_BADGE['Programado'];
+        const rel = getRelativeBadge(ev);
+
+        let boxCls = 'ev-date-box';
+        if (ev.status === 'Cancelado') boxCls += ' ev-cancelled';
+        else if (ev.date === today) boxCls += ' ev-today';
+        else if (ev.date < today || ev.status === 'Realizado') boxCls += ' ev-past';
+
+        const timeRange = ev.startTime
+          ? (ev.endTime ? `${formatTime12h(ev.startTime)} – ${formatTime12h(ev.endTime)}` : formatTime12h(ev.startTime))
+          : 'Horario por definir';
+
+        const adminButtons = isAdmin ? `
+          <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
+            ${ev.status !== 'Realizado' ? `<button type="button" class="ev-act-done px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Marcar como realizado"><i class="fa-solid fa-check mr-1 pointer-events-none"></i>Realizado</button>` : ''}
+            <button type="button" class="ev-act-edit px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Editar evento"><i class="fa-solid fa-pen mr-1 pointer-events-none"></i>Editar</button>
+            <button type="button" class="ev-act-del px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition ml-auto" data-id="${escapeHtml(ev.id)}" title="Eliminar evento"><i class="fa-solid fa-trash mr-1 pointer-events-none"></i>Eliminar</button>
+          </div>` : '';
+
+        return `
+          <article class="ev-card">
+            <div class="${boxCls}">
+              <span class="ev-date-month">${mon}</span>
+              <span class="ev-date-day">${day}</span>
+              <span class="ev-date-year">${yr}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <h4 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">${escapeHtml(ev.title)}</h4>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${rel.cls}">${escapeHtml(rel.text)}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md border ${catMeta.badge}">${escapeHtml(ev.category || 'Otro')}</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md border ${stCls}">${escapeHtml(ev.status || 'Programado')}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-slate-600">
+                <span><i class="fa-regular fa-clock text-slate-400 mr-1"></i>${escapeHtml(timeRange)}</span>
+                ${ev.location ? `<span><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i>${escapeHtml(ev.location)}</span>` : ''}
+                ${ev.responsible ? `<span><i class="fa-solid fa-user-tie text-slate-400 mr-1"></i>${escapeHtml(ev.responsible)}</span>` : ''}
+              </div>
+              ${ev.notes ? `<p class="text-xs text-slate-600 mt-2 bg-slate-50 rounded-lg px-2.5 py-1.5 border border-slate-100">${escapeHtml(ev.notes)}</p>` : ''}
+              ${adminButtons}
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    function resetEventForm(prefillDate) {
+      const form = document.getElementById('eventForm');
+      if (!form) return;
+      form.reset();
+      document.getElementById('evIdInput').value = '';
+      document.getElementById('evDateInput').value = prefillDate || selectedDateIso || getTodayLocalIsoDate();
+      setTime12hFrom24h('evStart', '');
+      setTime12hFrom24h('evEnd', '');
+      document.getElementById('evStatusInput').value = 'Programado';
+      document.getElementById('evFormHeading').innerHTML = '<i class="fa-solid fa-calendar-plus text-blue-600"></i><span>Programar Evento</span>';
+      document.getElementById('btnEvSubmit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>Guardar en Agenda</span>';
+      document.getElementById('btnEvCancelEdit').classList.add('hidden');
+    }
+
+    function loadEventIntoForm(id) {
+      const ev = eventsList.find(e => e.id === id);
+      if (!ev) return;
+      document.getElementById('evIdInput').value = ev.id;
+      document.getElementById('evTitleInput').value = ev.title || '';
+      document.getElementById('evDateInput').value = ev.date || getTodayLocalIsoDate();
+      setTime12hFrom24h('evStart', ev.startTime || '');
+      setTime12hFrom24h('evEnd', ev.endTime || '');
+      document.getElementById('evCategoryInput').value = ev.category || 'Culto Especial';
+      document.getElementById('evLocationInput').value = ev.location || '';
+      document.getElementById('evResponsibleInput').value = ev.responsible || '';
+      document.getElementById('evStatusInput').value = ev.status || 'Programado';
+      document.getElementById('evNotesInput').value = ev.notes || '';
+
+      document.getElementById('evFormHeading').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-600"></i><span>Editar Evento</span>';
+      document.getElementById('btnEvSubmit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>Actualizar Evento</span>';
+      document.getElementById('btnEvCancelEdit').classList.remove('hidden');
+      document.getElementById('eventFormCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.getElementById('evTitleInput').focus();
+    }
+
+    async function handleEventSubmit(e) {
+      e.preventDefault();
+      if (getCurrentRole() === 'consulta') {
+        showToast('Solo el rol Administrador puede programar eventos.', 'error');
+        return;
+      }
+      const idExisting = document.getElementById('evIdInput').value.trim();
+      const title = document.getElementById('evTitleInput').value.trim();
+      const date = document.getElementById('evDateInput').value;
+      syncTime12hHidden('evStart');
+      syncTime12hHidden('evEnd');
+      const startTime = document.getElementById('evStartTimeInput').value;
+      const endTime = document.getElementById('evEndTimeInput').value;
+      const category = document.getElementById('evCategoryInput').value;
+      const location = document.getElementById('evLocationInput').value.trim();
+      const responsible = document.getElementById('evResponsibleInput').value.trim();
+      const status = document.getElementById('evStatusInput').value;
+      const notes = document.getElementById('evNotesInput').value.trim();
+
+      if (!title || !date) {
+        showToast('Completa el título y la fecha del evento.', 'error');
+        return;
+      }
+      if (startTime && endTime && endTime < startTime) {
+        showToast('La hora de fin no puede ser anterior a la hora de inicio.', 'error');
+        return;
+      }
+
+      const payloadData = {
+        id: idExisting || '',
+        title,
+        date,
+        startTime,
+        endTime,
+        category,
+        location,
+        responsible,
+        status,
+        notes
+      };
+
+      try {
+        let savedRecord;
+        if (typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl()) {
+          showSaving(idExisting ? 'Actualizando evento en Firestore...' : 'Guardando evento en Firestore...');
+          const res = await fetchAPI('saveEvent', payloadData);
+          if (!res || res.status !== 'ok') {
+            throw new Error((res && res.message) || 'No se pudo guardar el evento en Firestore.');
+          }
+          savedRecord = normalizeClientEvent(res.record || { ...payloadData, id: res.id });
+        } else {
+          savedRecord = normalizeClientEvent({
+            ...payloadData,
+            id: idExisting || ('EV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 5).toUpperCase()),
+            updatedAt: new Date().toISOString()
+          });
+        }
+
+        const idx = eventsList.findIndex(x => x.id === savedRecord.id);
+        if (idx !== -1) eventsList[idx] = savedRecord;
+        else eventsList.push(savedRecord);
+
+        saveEventsLocal();
+        showToast(idExisting ? 'Evento actualizado en la agenda.' : 'Evento programado en la agenda.');
+
+        const dObj = parseDateSafe(savedRecord.date);
+        if (dObj) {
+          calYear = dObj.getFullYear();
+          calMonth = dObj.getMonth();
+        }
+        resetEventForm();
+        renderEventsModule();
+      } catch (err) {
+        showToast(err.message || 'Error al guardar el evento.', 'error');
+      } finally {
+        hideSaving();
+      }
+    }
+
+    async function deleteEventById(id) {
+      const ev = eventsList.find(e => e.id === id);
+      if (!ev) return;
+      const ok = await showConfirmDialog({
+        title: 'Eliminar evento',
+        message: `¿Deseas eliminar "${ev.title}" (${formatDisplayDate(ev.date)}) de la agenda?`,
+        confirmText: 'Eliminar',
+        tone: 'danger'
+      });
+      if (!ok) return;
+
+      try {
+        if (typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl()) {
+          showSaving('Eliminando evento en Firestore...');
+          const res = await fetchAPI('deleteEvent', { id });
+          if (!res || res.status !== 'ok') {
+            throw new Error((res && res.message) || 'No se pudo eliminar el evento en Firestore.');
+          }
+        }
+        eventsList = eventsList.filter(e => e.id !== id);
+        saveEventsLocal();
+        if (document.getElementById('evIdInput').value === id) resetEventForm();
+        renderEventsModule();
+        showToast('Evento eliminado de la agenda.');
+      } catch (err) {
+        showToast(err.message || 'Error al eliminar el evento.', 'error');
+      } finally {
+        hideSaving();
+      }
+    }
+
+    async function markEventDone(id) {
+      const ev = eventsList.find(e => e.id === id);
+      if (!ev) return;
+      const updatedPayload = { ...ev, status: 'Realizado' };
+      try {
+        if (typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl()) {
+          showSaving('Actualizando estado en Firestore...');
+          const res = await fetchAPI('saveEvent', updatedPayload);
+          if (!res || res.status !== 'ok') {
+            throw new Error((res && res.message) || 'No se pudo actualizar el evento.');
+          }
+          const saved = normalizeClientEvent(res.record || updatedPayload);
+          const idx = eventsList.findIndex(x => x.id === id);
+          if (idx !== -1) eventsList[idx] = saved;
+        } else {
+          ev.status = 'Realizado';
+          ev.updatedAt = new Date().toISOString();
+        }
+        saveEventsLocal();
+        renderEventsModule();
+        showToast('Evento marcado como realizado.');
+      } catch (err) {
+        showToast(err.message || 'Error al actualizar el evento.', 'error');
+      } finally {
+        hideSaving();
+      }
+    }
+
+    function renderEventsModule() {
+      renderEventsKPIs();
+      renderEventsCalendar();
+      renderEventsList();
+    }
+    window.renderEventsModule = renderEventsModule;
+
+    function initEventsModule() {
+      loadEventsLocal();
+      const todayD = parseDateSafe(getTodayLocalIsoDate()) || new Date();
+      calYear = todayD.getFullYear();
+      calMonth = todayD.getMonth();
+
+      const dateInput = document.getElementById('evDateInput');
+      if (dateInput && !dateInput.value) dateInput.value = getTodayLocalIsoDate();
+
+      document.getElementById('eventForm')?.addEventListener('submit', handleEventSubmit);
+      ['evStart', 'evEnd'].forEach(prefix => {
+        ['Hour', 'Min', 'AmPm'].forEach(part => {
+          document.getElementById(prefix + part)?.addEventListener('change', () => syncTime12hHidden(prefix));
+        });
+      });
+      document.getElementById('btnEvCancelEdit')?.addEventListener('click', () => resetEventForm());
+
+      document.getElementById('btnEvCalPrev')?.addEventListener('click', () => {
+        calMonth--;
+        if (calMonth < 0) { calMonth = 11; calYear--; }
+        renderEventsCalendar();
+        if (document.getElementById('evPeriodFilter')?.value === 'MONTH') renderEventsList();
+      });
+      document.getElementById('btnEvCalNext')?.addEventListener('click', () => {
+        calMonth++;
+        if (calMonth > 11) { calMonth = 0; calYear++; }
+        renderEventsCalendar();
+        if (document.getElementById('evPeriodFilter')?.value === 'MONTH') renderEventsList();
+      });
+      document.getElementById('btnEvCalToday')?.addEventListener('click', () => {
+        const d = parseDateSafe(getTodayLocalIsoDate()) || new Date();
+        calYear = d.getFullYear();
+        calMonth = d.getMonth();
+        selectedDateIso = '';
+        renderEventsModule();
+      });
+
+      document.getElementById('evCalendarGrid')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-ev-date]');
+        if (!btn) return;
+        const iso = btn.getAttribute('data-ev-date');
+        selectedDateIso = (selectedDateIso === iso) ? '' : iso;
+        renderEventsCalendar();
+        renderEventsList();
+      });
+
+      document.getElementById('btnEvClearDateFilter')?.addEventListener('click', () => {
+        selectedDateIso = '';
+        renderEventsCalendar();
+        renderEventsList();
+      });
+
+      document.getElementById('btnEvQuickAddDate')?.addEventListener('click', () => {
+        if (getCurrentRole() === 'consulta') return;
+        resetEventForm(selectedDateIso || getTodayLocalIsoDate());
+        document.getElementById('evTitleInput')?.focus();
+      });
+
+      document.getElementById('evSearchInput')?.addEventListener('input', renderEventsList);
+      document.getElementById('evPeriodFilter')?.addEventListener('change', () => {
+        selectedDateIso = '';
+        renderEventsCalendar();
+        renderEventsList();
+      });
+      document.getElementById('evCategoryFilter')?.addEventListener('change', renderEventsList);
+
+      document.getElementById('eventsListContainer')?.addEventListener('click', (e) => {
+        const btnDone = e.target.closest('.ev-act-done');
+        if (btnDone) { markEventDone(btnDone.getAttribute('data-id')); return; }
+        const btnEdit = e.target.closest('.ev-act-edit');
+        if (btnEdit) { loadEventIntoForm(btnEdit.getAttribute('data-id')); return; }
+        const btnDel = e.target.closest('.ev-act-del');
+        if (btnDel) { deleteEventById(btnDel.getAttribute('data-id')); return; }
+      });
+
+      document.getElementById('btnExportEventsCsv')?.addEventListener('click', () => {
+        const rows = getFilteredEvents().map(ev => [
+          formatDisplayDate(ev.date),
+          ev.startTime ? (ev.endTime ? `${formatTime12h(ev.startTime)} - ${formatTime12h(ev.endTime)}` : formatTime12h(ev.startTime)) : '',
+          ev.title || '',
+          ev.category || '',
+          ev.status || '',
+          ev.location || '',
+          ev.responsible || '',
+          ev.notes || ''
+        ]);
+        if (typeof downloadCsvFile === 'function') {
+          downloadCsvFile('agenda_eventos', ['Fecha', 'Horario', 'Evento', 'Categoría', 'Estado', 'Lugar', 'Responsable', 'Observaciones'], rows);
+        }
+      });
+
+      document.getElementById('btnPrintEvents')?.addEventListener('click', () => {
+        const list = getFilteredEvents();
+        const periodSel = document.getElementById('evPeriodFilter');
+        const periodTxt = selectedDateIso
+          ? `Fecha: ${formatDisplayDate(selectedDateIso)}`
+          : (periodSel ? periodSel.options[periodSel.selectedIndex].text : 'Agenda');
+        const catVal = document.getElementById('evCategoryFilter')?.value || 'ALL';
+        const filtroTxt = `${periodTxt} · Categoría: ${catVal === 'ALL' ? 'Todas' : catVal} · Total: ${list.length} evento(s)`;
+        const cols = [
+          { t: 'Fecha' },
+          { t: 'Horario' },
+          { t: 'Evento' },
+          { t: 'Categoría' },
+          { t: 'Lugar / Responsable' },
+          { t: 'Estado' }
+        ];
+        const rows = list.map(ev => [
+          formatDisplayDate(ev.date),
+          ev.startTime ? (ev.endTime ? `${formatTime12h(ev.startTime)} - ${formatTime12h(ev.endTime)}` : formatTime12h(ev.startTime)) : 'Por definir',
+          ev.notes ? `${ev.title} (${ev.notes})` : ev.title,
+          ev.category || 'Otro',
+          [ev.location, ev.responsible].filter(Boolean).join(' · ') || '—',
+          ev.status || 'Programado'
+        ]);
+        if (typeof printInstitutionalTable === 'function') {
+          printInstitutionalTable('Agenda de Eventos Eclesiásticos', filtroTxt, cols, rows, null, false);
+        }
+      });
+
+      updateEventsNavBadge();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initEventsModule);
+    } else {
+      initEventsModule();
+    }
+  })();
+  </script>
+
 </body>
 </html>
