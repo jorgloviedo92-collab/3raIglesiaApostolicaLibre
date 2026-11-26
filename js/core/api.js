@@ -225,8 +225,6 @@
 
         sessionStorage.removeItem(STORAGE_SESSION_TOKEN);
         sessionStorage.removeItem(STORAGE_USER_ROLE);
-        sessionStorage.removeItem('TEMP_GEMINI_KEY');
-        localStorage.removeItem('SAVED_GEMINI_KEY');
         resetPhotoQueues();
 
         adults = []; children = []; contributions = []; cashFlow = [];
