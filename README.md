@@ -15,6 +15,7 @@ css/
   events-agenda.css         Agenda de eventos
   pro-layer.css             Capa de refinamiento visual
 js/
+  config.js  Configuración: servidor oficial (FIXED_SERVER_URL)
   core/      validators.js (reglas de validación, funciones puras) · state.js (estado global) · utils.js (fechas, montos, escape) · ui.js (diálogos, avisos) · api.js (login, fetchAPI, sincronización)
   members/   form-logic.js · save.js (guardado y validación de fichas) · trash.js (papelera) · expediente.js
   finance/   finance.js (aportes y caja)
@@ -36,6 +37,8 @@ npm test        # Node 18+, sin dependencias
 ## Seguridad
 
 - La política de seguridad (CSP) de `index.html` **no permite scripts incrustados** (`'unsafe-inline'` solo se mantiene para estilos). Por eso no se usan atributos `onclick="..."` en el HTML: se escribe `data-on-click="nombre"` y se registra la acción en `js/ui/inline-handlers.js`.
+- **Servidor fijo (recomendado):** en `js/config.js` escribe la dirección `/exec` de tu Apps Script en `FIXED_SERVER_URL`. Con eso el login queda bloqueado a esa dirección y el PIN nunca puede enviarse a otro servidor. Si se deja vacía, el sistema pide confirmación cuando se escribe una dirección distinta a la usada antes.
+- La agenda guardada en el navegador se borra al cerrar sesión (incluido el cierre por inactividad).
 - Todo texto que viene de los datos se inserta con `escapeHtml(...)` al armar HTML.
 
 ## Importante

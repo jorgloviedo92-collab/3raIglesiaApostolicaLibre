@@ -33,7 +33,16 @@
       return STORAGE_EVENTS_KEY + '_' + Math.abs(hash).toString(36);
     }
 
+    // La agenda guardada en el navegador se borra al cerrar sesión y no se lee si no hay sesión
+    function clearEventsStorage() {
+      try {
+        localStorage.removeItem(getStorageKey());
+        localStorage.removeItem(STORAGE_EVENTS_KEY);
+      } catch (e) {}
+    }
+
     function loadEventsLocal() {
+      if (!getSessionToken()) { eventsList = []; clearEventsStorage(); return; }
       try {
         const raw = localStorage.getItem(getStorageKey()) || localStorage.getItem(STORAGE_EVENTS_KEY);
         if (raw) {
@@ -86,6 +95,7 @@
     window.clearEventsState = function () {
       eventsList = [];
       selectedDateIso = '';
+      clearEventsStorage();
       updateEventsNavBadge();
     };
 

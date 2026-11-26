@@ -3,6 +3,7 @@
     // ────────────────────────────────────────────────────────────────────
 
     function getScriptUrl() {
+      if (FIXED_SERVER_URL) return FIXED_SERVER_URL;
       try { return localStorage.getItem(STORAGE_API_ENDPOINT) || ''; } catch (e) { return ''; }
     }
 
@@ -100,7 +101,6 @@
       document.getElementById('cloudStatusText').textContent = 'En Línea';
     }
 
-    const REGEX_APPS_SCRIPT_URL = /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+\/|macros\/)s\/[a-zA-Z0-9_-]+\/exec$/;
 
     async function handleDirectLogin(e) {
       e.preventDefault();
@@ -111,20 +111,29 @@
       const statusBox = document.getElementById('authStatusBanner');
       const submitBtn = document.getElementById('btnLoginSubmit');
 
-      if (!urlInput || !pinInput) {
+      const showLoginError = (message) => {
         statusBox.className = "p-3 rounded-xl text-xs font-bold bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center gap-2";
-        statusBox.textContent = "Ingresa la URL del servidor y tu PIN.";
+        statusBox.textContent = message;
         statusBox.classList.remove('hidden');
         if (window.AuthUI) window.AuthUI.shakeCard();
-        return;
-      }
+      };
 
-      if (!REGEX_APPS_SCRIPT_URL.test(urlInput)) {
-        statusBox.className = "p-3 rounded-xl text-xs font-bold bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center gap-2";
-        statusBox.textContent = "URL inválida. Debe ser un enlace oficial de Google Apps Script terminado en /exec.";
-        statusBox.classList.remove('hidden');
-        if (window.AuthUI) window.AuthUI.shakeCard();
-        return;
+      if (!pinInput) { showLoginError("Ingresa la URL del servidor y tu PIN."); return; }
+
+      let savedUrl = '';
+      try { savedUrl = localStorage.getItem(STORAGE_API_ENDPOINT) || ''; } catch (err) {}
+      const urlCheck = validateServerUrl(urlInput, FIXED_SERVER_URL, savedUrl);
+      if (!urlCheck.ok) { showLoginError(urlCheck.error); return; }
+
+      // El PIN iría a un servidor distinto del habitual: el usuario debe confirmarlo expresamente
+      if (urlCheck.needsConfirm) {
+        const proceed = await showConfirmDialog({
+          title: 'Servidor distinto al habitual',
+          message: `Tu PIN se enviará a un servidor diferente al que usabas:\n\n${urlInput}\n\nContinúa solo si tú o tu administrador configuraron este cambio. Si alguien te pidió escribir esta dirección, cancela.`,
+          confirmText: 'Sí, conectar',
+          tone: 'danger'
+        });
+        if (!proceed) return;
       }
 
       isLoggingIn = true;

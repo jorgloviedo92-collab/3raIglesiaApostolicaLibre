@@ -4,7 +4,12 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedUrl = getScriptUrl();
-      if (savedUrl) document.getElementById('serverUrlInput').value = savedUrl;
+      const serverInput = document.getElementById('serverUrlInput');
+      if (savedUrl) serverInput.value = savedUrl;
+      if (FIXED_SERVER_URL) {
+        serverInput.readOnly = true;
+        serverInput.title = 'Servidor oficial configurado por el administrador';
+      }
 
       toggleDisciplineAvailability();
       setCashFlowRangeLastMonths(6);

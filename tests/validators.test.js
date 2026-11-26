@@ -186,3 +186,20 @@ test('validateChurchConfig: datos y cambio de PIN', () => {
   assert.match(V.validateChurchConfig({ ...pin, newPinConsulta: 'Xk93mq72' }), /diferentes/);
   assert.match(V.validateChurchConfig({ ...pin, newPinAdmin: 'actualPin1' }), /distintos del PIN actual/);
 });
+
+test('validateServerUrl: formato, servidor fijo y cambio de servidor', () => {
+  const A = 'https://script.google.com/macros/s/AKfycbAAAAAAAAAA/exec';
+  const B = 'https://script.google.com/macros/s/AKfycbBBBBBBBBBB/exec';
+  const run = (...args) => V.validateServerUrl(...args);
+  assert.deepEqual(run(A, '', ''), { ok: true, error: '', needsConfirm: false });        // primera vez
+  assert.deepEqual(run(A, '', A), { ok: true, error: '', needsConfirm: false });         // el mismo de siempre
+  assert.deepEqual(run(B, '', A), { ok: true, error: '', needsConfirm: true });          // distinto: pide confirmación
+  assert.deepEqual(run(A, A, B), { ok: true, error: '', needsConfirm: false });          // coincide con el fijo
+  assert.match(run(B, A, A).error, /servidor oficial/);                                   // fijo: rechaza otro
+  assert.equal(run(B, A, A).ok, false);
+  assert.match(run('', '', '').error, /Ingresa la URL/);
+  for (const malo of ['http://script.google.com/macros/s/AKfyc/exec', 'https://evil.com/macros/s/AKfyc/exec',
+    'https://script.google.com.evil.com/macros/s/AKfyc/exec', 'https://script.google.com/macros/s/AKfyc/dev', 'javascript:alert(1)']) {
+    assert.equal(run(malo, '', '').ok, false, malo);
+  }
+});

@@ -22,6 +22,8 @@
     const CEDULA_REGEX = /^\d{3}-\d{6}-\d{4}[A-Za-z]$/;
     const NAME_RULE_TEXT = 'solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras)';
 
+    const REGEX_APPS_SCRIPT_URL = /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+\/|macros\/)s\/[a-zA-Z0-9_-]+\/exec$/;
+
     // ── Fechas ──────────────────────────────────────────────────────────
 
     // Convierte 'AAAA-MM-DD' (o ISO con hora) en Date local. Devuelve null si no es una fecha real
@@ -274,6 +276,24 @@
       if (f.startTime && f.endTime && f.endTime <= f.startTime) return 'La hora de fin debe ser posterior a la hora de inicio.';
       if (f.status === 'Realizado') return eventDoneBlockReason(f.date, f.startTime, todayIso, nowHHMM);
       return '';
+    }
+
+    // ── Servidor ────────────────────────────────────────────────────────
+
+    // input: dirección escrita en el login. fixedUrl: dirección oficial configurada ('' si no hay).
+    // savedUrl: dirección usada la última vez en este navegador ('' si no hay).
+    // Devuelve { ok, error, needsConfirm }: needsConfirm = true cuando el PIN iría a un servidor distinto del habitual.
+    function validateServerUrl(input, fixedUrl, savedUrl) {
+      if (!input) return { ok: false, error: 'Ingresa la URL del servidor y tu PIN.', needsConfirm: false };
+      if (!REGEX_APPS_SCRIPT_URL.test(input)) {
+        return { ok: false, error: 'URL inválida. Debe ser un enlace oficial de Google Apps Script terminado en /exec.', needsConfirm: false };
+      }
+      if (fixedUrl) {
+        return input === fixedUrl
+          ? { ok: true, error: '', needsConfirm: false }
+          : { ok: false, error: 'Este sistema solo puede conectarse al servidor oficial configurado.', needsConfirm: false };
+      }
+      return { ok: true, error: '', needsConfirm: Boolean(savedUrl) && input !== savedUrl };
     }
 
     // ── Configuración institucional y PIN ───────────────────────────────
