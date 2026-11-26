@@ -1213,6 +1213,85 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
   .auth-gate .auth-label { color: #4a3720 !important; }
   .auth-gate .auth-btn { color: #fbf3dc !important; }
 }
+
+/* ═══════════ Corrección de renderizado para Tablet y Móvil (Chrome Android GPU) ═══════════
+   Evita que el compositor recorte la tarjeta del login al abrir/cerrar el teclado virtual
+   (provocado por perspective 3D, isolation, overflow:clip y capas GPU en fixed). */
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  .auth-gate {
+    height: 100%;
+    height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: opacity .35s ease !important;
+  }
+  .auth-gate.auth-leaving {
+    transform: none !important;
+    filter: none !important;
+    transition: opacity .35s ease !important;
+  }
+  .auth-wrap {
+    overflow: visible !important;
+    min-height: 100%;
+  }
+  .auth-tilt {
+    transform-style: flat !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .auth-motes {
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .auth-cardwrap {
+    perspective: none !important;
+    isolation: auto !important;
+    z-index: 3;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .auth-cardwrap::before { z-index: 0 !important; transform: translate(4px, 4px) !important; }
+  .auth-cardwrap::after  { z-index: 0 !important; transform: translate(8px, 8px) !important; }
+  .bible-page-ribbon     { z-index: 1 !important; filter: none !important; animation: none !important; }
+  .auth-gate .auth-card {
+    z-index: 2;
+    transform: none !important;
+    transform-origin: center !important;
+    animation: none !important;
+    filter: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+    will-change: auto !important;
+    contain: none !important;
+  }
+  .auth-gate .auth-card::before { display: none !important; }
+  .auth-gate .auth-input,
+  .auth-gate #authStatusBanner,
+  .auth-gate .auth-rise {
+    transform: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+    will-change: auto !important;
+  }
+  .auth-gate.auth-leaving .auth-card,
+  .auth-gate.auth-leaving .auth-cardwrap {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+  .auth-gate.auth-leaving .auth-card > *,
+  .auth-gate.auth-leaving .auth-card::after {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important;
+  }
+}
+
   </style>
   <!-- Tailwind CSS v3.4.17 GENERADO (antes se compilaba en el navegador desde cdn.tailwindcss.com).
        Si se agregan clases nuevas de Tailwind, hay que regenerarlo: bash .claude/tailwind/regenerar.sh -->
@@ -1684,7 +1763,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
               <label class="auth-label" for="accessPinInput">PIN de seguridad (Admin o Consulta)</label>
               <div class="auth-field">
                 <i class="fa-solid fa-key auth-ico" aria-hidden="true"></i>
-                <input type="password" id="accessPinInput" required maxlength="64" autocomplete="off"
+                <input type="password" id="accessPinInput" required maxlength="30" autocomplete="off"
                        placeholder="••••••••" class="auth-input auth-pin" />
                 <button type="button" id="btnTogglePinVisibility" class="auth-eye" aria-label="Mostrar PIN" aria-pressed="false">
                   <i class="fa-solid fa-eye" aria-hidden="true"></i>
@@ -1864,6 +1943,32 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       syncGateScroll();
       if (!gate.classList.contains('hidden')) { resetPin(); start(); }
     }).observe(gate, { attributes: true, attributeFilter: ['class'] });
+    /* Refresco seguro tras cerrar teclado virtual en tablets/móviles Android Chrome */
+    var repaintTimer = null;
+    function forceCardRepaint() {
+      if (gate.classList.contains('hidden')) return;
+      if (repaintTimer) clearTimeout(repaintTimer);
+      repaintTimer = setTimeout(function () {
+        repaintTimer = null;
+        if (gate.classList.contains('hidden')) return;
+        var cardEl = gate.querySelector('.auth-card');
+        if (cardEl) {
+          cardEl.style.visibility = 'hidden';
+          void cardEl.offsetHeight;
+          cardEl.style.visibility = '';
+        }
+        if (gate.scrollTop > 0 && gate.scrollHeight <= gate.clientHeight + 2) {
+          gate.scrollTop = 0;
+        }
+      }, 120);
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', forceCardRepaint);
+    }
+    if (form) {
+      form.addEventListener('focusout', forceCardRepaint);
+    }
+
     syncGateScroll();
     resize(); start();
   })();
@@ -3038,7 +3143,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
             <option value="menores">Menores Eliminados</option>
             <option value="contribuciones">Contribuciones Anuladas</option>
             <option value="caja">Movimientos de Caja Anulados</option>
-            <option value="eventos">Eventos Eliminados</option>
           </select>
           <button type="button" id="btnEmptyTrash" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center gap-1.5">
             <i class="fa-solid fa-trash-can"></i> <span>Vaciar Papelera (Eliminar Todo)</span>
@@ -3095,15 +3199,15 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
           <div id="pinEditBox" class="hidden mt-2 space-y-2">
             <div>
               <label class="text-[10px] font-bold text-amber-700">PIN Actual de Administrador *</label>
-              <input type="password" id="cfgPinActual" maxlength="64" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="PIN actual requerido" />
+              <input type="password" id="cfgPinActual" maxlength="30" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="PIN actual requerido" />
             </div>
             <div>
               <label class="text-[10px] font-bold text-amber-700">Nuevo PIN Administrador (Mínimo 8 caracteres)</label>
-              <input type="password" id="cfgPinAdmin" minlength="8" maxlength="64" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
+              <input type="password" id="cfgPinAdmin" minlength="8" maxlength="30" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
             </div>
             <div>
               <label class="text-[10px] font-bold text-amber-700">Nuevo PIN Consultor (Mínimo 8 caracteres)</label>
-              <input type="password" id="cfgPinConsulta" minlength="8" maxlength="64" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
+              <input type="password" id="cfgPinConsulta" minlength="8" maxlength="30" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
             </div>
           </div>
         </div>
@@ -3242,7 +3346,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     let deletedChildren = [];
     let deletedContributions = [];
     let deletedCashFlow = [];
-    let deletedEvents = [];
     
     let currentPhotoBase64 = '';
     let churchConfig = { name: 'Iglesia Local', pastor: '', secretary: '', address: '' };
@@ -3572,9 +3675,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       cashFlow = allCash.filter(cf => !cf.isDeleted && !cf.eliminado);
       deletedCashFlow = allCash.filter(cf => cf.isDeleted || cf.eliminado);
 
-      // Eventos dados de baja (solo llegan al Administrador); los activos los maneja la agenda
-      deletedEvents = (Array.isArray(res.events) ? res.events : []).filter(ev => ev && (ev.isDeleted || ev.eliminado));
-
       if (res.churchConfig) {
         churchConfig = { ...churchConfig, ...res.churchConfig };
       }
@@ -3719,7 +3819,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         resetPhotoQueues();
 
         adults = []; children = []; contributions = []; cashFlow = [];
-        deletedAdults = []; deletedChildren = []; deletedContributions = []; deletedCashFlow = []; deletedEvents = [];
+        deletedAdults = []; deletedChildren = []; deletedContributions = []; deletedCashFlow = [];
         if (typeof window.clearEventsState === 'function') window.clearEventsState();
         
         document.getElementById('accessPinInput').value = '';
@@ -4241,14 +4341,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       return FULL_NAME_REGEX.test(nombre) && (nombre.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g) || []).length >= 3;
     }
 
-    // Monto en córdobas: hasta 7 enteros y 2 decimales, entre 0.01 y 9,999,999 (el servidor valida lo mismo)
-    function parseMoneyInput(valor) {
-      const t = String(valor == null ? '' : valor).trim();
-      if (!/^\d{1,7}(\.\d{1,2})?$/.test(t)) return null;
-      const n = Math.round(parseFloat(t) * 100) / 100;
-      return (n >= 0.01 && n <= 9999999) ? n : null;
-    }
-
     function isValidPhoneNumber(tel) {
       if (!tel) return true;
       const digitos = tel.replace(/\D/g, '');
@@ -4313,7 +4405,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
 
       if (!birthDate) errors.push("La fecha de nacimiento es obligatoria.");
-      else if (birthDate.getFullYear() < 1900) errors.push("La fecha de nacimiento no es válida (año anterior a 1900).");
       else if (birthDate > today) errors.push("La fecha de nacimiento no puede ser una fecha futura.");
 
       if (!joinDate) errors.push("La fecha de ingreso a la iglesia es obligatoria.");
@@ -4741,7 +4832,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (table === 'child') return { active: children, trash: deletedChildren };
       if (table === 'contribution') return { active: contributions, trash: deletedContributions };
       if (table === 'cash') return { active: cashFlow, trash: deletedCashFlow };
-      if (table === 'event') return { active: [], trash: deletedEvents };
       return null;
     }
 
@@ -4755,12 +4845,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       const [rec] = from.splice(idx, 1);
       rec.eliminado = toTrash;
       rec.isDeleted = toTrash;
-      // Los eventos activos viven en la agenda: al restaurar se devuelven allí
-      if (table === 'event') {
-        if (!toTrash && typeof window.restoreEventToAgenda === 'function') window.restoreEventToAgenda(rec);
-        else if (toTrash) to.push(rec);
-        return;
-      }
       to.push(rec);
     }
 
@@ -4815,8 +4899,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         adultos: { label: 'Adultos eliminados', table: 'adult' },
         menores: { label: 'Menores/Jóvenes eliminados', table: 'child' },
         contribuciones: { label: 'Contribuciones anuladas', table: 'contribution' },
-        caja: { label: 'Movimientos de caja anulados', table: 'cash' },
-        eventos: { label: 'Eventos eliminados', table: 'event' }
+        caja: { label: 'Movimientos de caja anulados', table: 'cash' }
       }[filter] || { label: 'este módulo', table: '' };
 
       if (!(await showConfirmDialog({ title: 'Vaciar papelera', message: `Se eliminarán PERMANENTEMENTE todos los registros de ${filterInfo.label}.\n\nEsta acción no se puede deshacer: los datos se borran definitivamente de la base de datos.`, confirmText: 'Eliminar definitivamente', tone: 'danger' }))) {
@@ -4849,7 +4932,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (filter === 'menores') { dataset = deletedChildren; tipoStr = 'Menor'; tableKey = 'child'; }
       if (filter === 'contribuciones') { dataset = deletedContributions; tipoStr = 'Contribución'; tableKey = 'contribution'; }
       if (filter === 'caja') { dataset = deletedCashFlow; tipoStr = 'Caja/Gasto'; tableKey = 'cash'; }
-      if (filter === 'eventos') { dataset = deletedEvents; tipoStr = 'Evento'; tableKey = 'event'; }
 
       if (dataset.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-slate-400 font-bold">La papelera está vacía para este módulo.</td></tr>';
@@ -4868,8 +4950,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         tdDetalle.className = 'py-3 px-4 font-bold text-slate-700 text-sm';
         if (filter === 'adultos' || filter === 'menores') {
           tdDetalle.textContent = item.fullName || item.nombreCompleto;
-        } else if (filter === 'eventos') {
-          tdDetalle.textContent = `${item.title || item.titulo || 'Evento'} — ${formatDisplayDate(item.date || item.fecha)}`;
         } else if (filter === 'contribuciones') {
           tdDetalle.textContent = `Aporte ${formatCurrency(item.amount || item.monto)} -${item.memberName || item.nombreMiembro}`;
         } else {
@@ -4913,8 +4993,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         showToast("La fecha de la contribución no puede ser futura.", "error");
         return;
       }
-      const amt = parseMoneyInput(document.getElementById('contributionAmountInput').value);
-      if (amt === null) { showToast("El monto debe ser un número entre 0.01 y 9,999,999 con máximo 2 decimales.", "error"); return; }
+      const amt = parseFloat(document.getElementById('contributionAmountInput').value);
+      if (isNaN(amt) || amt <= 0 || amt > 9999999) { showToast("El monto debe ser mayor a 0 y válido.", "error"); return; }
       const nacMiembro = String(member.birthDate || member.fechaNacimiento || '').split('T')[0];
       if (nacMiembro && contribDateVal < nacMiembro) {
         showToast("La fecha de la contribución no puede ser anterior al nacimiento del miembro.", "error");
@@ -4957,8 +5037,8 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         showToast("La fecha del movimiento de caja no puede ser futura.", "error");
         return;
         }
-        const amt = parseMoneyInput(document.getElementById('cashAmountInput').value);
-        if (amt === null) { showToast("El monto debe ser un número entre 0.01 y 9,999,999 con máximo 2 decimales.", "error"); return; }
+        const amt = parseFloat(document.getElementById('cashAmountInput').value);
+        if (isNaN(amt) || amt <= 0 || amt > 9999999) { showToast("El monto debe ser mayor a 0 y válido.", "error"); return; }
 
         // Un egreso mayor que el saldo disponible deja la caja en negativo: se pide confirmación
         if (document.getElementById('cashMovementTypeSelect').value === 'Salida') {
@@ -8607,16 +8687,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       }
     };
 
-    window.restoreEventToAgenda = function (rec) {
-      const restored = normalizeClientEvent(rec);
-      if (!restored || !restored.id || !restored.title || !restored.date) return;
-      eventsList = eventsList.filter(e => e.id !== restored.id);
-      eventsList.push(restored);
-      saveEventsLocal();
-      updateEventsNavBadge();
-      if (typeof vistaActual !== 'undefined' && vistaActual === 'eventos') renderEventsModule();
-    };
-
     window.clearEventsState = function () {
       eventsList = [];
       selectedDateIso = '';
@@ -8891,7 +8961,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
 
         const adminButtons = isAdmin ? `
           <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
-            ${(ev.status !== 'Realizado' && !getEventNotDoneReason(ev.date, ev.startTime)) ? `<button type="button" class="ev-act-done px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Marcar como realizado"><i class="fa-solid fa-check mr-1 pointer-events-none"></i>Realizado</button>` : ''}
+            ${ev.status !== 'Realizado' ? `<button type="button" class="ev-act-done px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Marcar como realizado"><i class="fa-solid fa-check mr-1 pointer-events-none"></i>Realizado</button>` : ''}
             <button type="button" class="ev-act-edit px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Editar evento"><i class="fa-solid fa-pen mr-1 pointer-events-none"></i>Editar</button>
             <button type="button" class="ev-act-del px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition ml-auto" data-id="${escapeHtml(ev.id)}" title="Eliminar evento"><i class="fa-solid fa-trash mr-1 pointer-events-none"></i>Eliminar</button>
           </div>` : '';
@@ -8982,20 +9052,6 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
         showToast('Completa el título y la fecha del evento.', 'error');
         return;
       }
-      if (title.replace(/[<>]/g, '').replace(/^[=@\s]+/, '').trim().length < 2) {
-        showToast('El título del evento debe tener al menos 2 caracteres.', 'error');
-        return;
-      }
-      const evYear = parseInt(String(date).substring(0, 4), 10);
-      const maxEvYear = new Date().getFullYear() + 10;
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || evYear < 1900 || evYear > maxEvYear) {
-        showToast(`La fecha del evento debe estar entre 1900 y ${maxEvYear}.`, 'error');
-        return;
-      }
-      if (status === 'Realizado') {
-        const notDoneReason = getEventNotDoneReason(date, startTime);
-        if (notDoneReason) { showToast(notDoneReason + ' Cambia el estado o la fecha.', 'error'); return; }
-      }
       if (startTime && endTime && endTime < startTime) {
         showToast('La hora de fin no puede ser anterior a la hora de inicio.', 'error');
         return;
@@ -9057,9 +9113,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       if (!ev) return;
       const ok = await showConfirmDialog({
         title: 'Eliminar evento',
-        message: `¿Deseas eliminar "${ev.title}" (${formatDisplayDate(ev.date)}) de la agenda?
-
-El evento quedará en la Papelera y podrás restaurarlo o eliminarlo definitivamente.`,
+        message: `¿Deseas eliminar "${ev.title}" (${formatDisplayDate(ev.date)}) de la agenda?`,
         confirmText: 'Eliminar',
         tone: 'danger'
       });
@@ -9073,17 +9127,11 @@ El evento quedará en la Papelera y podrás restaurarlo o eliminarlo definitivam
             throw new Error((res && res.message) || 'No se pudo eliminar el evento en Firestore.');
           }
         }
-        const enServidor = typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl();
         eventsList = eventsList.filter(e => e.id !== id);
         saveEventsLocal();
-        if (enServidor && typeof deletedEvents !== 'undefined') {
-          deletedEvents = deletedEvents.filter(e => String(e.id) !== String(id));
-          deletedEvents.push({ ...ev, eliminado: true, isDeleted: true });
-        }
         if (document.getElementById('evIdInput').value === id) resetEventForm();
-        updateEventsNavBadge();
         renderEventsModule();
-        showToast(enServidor ? `"${ev.title}" se movió a la Papelera.` : 'Evento eliminado de la agenda.');
+        showToast('Evento eliminado de la agenda.');
       } catch (err) {
         showToast(err.message || 'Error al eliminar el evento.', 'error');
       } finally {
@@ -9091,24 +9139,9 @@ El evento quedará en la Papelera y podrás restaurarlo o eliminarlo definitivam
       }
     }
 
-    // Devuelve el motivo por el que un evento aún no puede marcarse como Realizado ('' si sí puede).
-    // El servidor aplica la misma regla.
-    function getEventNotDoneReason(date, startTime) {
-      const todayIso = getTodayLocalIsoDate();
-      if (!date || date > todayIso) return 'No se puede marcar como Realizado un evento cuya fecha aún no ha llegado.';
-      if (date === todayIso && startTime) {
-        const now = new Date();
-        const nowHhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        if (startTime > nowHhmm) return 'No se puede marcar como Realizado un evento que todavía no ha comenzado.';
-      }
-      return '';
-    }
-
     async function markEventDone(id) {
       const ev = eventsList.find(e => e.id === id);
       if (!ev) return;
-      const notDoneReason = getEventNotDoneReason(ev.date, ev.startTime);
-      if (notDoneReason) { showToast(notDoneReason, 'error'); return; }
       const updatedPayload = { ...ev, status: 'Realizado' };
       try {
         if (typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl()) {
