@@ -9202,7 +9202,7 @@ html.gate-open body::after {
 
         const adminButtons = isAdmin ? `
           <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
-            ${ev.status !== 'Realizado' ? `<button type="button" class="ev-act-done px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Marcar como realizado"><i class="fa-solid fa-check mr-1 pointer-events-none"></i>Realizado</button>` : ''}
+            ${ev.status !== 'Realizado' && ev.status !== 'Cancelado' && !getEventDoneBlockReason(ev.date, ev.startTime) ? `<button type="button" class="ev-act-done px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Marcar como realizado"><i class="fa-solid fa-check mr-1 pointer-events-none"></i>Realizado</button>` : ''}
             <button type="button" class="ev-act-edit px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition" data-id="${escapeHtml(ev.id)}" title="Editar evento"><i class="fa-solid fa-pen mr-1 pointer-events-none"></i>Editar</button>
             <button type="button" class="ev-act-del px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition ml-auto" data-id="${escapeHtml(ev.id)}" title="Eliminar evento"><i class="fa-solid fa-trash mr-1 pointer-events-none"></i>Eliminar</button>
           </div>` : '';
@@ -9244,6 +9244,7 @@ html.gate-open body::after {
       setTime12hFrom24h('evStart', '');
       setTime12hFrom24h('evEnd', '');
       document.getElementById('evStatusInput').value = 'Programado';
+      refreshEventStatusOptions();
       document.getElementById('evFormHeading').innerHTML = '<i class="fa-solid fa-calendar-plus text-blue-600"></i><span>Programar Evento</span>';
       document.getElementById('btnEvSubmit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>Guardar en Agenda</span>';
       document.getElementById('btnEvCancelEdit').classList.add('hidden');
@@ -9262,6 +9263,7 @@ html.gate-open body::after {
       document.getElementById('evResponsibleInput').value = ev.responsible || '';
       document.getElementById('evStatusInput').value = ev.status || 'Programado';
       document.getElementById('evNotesInput').value = ev.notes || '';
+      refreshEventStatusOptions();
 
       document.getElementById('evFormHeading').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-600"></i><span>Editar Evento</span>';
       document.getElementById('btnEvSubmit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>Actualizar Evento</span>';
@@ -9296,6 +9298,13 @@ html.gate-open body::after {
       if (startTime && endTime && endTime < startTime) {
         showToast('La hora de fin no puede ser anterior a la hora de inicio.', 'error');
         return;
+      }
+      if (status === 'Realizado') {
+        const blockReason = getEventDoneBlockReason(date, startTime);
+        if (blockReason) {
+          showToast(blockReason, 'error');
+          return;
+        }
       }
 
       const payloadData = {
@@ -9380,9 +9389,46 @@ html.gate-open body::after {
       }
     }
 
+    // Hora actual HH:MM en la zona horaria de Nicaragua (misma referencia que getTodayLocalIsoDate)
+    const NICARAGUA_HHMM_FORMATTER = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Managua', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
+    // Devuelve el motivo por el que un evento NO puede marcarse como Realizado, o '' si sí puede.
+    function getEventDoneBlockReason(date, startTime) {
+      if (!date) return 'Indica la fecha del evento antes de marcarlo como realizado.';
+      const todayIso = getTodayLocalIsoDate();
+      if (date > todayIso) return 'Solo se puede marcar como realizado un evento cuya fecha ya llegó.';
+      if (date === todayIso && startTime && startTime > NICARAGUA_HHMM_FORMATTER.format(new Date())) {
+        return 'Este evento todavía no ha comenzado; podrás marcarlo como realizado a partir de su hora de inicio.';
+      }
+      return '';
+    }
+
+    // En el formulario, la opción "Realizado" solo está disponible si la fecha/hora ya llegó
+    function refreshEventStatusOptions() {
+      const statusSel = document.getElementById('evStatusInput');
+      const doneOpt = statusSel?.querySelector('option[value="Realizado"]');
+      if (!doneOpt) return;
+      syncTime12hHidden('evStart');
+      const reason = getEventDoneBlockReason(
+        document.getElementById('evDateInput').value,
+        document.getElementById('evStartTimeInput').value
+      );
+      doneOpt.disabled = !!reason;
+      doneOpt.textContent = reason ? 'Realizado (disponible cuando llegue la fecha)' : 'Realizado';
+      if (reason && statusSel.value === 'Realizado') {
+        statusSel.value = 'Programado';
+        showToast('El estado volvió a "Programado": ' + reason, 'error');
+      }
+    }
+
     async function markEventDone(id) {
       const ev = eventsList.find(e => e.id === id);
       if (!ev) return;
+      const blockReason = getEventDoneBlockReason(ev.date, ev.startTime);
+      if (blockReason) {
+        showToast(blockReason, 'error');
+        return;
+      }
       const updatedPayload = { ...ev, status: 'Realizado' };
       try {
         if (typeof fetchAPI === 'function' && getSessionToken() && getScriptUrl()) {
@@ -9427,9 +9473,11 @@ html.gate-open body::after {
       document.getElementById('eventForm')?.addEventListener('submit', handleEventSubmit);
       ['evStart', 'evEnd'].forEach(prefix => {
         ['Hour', 'Min', 'AmPm'].forEach(part => {
-          document.getElementById(prefix + part)?.addEventListener('change', () => syncTime12hHidden(prefix));
+          document.getElementById(prefix + part)?.addEventListener('change', () => { syncTime12hHidden(prefix); refreshEventStatusOptions(); });
         });
       });
+      document.getElementById('evDateInput')?.addEventListener('change', refreshEventStatusOptions);
+      document.getElementById('evStatusInput')?.addEventListener('focus', refreshEventStatusOptions);
       document.getElementById('btnEvCancelEdit')?.addEventListener('click', () => resetEventForm());
 
       document.getElementById('btnEvCalPrev')?.addEventListener('click', () => {
