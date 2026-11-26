@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcclesiaSoft Pro V3.2 - Gestión Eclesiástica y Reportes</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; img-src 'self' data: https://lh3.googleusercontent.com https://drive.google.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; connect-src 'self' https://script.google.com https://*.script.googleusercontent.com https://*.googleusercontent.com;" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; img-src 'self' data: https://lh3.googleusercontent.com https://drive.google.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; connect-src 'self' https://script.google.com https://*.script.googleusercontent.com https://*.googleusercontent.com;" />
   <!-- defer: Chart.js (200 KB) se descarga sin detener el dibujo de la página; solo se usa después de cargar el documento -->
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js" integrity="sha384-zuFoHkJ6+XzUchVtS39qBWxb+LvdA7aQ/ze8jYdufBf/A1jeuKGDBg4crfxvZAr8" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -148,7 +149,7 @@
 
           <!-- Botón Certificados en cabecera para Celular y Tablet -->
           <div class="flex items-center gap-1.5 lg:hidden shrink-0">
-            <button type="button" onclick="toggleCertificatesModal(true)" title="Certificados" class="h-8 px-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-[11px] shadow-md border border-blue-400/40 flex items-center gap-1.5 transition cursor-pointer">
+            <button type="button" data-on-click="cert-open" title="Certificados" class="h-8 px-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-[11px] shadow-md border border-blue-400/40 flex items-center gap-1.5 transition cursor-pointer">
               <i class="fa-solid fa-award text-[#f6dc92] text-xs"></i>
               <span>Certificados</span>
             </button>
@@ -246,11 +247,11 @@
         </div>
         </div>
         <div class="flex items-center gap-2.5 shrink-0">
-          <button type="button" onclick="toggleCertificatesModal(true)" class="px-4 py-2.5 rounded-xl bg-[#0f5fa8] hover:bg-[#0c4f8f] text-white font-bold text-sm shadow-md flex items-center gap-2 transition cursor-pointer">
+          <button type="button" data-on-click="cert-open" class="px-4 py-2.5 rounded-xl bg-[#0f5fa8] hover:bg-[#0c4f8f] text-white font-bold text-sm shadow-md flex items-center gap-2 transition cursor-pointer">
             <i class="fa-solid fa-award text-[#e9bf63]"></i>
             <span>Certificados</span>
           </button>
-          <button type="button" id="btnTopBarLogout" onclick="logoutSystem(true)" title="Cerrar Sesión" class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-sm flex items-center gap-2 transition cursor-pointer">
+          <button type="button" id="btnTopBarLogout" data-on-click="logout" title="Cerrar Sesión" class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-sm flex items-center gap-2 transition cursor-pointer">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Salir</span>
           </button>
@@ -1387,7 +1388,7 @@
         <i class="fa-solid fa-award text-amber-400 text-lg"></i>
         <h3 class="font-extrabold text-sm sm:text-base">Emisión de Certificados</h3>
       </div>
-      <button type="button" onclick="toggleCertificatesModal(false)" class="text-slate-400 hover:text-white cursor-pointer p-1">
+      <button type="button" data-on-click="cert-close" class="text-slate-400 hover:text-white cursor-pointer p-1">
         <i class="fa-solid fa-xmark text-xl pointer-events-none"></i>
       </button>
     </div>
@@ -1397,43 +1398,43 @@
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-amber-50/70 p-4 rounded-2xl border border-amber-200">
         <div>
           <label class="font-bold text-slate-700 block mb-1">Tipo de Certificado</label>
-          <select id="certTypeSelect" onchange="updateCertificateSelectors()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-bold text-amber-900">
+          <select id="certTypeSelect" data-on-change="cert-type-change" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-bold text-amber-900">
             <option value="BAUTISMO">Certificado de Bautismo en Agua</option>
             <option value="MATRIMONIO">Certificado Eclesiástico de Matrimonio</option>
           </select>
         </div>
         <div>
           <label class="font-bold text-slate-700 block mb-1">Seleccionar Miembro</label>
-          <select id="certMemberSelect" onchange="fillCertificateFromMember()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-semibold"></select>
+          <select id="certMemberSelect" data-on-change="cert-member-change" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white font-semibold"></select>
         </div>
         <div id="certSpouseWrapper" class="hidden">
           <label class="font-bold text-slate-700 block mb-1">Nombre del Cónyuge</label>
-          <input type="text" id="certSpouseInput" oninput="renderCertificatePreview()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white" placeholder="Nombre del esposo(a)..." />
+          <input type="text" id="certSpouseInput" data-on-input="cert-preview" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white" placeholder="Nombre del esposo(a)..." />
         </div>
         <div>
           <label class="font-bold text-slate-700 block mb-1">Fecha Solemne</label>
-          <input type="date" id="certDateInput" onchange="renderCertificatePreview()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white" />
+          <input type="date" id="certDateInput" data-on-change="cert-preview" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white" />
         </div>
         <div>
           <label class="font-bold text-slate-700 block mb-1">Lugar / Templo</label>
-          <input type="text" id="certPlaceInput" oninput="renderCertificatePreview()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white" />
+          <input type="text" id="certPlaceInput" data-on-input="cert-preview" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white" />
         </div>
         <div class="sm:col-span-3">
           <label class="font-bold text-slate-700 block mb-1">Texto Solemne / Versículo Bíblico</label>
-          <input type="text" id="certVerseInput" oninput="renderCertificatePreview()" class="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white" />
+          <input type="text" id="certVerseInput" data-on-input="cert-preview" class="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white" />
         </div>
         <div class="sm:col-span-3 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-amber-200">
           <div class="flex items-center gap-2">
             <label class="bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-xl cursor-pointer transition flex items-center gap-1.5 shadow-sm">
               <i class="fa-solid fa-image text-amber-600"></i> Subir Logo / Sello para Certificado
-              <input type="file" id="certLogoInput" accept="image/png,image/jpeg,image/webp" onchange="handleCertLogoUpload(event)" class="hidden" />
+              <input type="file" id="certLogoInput" accept="image/png,image/jpeg,image/webp" data-on-change="cert-logo-upload" class="hidden" />
             </label>
-            <button type="button" onclick="clearCertLogo()" class="text-rose-600 hover:underline font-bold text-[11px]">
+            <button type="button" data-on-click="cert-logo-clear" class="text-rose-600 hover:underline font-bold text-[11px]">
               Quitar imagen
             </button>
           </div>
           <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-            <input type="checkbox" id="certWatermarkCheck" checked onchange="renderCertificatePreview()" class="rounded text-amber-600" />
+            <input type="checkbox" id="certWatermarkCheck" checked data-on-change="cert-preview" class="rounded text-amber-600" />
             Mostrar también como marca de agua al fondo
           </label>
         </div>
@@ -1443,7 +1444,7 @@
       <div id="certPreviewBox" class="border-4 border-double border-blue-900 p-6 rounded-xl bg-white text-center space-y-3"></div>
 
       <div class="flex justify-end">
-        <button type="button" onclick="printCurrentCertificate()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md flex items-center gap-2">
+        <button type="button" data-on-click="cert-print" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md flex items-center gap-2">
           <i class="fa-solid fa-print"></i> Imprimir Certificado Oficial
         </button>
       </div>
@@ -1458,6 +1459,7 @@
   <script src="js/ui/glassy-sidebar.js"></script>
 
   <script src="js/modules/events-agenda.js"></script>
+  <script src="js/ui/inline-handlers.js"></script>
 
 </body>
 </html>

@@ -21,7 +21,7 @@ js/
   views/     directory.js (directorio) · dashboard.js (resumen y gráficos)
   reports/   reports.js
   modules/   reports-certificates.js · person-search.js · events-agenda.js
-  ui/        login-ui.js · glassy-sidebar.js
+  ui/        login-ui.js · glassy-sidebar.js · inline-handlers.js (acciones de botones: data-on-click/change/input)
   main.js    Arranque: eventos de la página
 ```
 
@@ -32,6 +32,11 @@ Todas las reglas están en `js/core/validators.js` como funciones puras (sin DOM
 ```
 npm test        # Node 18+, sin dependencias
 ```
+
+## Seguridad
+
+- La política de seguridad (CSP) de `index.html` **no permite scripts incrustados** (`'unsafe-inline'` solo se mantiene para estilos). Por eso no se usan atributos `onclick="..."` en el HTML: se escribe `data-on-click="nombre"` y se registra la acción en `js/ui/inline-handlers.js`.
+- Todo texto que viene de los datos se inserta con `escapeHtml(...)` al armar HTML.
 
 ## Importante
 
