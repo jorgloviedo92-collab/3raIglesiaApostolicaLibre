@@ -22,6 +22,26 @@
   box-shadow: 0 0 0 3px rgba(27, 130, 209, 0.16);
 }
 
+/* Filtros de la agenda: el buscador va en su propia fila y los dos filtros lado a lado, para que
+   ningún texto se corte en tabletas. */
+#view-eventos .ev-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+#view-eventos .ev-filters .ui-search {
+  flex: 1 1 100%;
+}
+/* cada filtro necesita ~220 px para mostrar su texto completo; si no caben dos, se apilan */
+#view-eventos .ev-filters select {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+#view-eventos .ev-filters .ui-search input,
+#view-eventos .ev-filters select {
+  height: 40px;
+}
+
 /* Badge del menú lateral en modo colapsado y activo */
 #mainHeader nav button.tab-active #navEventsCount {
   background: #e6f2ff !important;
