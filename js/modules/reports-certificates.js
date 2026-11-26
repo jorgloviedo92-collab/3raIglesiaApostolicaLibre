@@ -10,7 +10,7 @@
       extraFilters.innerHTML = `
         <div>
           <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Categoría</label>
-          <select id="rptFilterCategory" onchange="renderOnScreenReport()" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold">
+          <select id="rptFilterCategory" data-on-change="rpt-render" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold">
             <option value="ALL">Todas</option>
             <option value="Activo">Activos</option>
             <option value="Directivo">Directivos</option>
@@ -20,7 +20,7 @@
         </div>
         <div>
           <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Bautismo</label>
-          <select id="rptFilterBaptized" onchange="renderOnScreenReport()" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold">
+          <select id="rptFilterBaptized" data-on-change="rpt-render" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold">
             <option value="ALL">Todos</option>
             <option value="Sí">Bautizados</option>
             <option value="No">No Bautizados</option>
@@ -28,7 +28,7 @@
         </div>
         <div>
           <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Género</label>
-          <select id="rptFilterGender" onchange="renderOnScreenReport()" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold">
+          <select id="rptFilterGender" data-on-change="rpt-render" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold">
             <option value="ALL">Todos</option>
             <option value="Masculino">Masculino</option>
             <option value="Femenino">Femenino</option>
@@ -36,7 +36,7 @@
         </div>
         <div class="flex-grow min-w-[180px]">
           <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Buscar en el Reporte</label>
-          <input type="text" id="rptFilterSearch" oninput="debouncedRenderOnScreenReport()" placeholder="Filtrar por nombre o cédula..." class="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-xs" />
+          <input type="text" id="rptFilterSearch" data-on-input="rpt-render-debounced" placeholder="Filtrar por nombre o cédula..." class="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-xs" />
         </div>
       `;
       filterContainer.appendChild(extraFilters);
