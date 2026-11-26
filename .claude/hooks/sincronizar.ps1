@@ -58,7 +58,10 @@ try {
 
     # Sintaxis de todos los .js y pruebas automáticas antes de publicar
     $fallos = @()
-    Get-ChildItem -Path (Join-Path $repo 'js') -Filter *.js -Recurse | ForEach-Object {
+    $scripts = @(Get-ChildItem -Path (Join-Path $repo 'js') -Filter *.js -Recurse)
+    $sw = Join-Path $repo 'sw.js'
+    if (Test-Path $sw) { $scripts += Get-Item $sw }
+    $scripts | ForEach-Object {
       $r = & node --check $_.FullName 2>&1
       if ($LASTEXITCODE -ne 0) { $fallos += "Sintaxis: $($_.FullName.Substring($repo.Length + 1)): $(($r | Select-Object -First 1))" }
     }

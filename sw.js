@@ -12,11 +12,14 @@ const CACHE = 'ecclesiasoft-app-v1';
 const CDN_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 const ESPERA_RED_MS = 6000;
 
+// Si el navegador no permite usar la caché (modo privado, almacenamiento lleno...), la app sigue
+// funcionando igual con internet: ningún error de caché debe impedir instalar o cargar.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
       .then((c) => c.addAll(['./', 'index.html', 'manifest.webmanifest']))
+      .catch(() => {})
       .then(() => self.skipWaiting())
   );
 });
@@ -33,7 +36,10 @@ self.addEventListener('activate', (event) => {
 function guardar(request, response) {
   if (response && response.ok && (response.type === 'basic' || response.type === 'cors')) {
     const copia = response.clone();
-    caches.open(CACHE).then((c) => c.put(request, copia));
+    caches
+      .open(CACHE)
+      .then((c) => c.put(request, copia))
+      .catch(() => {});
   }
   return response;
 }
@@ -47,6 +53,7 @@ function redPrimero(request, esPagina) {
     caches
       .match(request, { ignoreSearch: esPagina })
       .then((r) => r || (esPagina ? caches.match('index.html') : null))
+      .catch(() => null)
       .then((r) => r || red)
   );
 }
@@ -54,12 +61,15 @@ function redPrimero(request, esPagina) {
 // Librerías externas con versión fija (Chart.js, íconos, fuentes): la copia guardada sirve, y se
 // actualiza en segundo plano.
 function cachePrimero(request) {
-  return caches.match(request).then((guardada) => {
-    const red = fetch(request)
-      .then((r) => guardar(request, r))
-      .catch(() => guardada);
-    return guardada || red;
-  });
+  return caches
+    .match(request)
+    .catch(() => null)
+    .then((guardada) => {
+      const red = fetch(request)
+        .then((r) => guardar(request, r))
+        .catch(() => guardada);
+      return guardada || red;
+    });
 }
 
 self.addEventListener('fetch', (event) => {

@@ -50,6 +50,22 @@ No se formatean `index.html`, `css/tailwind.css` (generado) ni `Code.js`.
 - La política de seguridad (CSP) de `index.html` **no permite scripts incrustados** (`'unsafe-inline'` solo se mantiene para estilos). Por eso no se usan atributos `onclick="..."` en el HTML: se escribe `data-on-click="nombre"` y se registra la acción en `js/ui/inline-handlers.js`.
 - Todo texto que viene de los datos se inserta con `escapeHtml(...)` al armar HTML.
 
+## App instalable (PWA)
+
+La página se puede instalar como aplicación en tabletas, celulares y computadoras (ícono propio, pantalla completa). Sigue funcionando igual desde el navegador.
+
+```
+manifest.webmanifest        Nombre, colores e íconos de la app
+sw.js                       Service worker: "red primero" (siempre la versión publicada); sin internet abre la última copia
+js/pwa.js                   Registra sw.js (solo en https o localhost; con file:// se omite)
+icons/                      Íconos 192/512 (normales y adaptables) y apple-touch-icon (iPhone/iPad)
+```
+
+- **Instalar:** Android/Chrome → menú ⋮ → "Instalar aplicación". iPad/iPhone (Safari) → Compartir → "Agregar a pantalla de inicio". Computadora (Chrome/Edge) → ícono de instalar en la barra de direcciones.
+- **Actualizaciones:** no hay que hacer nada. Lo que se publica en GitHub Pages llega a la app la próxima vez que se abre con internet.
+- **Datos:** el service worker no intercepta ni guarda las llamadas al servidor (Apps Script). Sin internet la app abre, pero para ver o guardar datos necesita conexión.
+- Si se agrega un archivo que la app deba tener sin conexión, no hace falta listarlo: se guarda solo la primera vez que se carga.
+
 ## Backend (Code.js)
 
 `Code.js` es el backend de Google Apps Script. Puede estar en esta carpeta, pero **no se sube al repositorio** (está en `.gitignore`): se pega a mano en Apps Script y se crea una nueva versión de la implementación. `tests/backend.test.js` lo prueba con servicios de Google simulados y se omite si el archivo no está.
