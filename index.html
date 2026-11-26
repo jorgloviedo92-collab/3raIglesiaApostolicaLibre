@@ -1780,6 +1780,171 @@ html.gate-open body::after {
   }
   </style>
 
+  <style id="proLayerStyles">
+  /* ═══════════ Capa profesional III ═══════════
+     Solo apariencia. No cambia IDs, clases usadas por la lógica, ni
+     la visibilidad (display) de ningún elemento. No afecta la impresión
+     ni la pantalla de acceso. Para revertir: borrar este bloque <style>. */
+  @media screen {
+    :root {
+      --pro-brand: #0f5fa8;
+      --pro-brand-dark: #0a3f78;
+      --pro-ink: #0b2540;
+      --pro-text: #334155;
+      --pro-muted: #64748b;
+      --pro-line: #dbe5ef;
+      --pro-line-strong: #cbd5e1;
+      --pro-surface: #ffffff;
+      --pro-soft: #f6f9fc;
+      --pro-radius: 14px;
+      --pro-radius-sm: 10px;
+      --pro-shadow: 0 1px 2px rgba(11, 37, 64, .05), 0 6px 18px -14px rgba(11, 37, 64, .30);
+      --pro-shadow-hover: 0 2px 4px rgba(11, 37, 64, .06), 0 12px 26px -16px rgba(11, 37, 64, .36);
+    }
+
+    /* 1 · Fondo de trabajo sereno: las nubes quedan fijas y muy tenues */
+    body {
+      background-image: linear-gradient(180deg, #dcecfa 0%, #eaf3fb 34%, #f4f8fc 70%, #f7f9fc 100%) !important;
+    }
+    body::before { animation: none !important; opacity: .28 !important; }
+    body::after  { animation: none !important; opacity: .12 !important; }
+    ::selection { background: rgba(15, 95, 168, .18); color: inherit; }
+
+    /* 2 · Tarjetas y paneles con un mismo radio, borde y sombra */
+    #appShell main .bg-white.rounded-2xl,
+    #appShell main .bg-white.rounded-xl.shadow-sm,
+    #appShell main .dash-card {
+      border-radius: var(--pro-radius) !important;
+      border-color: var(--pro-line) !important;
+      box-shadow: var(--pro-shadow) !important;
+    }
+    #appShell main .dash-kpi:hover { box-shadow: var(--pro-shadow-hover) !important; transform: translateY(-1px); }
+    #memberModal > div, #configModal > div, #certificatesModal > div {
+      border-radius: 16px !important;
+      box-shadow: 0 30px 70px -24px rgba(11, 37, 64, .55) !important;
+    }
+
+    /* 3 · Títulos de sección: misma escala y color; íconos en el color de la marca */
+    #appShell main h3.text-base, #appShell main h3.text-lg {
+      color: var(--pro-ink) !important;
+      font-weight: 600 !important;
+      letter-spacing: -.005em;
+    }
+    #appShell main h3.text-base > i, #appShell main h3.text-sm > i {
+      color: var(--pro-brand) !important;
+      opacity: .9;
+    }
+
+    /* 4 · Menú lateral: íconos de un solo tono (el activo conserva su acento) */
+    #mainHeader nav button:not(.tab-active) > i,
+    #mainHeader nav button:not(.tab-active) > span > i {
+      color: rgba(214, 233, 252, .85) !important;
+    }
+    #mainHeader nav button:not(.tab-active):hover > i,
+    #mainHeader nav button:not(.tab-active):hover > span > i { color: #ffffff !important; }
+
+    /* 5 · Formularios: etiquetas legibles, campos de altura uniforme */
+    #appShell main form label.block,
+    #configModal form label.block {
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      color: var(--pro-text) !important;
+      letter-spacing: .005em;
+      margin-bottom: 6px !important;
+    }
+    #appShell main form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+    #appShell main form select,
+    #configModal form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    #configModal form select {
+      min-height: 40px;
+      border-radius: var(--pro-radius-sm) !important;
+      border-color: var(--pro-line-strong);
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    #appShell main form textarea { border-radius: var(--pro-radius-sm) !important; }
+    #appShell main form input:not([readonly]):not([type="checkbox"]):hover,
+    #appShell main form select:hover { border-color: #94a3b8; }
+    #appShell main input[readonly] { cursor: default; }
+    input[type="checkbox"] { accent-color: var(--pro-brand); }
+    #view-registro form h3 {
+      font-size: 13px !important;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--pro-muted) !important;
+      font-weight: 600 !important;
+    }
+
+    /* 6 · Botones: sombras discretas y respuesta al pulsar */
+    #appShell main button[type="submit"],
+    #appShell main .shadow-md,
+    #topBar .shadow-md {
+      box-shadow: 0 1px 2px rgba(11, 37, 64, .12), 0 6px 14px -10px rgba(15, 95, 168, .55) !important;
+    }
+    #appShell button:not(:disabled):active,
+    #memberModal button:not(:disabled):active,
+    #configModal button:not(:disabled):active { transform: translateY(1px); }
+    #appShell main button[type="submit"] { font-weight: 600 !important; letter-spacing: .01em; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* 7 · Directorio: pestañas y encabezado de tabla en estilo sobrio */
+    #directoryToolbar button[id^="dirTab"]:not(.btn-dir-active) {
+      background: #ffffff !important;
+      color: var(--pro-muted) !important;
+      border: 1px solid var(--pro-line);
+      border-bottom: 0;
+    }
+    #directoryToolbar button[id^="dirTab"]:not(.btn-dir-active):hover { color: var(--pro-brand) !important; background: var(--pro-soft) !important; }
+    #directoryTableWrapper thead tr,
+    #directoryTableWrapper thead th {
+      background: #f1f5f9 !important;
+      color: #475569 !important;
+      border-bottom: 1px solid var(--pro-line);
+    }
+
+    /* 8 · Tablas: celdas con aire y números alineados */
+    #appShell main table td { line-height: 1.45; }
+    #appShell main table thead th { font-weight: 600 !important; }
+    #contributionsTableBody td:nth-last-child(2),
+    #cashTableBody td { font-variant-numeric: tabular-nums; }
+    #directoryPagination { background: var(--pro-soft) !important; color: var(--pro-text); }
+
+    /* 9 · Cifras grandes: peso firme sin verse pesado */
+    #appShell .cash-amount, #appShell [data-skel] { font-weight: 700 !important; letter-spacing: -.01em; }
+    #view-caja .cash-card span.uppercase,
+    #appShell main .uppercase.text-xs.font-bold { letter-spacing: .05em; font-weight: 600 !important; }
+
+    /* 10 · Ventanas: encabezado y botón de cierre más limpios */
+    #memberModal [id^="btnCloseModalTop"], #configModal [id^="btnCloseConfigTop"] {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background-color .15s ease, color .15s ease;
+    }
+    #memberModal [id^="btnCloseModalTop"]:hover, #configModal [id^="btnCloseConfigTop"]:hover { background: rgba(255, 255, 255, .14); }
+
+    /* 11 · Barras de desplazamiento finas y discretas */
+    #appShell main *, #memberModal *, #configModal *, #certificatesModal * {
+      scrollbar-width: thin;
+      scrollbar-color: #c3d0dd transparent;
+    }
+    #appShell main ::-webkit-scrollbar, #memberModal ::-webkit-scrollbar, #configModal ::-webkit-scrollbar { width: 8px; height: 8px; }
+    #appShell main ::-webkit-scrollbar-thumb, #memberModal ::-webkit-scrollbar-thumb, #configModal ::-webkit-scrollbar-thumb {
+      background: #c3d0dd; border-radius: 99px; border: 2px solid transparent; background-clip: padding-box;
+    }
+    #appShell main ::-webkit-scrollbar-track { background: transparent; }
+
+    /* 12 · Celular: zonas táctiles cómodas y campos sin zoom automático */
+    @media (max-width: 640px) {
+      #appShell main form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+      #appShell main form select,
+      #appShell main .ui-search input { font-size: 16px !important; }
+      #appShell main button[type="submit"] { min-height: 44px; }
+      #appShell main .bg-white.rounded-2xl { border-radius: 12px !important; }
+    }
+  }
+  @media screen and (prefers-reduced-motion: reduce) {
+    #appShell main .dash-kpi:hover, #appShell button:active { transform: none !important; }
+  }
+  </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800 antialiased">
 
