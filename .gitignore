@@ -1,3 +1,7 @@
 node_modules/
 .claude/hooks/sincronizacion.log
 .claude/settings.local.json
+
+# Backend de Google Apps Script: se pega a mano en Apps Script, NO va al repositorio
+/Code.js
+/Code.js.bak

@@ -38,6 +38,10 @@ npm test        # Node 18+, sin dependencias
 - La política de seguridad (CSP) de `index.html` **no permite scripts incrustados** (`'unsafe-inline'` solo se mantiene para estilos). Por eso no se usan atributos `onclick="..."` en el HTML: se escribe `data-on-click="nombre"` y se registra la acción en `js/ui/inline-handlers.js`.
 - Todo texto que viene de los datos se inserta con `escapeHtml(...)` al armar HTML.
 
+## Backend (Code.js)
+
+`Code.js` es el backend de Google Apps Script. Puede estar en esta carpeta, pero **no se sube al repositorio** (está en `.gitignore`): se pega a mano en Apps Script y se crea una nueva versión de la implementación. `tests/backend.test.js` lo prueba con servicios de Google simulados y se omite si el archivo no está.
+
 ## Importante
 
 - Son scripts clásicos (no módulos ES) que comparten el ámbito global: **el orden de los `<script>` en `index.html` importa**. `core/validators.js` va primero (los demás archivos usan sus funciones) y `main.js` al final de ese bloque.
