@@ -2004,7 +2004,7 @@ html.gate-open body::after {
               <label class="auth-label" for="accessPinInput">PIN de seguridad (Admin o Consulta)</label>
               <div class="auth-field">
                 <i class="fa-solid fa-key auth-ico" aria-hidden="true"></i>
-                <input type="password" id="accessPinInput" required maxlength="30" autocomplete="off"
+                <input type="password" id="accessPinInput" required maxlength="64" autocomplete="off"
                        placeholder="••••••••" class="auth-input auth-pin" />
                 <button type="button" id="btnTogglePinVisibility" class="auth-eye" aria-label="Mostrar PIN" aria-pressed="false">
                   <i class="fa-solid fa-eye" aria-hidden="true"></i>
@@ -3440,15 +3440,15 @@ html.gate-open body::after {
           <div id="pinEditBox" class="hidden mt-2 space-y-2">
             <div>
               <label class="text-[10px] font-bold text-amber-700">PIN Actual de Administrador *</label>
-              <input type="password" id="cfgPinActual" maxlength="30" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="PIN actual requerido" />
+              <input type="password" id="cfgPinActual" maxlength="64" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="PIN actual requerido" />
             </div>
             <div>
               <label class="text-[10px] font-bold text-amber-700">Nuevo PIN Administrador (Mínimo 8 caracteres)</label>
-              <input type="password" id="cfgPinAdmin" minlength="8" maxlength="30" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
+              <input type="password" id="cfgPinAdmin" minlength="8" maxlength="64" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
             </div>
             <div>
               <label class="text-[10px] font-bold text-amber-700">Nuevo PIN Consultor (Mínimo 8 caracteres)</label>
-              <input type="password" id="cfgPinConsulta" minlength="8" maxlength="30" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
+              <input type="password" id="cfgPinConsulta" minlength="8" maxlength="64" class="w-full px-2 py-1 rounded border border-amber-300 font-mono" placeholder="Mínimo 8 caracteres" />
             </div>
           </div>
         </div>
@@ -3630,10 +3630,22 @@ html.gate-open body::after {
       if (!dateStr) return null;
       const s = String(dateStr).split('T')[0];
       const p = s.split('-');
-      if (p.length === 3) {
-        return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
-      }
-      return null;
+      if (p.length !== 3 || !/^\d{4}$/.test(p[0]) || !/^\d{1,2}$/.test(p[1]) || !/^\d{1,2}$/.test(p[2])) return null;
+      const y = parseInt(p[0], 10), m = parseInt(p[1], 10), d = parseInt(p[2], 10);
+      if (y < 1900 || y > 2100) return null;
+      // setFullYear evita que años 0-99 se interpreten como 19xx; se rechazan fechas que "rebotan" (31 de febrero, mes 13...)
+      const date = new Date(2000, 0, 1);
+      date.setFullYear(y, m - 1, d);
+      if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return null;
+      return date;
+    }
+
+    // Monto monetario: acepta solo números positivos con un máximo de 2 decimales y devuelve el valor redondeado al centavo (o null si no es válido)
+    function parseMoneyAmount(raw) {
+      const txt = String(raw === null || raw === undefined ? '' : raw).trim();
+      if (!/^\d+(\.\d{1,2})?$/.test(txt)) return null;
+      const n = Math.round(parseFloat(txt) * 100) / 100;
+      return (n >= 0.01 && n <= 9999999) ? n : null;
     }
 
     function formatDisplayDate(dateStr) {
@@ -5234,11 +5246,18 @@ html.gate-open body::after {
         showToast("La fecha de la contribución no puede ser futura.", "error");
         return;
       }
-      const amt = parseFloat(document.getElementById('contributionAmountInput').value);
-      if (isNaN(amt) || amt <= 0 || amt > 9999999) { showToast("El monto debe ser mayor a 0 y válido.", "error"); return; }
+      const amt = parseMoneyAmount(document.getElementById('contributionAmountInput').value);
+      if (amt === null) { showToast("El monto debe estar entre 0.01 y 9,999,999, con máximo 2 decimales.", "error"); return; }
+      if (!document.getElementById('contributionTypeSelect').value) { showToast("Selecciona el tipo de contribución.", "error"); return; }
+      if (document.getElementById('contributionNotesInput').value.trim().length > 200) { showToast("Las notas no pueden superar 200 caracteres.", "error"); return; }
       const nacMiembro = String(member.birthDate || member.fechaNacimiento || '').split('T')[0];
       if (nacMiembro && contribDateVal < nacMiembro) {
         showToast("La fecha de la contribución no puede ser anterior al nacimiento del miembro.", "error");
+        return;
+      }
+      const defMiembro = (member.isDeceased === 'Sí' || member.fallecido === 'Sí') ? String(member.deceasedDate || member.fechaDefuncion || '').split('T')[0] : '';
+      if (defMiembro && contribDateVal > defMiembro) {
+        showToast("La fecha de la contribución no puede ser posterior a la defunción del miembro.", "error");
         return;
       }
 
@@ -5249,7 +5268,7 @@ html.gate-open body::after {
           nombreMiembro: member.fullName || member.nombreCompleto,
           fecha: contribDateVal,
           tipoContribucion: document.getElementById('contributionTypeSelect').value,
-          monto: Math.round(amt * 100) / 100,
+          monto: amt,
           metodoPago: document.getElementById('contributionMethodSelect').value,
           notasReferencia: document.getElementById('contributionNotesInput').value.trim()
           };
@@ -5278,8 +5297,10 @@ html.gate-open body::after {
         showToast("La fecha del movimiento de caja no puede ser futura.", "error");
         return;
         }
-        const amt = parseFloat(document.getElementById('cashAmountInput').value);
-        if (isNaN(amt) || amt <= 0 || amt > 9999999) { showToast("El monto debe ser mayor a 0 y válido.", "error"); return; }
+        const amt = parseMoneyAmount(document.getElementById('cashAmountInput').value);
+        if (amt === null) { showToast("El monto debe estar entre 0.01 y 9,999,999, con máximo 2 decimales.", "error"); return; }
+        if (!document.getElementById('cashCategorySelect').value) { showToast("Selecciona el concepto o categoría del movimiento.", "error"); return; }
+        if (document.getElementById('cashNotesInput').value.trim().length > 200) { showToast("La descripción no puede superar 200 caracteres.", "error"); return; }
 
         // Un egreso mayor que el saldo disponible deja la caja en negativo: se pide confirmación
         if (document.getElementById('cashMovementTypeSelect').value === 'Salida') {
@@ -5294,7 +5315,7 @@ html.gate-open body::after {
             tipoMovimiento: document.getElementById('cashMovementTypeSelect').value,
             categoriaConcepto: document.getElementById('cashCategorySelect').value,
             fecha: cfDateVal,
-            monto: Math.round(amt * 100) / 100,
+            monto: amt,
             formaPago: document.getElementById('cashMethodSelect').value,
             descripcionObservacion: document.getElementById('cashNotesInput').value.trim()
           };
@@ -8093,6 +8114,19 @@ html.gate-open body::after {
           newPinConsulta: document.getElementById('cfgPinConsulta').value.trim()
         };
 
+        if (cfgData.name.length < 3) {
+          showToast("El nombre de la iglesia es obligatorio (mínimo 3 caracteres).", "error");
+          return;
+        }
+        if (cfgData.pastor && !isValidPersonName(cfgData.pastor)) {
+          showToast("El nombre del Pastor solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).", "error");
+          return;
+        }
+        if (cfgData.secretary && !isValidPersonName(cfgData.secretary)) {
+          showToast("El nombre del Secretario solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).", "error");
+          return;
+        }
+
         if (isChangingPin) {
           if (!cfgData.pinActual || !cfgData.newPinAdmin || !cfgData.newPinConsulta) {
             showToast("Ingresa el PIN actual y ambos nuevos PINs.", "error");
@@ -8109,6 +8143,10 @@ html.gate-open body::after {
           }
           if (cfgData.newPinAdmin === cfgData.newPinConsulta) {
             showToast("El PIN de Administrador y el de Consulta deben ser diferentes.", "error");
+            return;
+          }
+          if (cfgData.newPinAdmin === cfgData.pinActual || cfgData.newPinConsulta === cfgData.pinActual) {
+            showToast("Los nuevos PINs deben ser distintos del PIN actual.", "error");
             return;
           }
         }
@@ -8138,6 +8176,8 @@ html.gate-open body::after {
 
       document.getElementById('idNumber').addEventListener('input', (e) => {
         let val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        // Posiciones 1-13 solo dígitos; la posición 14 es la letra final
+        val = val.split('').reduce((acc, ch) => (acc.length < 13 ? /\d/.test(ch) : /[A-Z]/.test(ch)) ? acc + ch : acc, '');
         if (val.length > 14) val = val.substring(0, 14);
         let formatted = '';
         if (val.length > 0) formatted += val.substring(0, 3);
@@ -9295,8 +9335,24 @@ html.gate-open body::after {
         showToast('Completa el título y la fecha del evento.', 'error');
         return;
       }
-      if (startTime && endTime && endTime < startTime) {
-        showToast('La hora de fin no puede ser anterior a la hora de inicio.', 'error');
+      if (title.length < 3 || title.length > 120) {
+        showToast('El título del evento debe tener entre 3 y 120 caracteres.', 'error');
+        return;
+      }
+      if (!parseDateSafe(date)) {
+        showToast('La fecha del evento no es válida.', 'error');
+        return;
+      }
+      if (location.length > 120 || responsible.length > 100 || notes.length > 400) {
+        showToast('Lugar (120), responsable (100) o notas (400) exceden el largo permitido.', 'error');
+        return;
+      }
+      if (endTime && !startTime) {
+        showToast('Indica la hora de inicio antes de la hora de fin.', 'error');
+        return;
+      }
+      if (startTime && endTime && endTime <= startTime) {
+        showToast('La hora de fin debe ser posterior a la hora de inicio.', 'error');
         return;
       }
       if (status === 'Realizado') {
