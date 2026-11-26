@@ -13,7 +13,15 @@ let isLoggingOut = false;
 function getClientId() {
   let cid = sessionStorage.getItem(STORAGE_CLIENT_ID);
   if (!cid) {
-    cid = 'cli_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+    // Aleatorio criptográfico: el servidor usa este identificador para reconocer dispositivos
+    // que ya iniciaron sesión, así que no debe poder adivinarse.
+    let rnd = '';
+    try {
+      rnd = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      rnd = Math.random().toString(36).substring(2, 10);
+    }
+    cid = 'cli_' + rnd + '_' + Date.now().toString(36);
     sessionStorage.setItem(STORAGE_CLIENT_ID, cid);
   }
   return cid;

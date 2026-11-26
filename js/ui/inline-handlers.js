@@ -64,3 +64,33 @@
     });
   });
 })();
+
+/*
+ * Ventanas (expediente, configuración y certificados): la tecla Escape cierra la que esté abierta,
+ * igual que su botón "Cerrar". Si hay un diálogo de confirmación abierto, ese diálogo atiende la
+ * tecla primero (detiene el evento), así que aquí no llega.
+ */
+(function () {
+  var VENTANAS = [
+    {
+      id: 'certificatesModal',
+      cerrar: function () {
+        toggleCertificatesModal(false);
+      }
+    },
+    { id: 'configModal', boton: 'btnCloseConfigTop' },
+    { id: 'memberModal', boton: 'btnCloseModalTop' }
+  ];
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    for (var i = 0; i < VENTANAS.length; i++) {
+      var v = VENTANAS[i];
+      var el = document.getElementById(v.id);
+      if (!el || !el.classList.contains('flex')) continue;
+      e.preventDefault();
+      if (v.cerrar) v.cerrar();
+      else document.getElementById(v.boton).click();
+      return;
+    }
+  });
+})();

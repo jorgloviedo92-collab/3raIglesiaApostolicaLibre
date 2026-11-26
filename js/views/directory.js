@@ -960,7 +960,10 @@ function renderContributionsTable() {
       const btnDel = document.createElement('button');
       btnDel.className = 'text-rose-600 hover:text-rose-800 p-1 act-del-contrib';
       btnDel.setAttribute('data-id', c.id);
-      btnDel.setAttribute('data-name', `Aporte ${formatCurrency(amt)} de${c.memberName || c.nombreMiembro}`);
+      btnDel.setAttribute('data-name', `Aporte ${formatCurrency(amt)} de ${c.memberName || c.nombreMiembro}`);
+      btnDel.type = 'button';
+      btnDel.title = 'Anular aporte (va a la Papelera)';
+      btnDel.setAttribute('aria-label', 'Anular aporte');
       btnDel.innerHTML = '<i class="fa-solid fa-trash pointer-events-none"></i>';
       tdAct.appendChild(btnDel);
     }
@@ -1066,6 +1069,9 @@ function renderCashTable() {
       btnDel.className = 'text-rose-600 hover:text-rose-800 p-1 act-del-cash';
       btnDel.setAttribute('data-id', cf.id);
       btnDel.setAttribute('data-name', `Movimiento ${cf.receipt || cf.reciboFactura} (${formatCurrency(amt)})`);
+      btnDel.type = 'button';
+      btnDel.title = 'Anular movimiento (va a la Papelera)';
+      btnDel.setAttribute('aria-label', 'Anular movimiento');
       btnDel.innerHTML = '<i class="fa-solid fa-trash pointer-events-none"></i>';
       tdAct.appendChild(btnDel);
     }

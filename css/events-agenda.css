@@ -49,6 +49,22 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Tabletas horizontales (1024–1279 px): la columna del calendario y el formulario no baja de
+   320 px; la agenda ocupa el resto. Antes era un tercio fijo (~200 px) y los campos se cortaban. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .ev-layout {
+    grid-template-columns: minmax(320px, 1fr) minmax(0, 1.4fr) !important;
+  }
+  .ev-layout > * {
+    grid-column: auto !important;
+  }
+}
+/* Hora / minutos / AM-PM: tres desplegables en la misma fila; con menos relleno caben "00" y "AM" */
+#eventFormCard .grid-cols-3 select {
+  min-width: 0;
+  padding-left: 0.45rem;
+  padding-right: 0.25rem;
+}
 
 /* Badge del menú lateral en modo colapsado y activo */
 #mainHeader nav button.tab-active #navEventsCount {

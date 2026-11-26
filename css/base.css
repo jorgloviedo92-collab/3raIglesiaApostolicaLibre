@@ -1427,3 +1427,20 @@ th[data-sort][aria-sort="descending"]::after {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Cédula: en tabletas su columna mide un tercio; con menos relleno y cifras de ancho fijo cabe
+   la cédula completa (000-000000-0000A) sin cortarse mientras se escribe. */
+#idNumber {
+  padding-left: 0.55rem;
+  padding-right: 0.45rem;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 640px) and (max-width: 1279.98px) {
+  #idNumber {
+    font-size: 13px;
+  }
+}
+/* Filtro de categoría del directorio: "Categoría (Todas)" cabe completo en tabletas */
+#filterCategory {
+  padding-right: 0.45rem;
+}

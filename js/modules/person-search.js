@@ -94,6 +94,14 @@
     field.append(lupa, input, limpiar);
     box.append(field, list);
     sel.insertAdjacentElement('afterend', box);
+    // La etiqueta del campo apunta ahora al buscador (la lista original queda oculta), así al
+    // tocar la etiqueta se enfoca el campo donde se escribe.
+    if (sel.id) {
+      input.id = sel.id + 'Buscar';
+      document.querySelectorAll('label[for="' + sel.id + '"]').forEach(function (lbl) {
+        lbl.htmlFor = input.id;
+      });
+    }
     sel.classList.add('person-picker-native');
     sel.tabIndex = -1;
     sel.setAttribute('aria-hidden', 'true');
@@ -246,6 +254,7 @@
       } else if (e.key === 'Escape') {
         if (!list.hidden) {
           e.preventDefault();
+          e.stopPropagation(); // cierra solo la lista, no la ventana que la contiene
           input.value = textoSeleccionado();
           cerrar();
         }

@@ -99,6 +99,12 @@
   window.clearEventsState = function () {
     eventsList = [];
     selectedDateIso = '';
+    // Al cerrar sesión no deben quedar datos de la agenda guardados en este navegador
+    // (equipos compartidos). Al volver a entrar se descargan otra vez del servidor.
+    try {
+      localStorage.removeItem(getStorageKey());
+      localStorage.removeItem(STORAGE_EVENTS_KEY);
+    } catch (e) {}
     updateEventsNavBadge();
   };
 

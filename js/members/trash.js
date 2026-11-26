@@ -168,9 +168,9 @@ function renderTrashTable() {
     if (filter === 'adultos' || filter === 'menores') {
       tdDetalle.textContent = item.fullName || item.nombreCompleto;
     } else if (filter === 'contribuciones') {
-      tdDetalle.textContent = `Aporte ${formatCurrency(item.amount || item.monto)} -${item.memberName || item.nombreMiembro}`;
+      tdDetalle.textContent = `Aporte ${formatCurrency(item.amount || item.monto)} - ${item.memberName || item.nombreMiembro}`;
     } else {
-      tdDetalle.textContent = `Movimiento ${formatCurrency(item.amount || item.monto)} -${item.category || item.categoriaConcepto}`;
+      tdDetalle.textContent = `Movimiento ${formatCurrency(item.amount || item.monto)} - ${item.category || item.categoriaConcepto}`;
     }
 
     const tdModulo = document.createElement('td');
