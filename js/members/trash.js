@@ -8,6 +8,7 @@ function getLocalLists(table) {
   if (table === 'child') return { active: children, trash: deletedChildren };
   if (table === 'contribution') return { active: contributions, trash: deletedContributions };
   if (table === 'cash') return { active: cashFlow, trash: deletedCashFlow };
+  if (table === 'event' && typeof window.getEventLists === 'function') return window.getEventLists();
   return null;
 }
 
@@ -70,8 +71,9 @@ async function executeLogicalRestore(table, id) {
     const res = await fetchAPI('restoreItemLogical', { table: table, id: id });
     if (res.status !== 'ok') throw new Error(res.message);
     moveLocalRecord(table, id, false);
+    if (table === 'event' && typeof window.afterEventsTrashChange === 'function') window.afterEventsTrashChange();
     updateAllViews();
-    showToast('Registro restaurado con éxito.');
+    showToast(table === 'event' ? 'Evento restaurado en la agenda.' : 'Registro restaurado con éxito.');
     if (table === 'adult' || table === 'child') syncFromCloud(false); // puede traer vínculos corregidos por el servidor
   } catch (err) {
     showToast('Error al restaurar: ' + err.message, 'error');
@@ -90,7 +92,8 @@ async function executeEmptyTrash() {
     adultos: { label: 'Adultos eliminados', table: 'adult' },
     menores: { label: 'Menores/Jóvenes eliminados', table: 'child' },
     contribuciones: { label: 'Contribuciones anuladas', table: 'contribution' },
-    caja: { label: 'Movimientos de caja anulados', table: 'cash' }
+    caja: { label: 'Movimientos de caja anulados', table: 'cash' },
+    eventos: { label: 'Eventos eliminados', table: 'event' }
   }[filter] || { label: 'este módulo', table: '' };
 
   if (
@@ -110,6 +113,8 @@ async function executeEmptyTrash() {
     if (res.status !== 'ok') throw new Error(res.message);
     const lists = getLocalLists(filterInfo.table);
     if (lists) lists.trash.length = 0;
+    if (filterInfo.table === 'event' && typeof window.afterEventsTrashChange === 'function')
+      window.afterEventsTrashChange();
     renderTrashTable();
     showToast(res.message || 'Papelera vaciada con éxito.');
   } catch (err) {
@@ -148,6 +153,12 @@ function renderTrashTable() {
     tipoStr = 'Caja/Gasto';
     tableKey = 'cash';
   }
+  if (filter === 'eventos') {
+    const lists = getLocalLists('event');
+    dataset = lists ? lists.trash : [];
+    tipoStr = 'Evento';
+    tableKey = 'event';
+  }
 
   if (dataset.length === 0) {
     tbody.innerHTML =
@@ -169,6 +180,8 @@ function renderTrashTable() {
       tdDetalle.textContent = item.fullName || item.nombreCompleto;
     } else if (filter === 'contribuciones') {
       tdDetalle.textContent = `Aporte ${formatCurrency(item.amount || item.monto)} - ${item.memberName || item.nombreMiembro}`;
+    } else if (filter === 'eventos') {
+      tdDetalle.textContent = `${item.title} - ${formatDisplayDate(item.date)}${item.category ? ' (' + item.category + ')' : ''}`;
     } else {
       tdDetalle.textContent = `Movimiento ${formatCurrency(item.amount || item.monto)} - ${item.category || item.categoriaConcepto}`;
     }

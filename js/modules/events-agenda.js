@@ -35,6 +35,7 @@
   };
 
   let eventsList = [];
+  let deletedEventsList = []; // eventos eliminados: se muestran y restauran en la Papelera
   let calYear = new Date().getFullYear();
   let calMonth = new Date().getMonth(); // 0..11
   let selectedDateIso = ''; // '' significa sin filtro de día específico
@@ -85,10 +86,16 @@
 
   window.mergeCloudEvents = function (cloudEvents) {
     if (!Array.isArray(cloudEvents)) return;
+    const valido = (e) => e && e.id && e.title && e.date;
     eventsList = cloudEvents
       .filter((e) => e && !e.isDeleted && !e.eliminado)
       .map(normalizeClientEvent)
-      .filter((e) => e && e.id && e.title && e.date);
+      .filter(valido);
+    // Solo el Administrador recibe los eliminados (el servidor no se los envía al rol Consulta)
+    deletedEventsList = cloudEvents
+      .filter((e) => e && (e.isDeleted || e.eliminado))
+      .map(normalizeClientEvent)
+      .filter(valido);
     saveEventsLocal();
     updateEventsNavBadge();
     if (typeof vistaActual !== 'undefined' && vistaActual === 'eventos') {
@@ -96,8 +103,20 @@
     }
   };
 
+  // Para la Papelera (js/members/trash.js): listas de eventos activos y eliminados, y el aviso
+  // que refresca la agenda después de restaurar o vaciar.
+  window.getEventLists = function () {
+    return { active: eventsList, trash: deletedEventsList };
+  };
+  window.afterEventsTrashChange = function () {
+    saveEventsLocal();
+    updateEventsNavBadge();
+    if (typeof vistaActual !== 'undefined' && vistaActual === 'eventos') renderEventsModule();
+  };
+
   window.clearEventsState = function () {
     eventsList = [];
+    deletedEventsList = [];
     selectedDateIso = '';
     // Al cerrar sesión no deben quedar datos de la agenda guardados en este navegador
     // (equipos compartidos). Al volver a entrar se descargan otra vez del servidor.
@@ -558,7 +577,7 @@
     if (!ev) return;
     const ok = await showConfirmDialog({
       title: 'Eliminar evento',
-      message: `¿Deseas eliminar "${ev.title}" (${formatDisplayDate(ev.date)}) de la agenda?`,
+      message: `¿Deseas eliminar "${ev.title}" (${formatDisplayDate(ev.date)}) de la agenda?\n\nEl evento pasará a la Papelera y podrás restaurarlo.`,
       confirmText: 'Eliminar',
       tone: 'danger'
     });
@@ -573,10 +592,11 @@
         }
       }
       eventsList = eventsList.filter((e) => e.id !== id);
+      deletedEventsList.push(ev);
       saveEventsLocal();
       if (document.getElementById('evIdInput').value === id) resetEventForm();
       renderEventsModule();
-      showToast('Evento eliminado de la agenda.');
+      showToast('Evento movido a la Papelera.');
     } catch (err) {
       showToast(err.message || 'Error al eliminar el evento.', 'error');
     } finally {
