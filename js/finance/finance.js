@@ -9,25 +9,16 @@
       const member = adults.find(a => String(a.id).trim() === String(memberId).trim());
       if (!member) { showToast("Selecciona un miembro válido.", "error"); return; }
       const contribDateVal = document.getElementById('contributionDateInput').value;
-      if (!contribDateVal) { showToast("Indica la fecha de la contribución.", "error"); return; }
-      if (parseDateSafe(contribDateVal) > parseDateSafe(getTodayLocalIsoDate())) {
-        showToast("La fecha de la contribución no puede ser futura.", "error");
-        return;
-      }
-      const amt = parseMoneyAmount(document.getElementById('contributionAmountInput').value);
-      if (amt === null) { showToast("El monto debe estar entre 0.01 y 9,999,999, con máximo 2 decimales.", "error"); return; }
-      if (!document.getElementById('contributionTypeSelect').value) { showToast("Selecciona el tipo de contribución.", "error"); return; }
-      if (document.getElementById('contributionNotesInput').value.trim().length > 200) { showToast("Las notas no pueden superar 200 caracteres.", "error"); return; }
-      const nacMiembro = String(member.birthDate || member.fechaNacimiento || '').split('T')[0];
-      if (nacMiembro && contribDateVal < nacMiembro) {
-        showToast("La fecha de la contribución no puede ser anterior al nacimiento del miembro.", "error");
-        return;
-      }
-      const defMiembro = (member.isDeceased === 'Sí' || member.fallecido === 'Sí') ? String(member.deceasedDate || member.fechaDefuncion || '').split('T')[0] : '';
-      if (defMiembro && contribDateVal > defMiembro) {
-        showToast("La fecha de la contribución no puede ser posterior a la defunción del miembro.", "error");
-        return;
-      }
+      const { error: contribError, amount: amt } = validateContribution({
+        memberFound: true,
+        date: contribDateVal,
+        amount: document.getElementById('contributionAmountInput').value,
+        type: document.getElementById('contributionTypeSelect').value,
+        notes: document.getElementById('contributionNotesInput').value,
+        memberBirth: member.birthDate || member.fechaNacimiento,
+        memberDeceasedDate: (member.isDeceased === 'Sí' || member.fallecido === 'Sí') ? (member.deceasedDate || member.fechaDefuncion) : ''
+      }, getTodayLocalIsoDate());
+      if (contribError) { showToast(contribError, "error"); return; }
 
       showSaving("Asentando aporte...");
       try {
@@ -60,15 +51,13 @@
         e.preventDefault();
         if (getCurrentRole() !== 'admin') { showToast("Se requiere rol Administrador.", "error"); return; }
         const cfDateVal = document.getElementById('cashDateInput').value;
-        if (!cfDateVal) { showToast("Indica la fecha del movimiento de caja.", "error"); return; }
-        if (parseDateSafe(cfDateVal) > parseDateSafe(getTodayLocalIsoDate())) {
-        showToast("La fecha del movimiento de caja no puede ser futura.", "error");
-        return;
-        }
-        const amt = parseMoneyAmount(document.getElementById('cashAmountInput').value);
-        if (amt === null) { showToast("El monto debe estar entre 0.01 y 9,999,999, con máximo 2 decimales.", "error"); return; }
-        if (!document.getElementById('cashCategorySelect').value) { showToast("Selecciona el concepto o categoría del movimiento.", "error"); return; }
-        if (document.getElementById('cashNotesInput').value.trim().length > 200) { showToast("La descripción no puede superar 200 caracteres.", "error"); return; }
+        const { error: cashError, amount: amt } = validateCashMovement({
+          date: cfDateVal,
+          amount: document.getElementById('cashAmountInput').value,
+          category: document.getElementById('cashCategorySelect').value,
+          notes: document.getElementById('cashNotesInput').value
+        }, getTodayLocalIsoDate());
+        if (cashError) { showToast(cashError, "error"); return; }
 
         // Un egreso mayor que el saldo disponible deja la caja en negativo: se pide confirmación
         if (document.getElementById('cashMovementTypeSelect').value === 'Salida') {

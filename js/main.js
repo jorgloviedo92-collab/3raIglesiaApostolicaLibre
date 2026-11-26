@@ -264,41 +264,10 @@
           newPinConsulta: document.getElementById('cfgPinConsulta').value.trim()
         };
 
-        if (cfgData.name.length < 3) {
-          showToast("El nombre de la iglesia es obligatorio (mínimo 3 caracteres).", "error");
+        const cfgError = validateChurchConfig(cfgData);
+        if (cfgError) {
+          showToast(cfgError, "error");
           return;
-        }
-        if (cfgData.pastor && !isValidPersonName(cfgData.pastor)) {
-          showToast("El nombre del Pastor solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).", "error");
-          return;
-        }
-        if (cfgData.secretary && !isValidPersonName(cfgData.secretary)) {
-          showToast("El nombre del Secretario solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).", "error");
-          return;
-        }
-
-        if (isChangingPin) {
-          if (!cfgData.pinActual || !cfgData.newPinAdmin || !cfgData.newPinConsulta) {
-            showToast("Ingresa el PIN actual y ambos nuevos PINs.", "error");
-            return;
-          }
-          const pinLenOk = (v) => v.length >= 8 && v.length <= 64;
-          if (!pinLenOk(cfgData.newPinAdmin) || !pinLenOk(cfgData.newPinConsulta)) {
-            showToast("Los nuevos PINs deben tener entre 8 y 64 caracteres.", "error");
-            return;
-          }
-          if (isWeakPin(cfgData.newPinAdmin) || isWeakPin(cfgData.newPinConsulta)) {
-            showToast("Elige PINs más seguros: evita números repetidos, secuencias (12345678) o valores comunes.", "error");
-            return;
-          }
-          if (cfgData.newPinAdmin === cfgData.newPinConsulta) {
-            showToast("El PIN de Administrador y el de Consulta deben ser diferentes.", "error");
-            return;
-          }
-          if (cfgData.newPinAdmin === cfgData.pinActual || cfgData.newPinConsulta === cfgData.pinActual) {
-            showToast("Los nuevos PINs deben ser distintos del PIN actual.", "error");
-            return;
-          }
         }
 
         showSaving("Guardando configuración...");

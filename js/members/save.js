@@ -2,47 +2,7 @@
     // GUARDADO Y LIMPIEZA PROFUNDA
     // ────────────────────────────────────────────────────────────────────
 
-    const MIN_PARENT_AGE_DIFF = 12;
-    const MIN_GUARDIAN_AGE = 18; // un tutor legal debe ser mayor de edad (el servidor valida lo mismo)
-    const MIN_ADULT_MEMBER_AGE = 15; // solo personas de 15 años o más se registran en Adultos (el servidor valida lo mismo)
-    const FULL_NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' .-]{3,100}$/;
-
-    function isValidPersonName(nombre) {
-      return FULL_NAME_REGEX.test(nombre) && (nombre.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g) || []).length >= 3;
-    }
-
-    function isValidPhoneNumber(tel) {
-      if (!tel) return true;
-      const digitos = tel.replace(/\D/g, '');
-      return /^[+]?[0-9 ()-]+$/.test(tel) && digitos.length >= 8 && digitos.length <= 15;
-    }
-
-    function isWeakPin(pin) {
-      const p = String(pin).toLowerCase();
-      if (/^(.)\1+$/.test(p)) return true;
-      const secuencia = '0123456789abcdefghijklmnopqrstuvwxyz';
-      if (secuencia.includes(p) || secuencia.split('').reverse().join('').includes(p)) return true;
-      return ['password', 'contraseña', 'contrasena', 'iglesia1', 'qwertyui', 'admin123', 'abc12345', '12341234'].includes(p);
-    }
-
-    function isCedulaMatchingBirthDate(cedula, birthDateStr) {
-      if (!cedula || !birthDateStr) return true;
-      const cleanDate = String(birthDateStr).split('T')[0];
-      const parts = cleanDate.split('-');
-      if (parts.length !== 3) return true;
-      const expected = parts[2] + parts[1] + parts[0].slice(-2); // DDMMAA
-      return cedula.substring(4, 10) === expected;
-    }
-
-    function diffYearsBetweenIso(olderDateStr, youngerDateStr) {
-      if (!olderDateStr || !youngerDateStr) return null;
-      const a = String(olderDateStr).split('T')[0].split('-').map(Number);
-      const b = String(youngerDateStr).split('T')[0].split('-').map(Number);
-      if (a.length !== 3 || b.length !== 3) return null;
-      let diff = b[0] - a[0];
-      if (b[1] < a[1] || (b[1] === a[1] && b[2] < a[2])) diff--;
-      return diff;
-    }
+    // Las reglas de validación (constantes, nombres, teléfono, cédula, fechas, disciplina...) viven en js/core/validators.js
 
     async function handleMemberFormSubmit(e) {
       e.preventDefault();
@@ -65,91 +25,37 @@
       const disciplineDateStr = document.getElementById('disciplineDate').value;
 
       const birthDate = parseDateSafe(birthDateStr);
-      const joinDate = parseDateSafe(joinDateStr);
-      const today = parseDateSafe(getTodayLocalIsoDate());
+      const todayIso = getTodayLocalIsoDate();
+      const categoryVal = document.getElementById('category').value;
 
-      if (!fullName) errors.push("El nombre completo es obligatorio.");
-      else if (!isValidPersonName(fullName)) errors.push("El nombre solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).");
-      if (!isValidPhoneNumber(document.getElementById('phone').value.trim())) {
-        errors.push("Teléfono inválido: use solo números (8 a 15 dígitos), por ejemplo 8888-8888.");
-      }
-
-      if (!birthDate) errors.push("La fecha de nacimiento es obligatoria.");
-      else if (birthDate > today) errors.push("La fecha de nacimiento no puede ser una fecha futura.");
-
-      if (!joinDate) errors.push("La fecha de ingreso a la iglesia es obligatoria.");
-      else if (birthDate && joinDate < birthDate) errors.push("La fecha de ingreso no puede ser anterior al nacimiento.");
-      else if (joinDate > today) errors.push("La fecha de ingreso no puede ser futura.");
+      errors.push(...validateMemberBasics({
+        fullName, phone: document.getElementById('phone').value.trim(), birth: birthDateStr, join: joinDateStr
+      }, todayIso));
 
       const memberAgeYears = birthDate ? calculateAgeYears(birthDateStr, isDeceased ? 'Sí' : 'No', deceasedDateStr) : 0;
       const promotingChildIdCheck = (document.getElementById('promotingFromChildId').value || '').trim();
 
-      if (isBaptized && !baptismDateStr) {
-        errors.push("Un miembro bautizado debe tener la fecha de bautismo.");
-      } else if (isBaptized && !parseDateSafe(baptismDateStr)) {
-        errors.push("La fecha de bautismo no es válida.");
-      } else if (isBaptized) {
-        const bapDate = parseDateSafe(baptismDateStr);
-        if (bapDate > today) errors.push("La fecha de bautismo no puede ser una fecha futura.");
-        if (birthDate && bapDate < birthDate) errors.push("La fecha de bautismo no puede ser anterior al nacimiento.");
-      }
+      errors.push(...validateBaptism({ isBaptized, baptism: baptismDateStr, birth: birthDateStr }, todayIso));
+      errors.push(...validateDeceased({
+        isDeceased, deceased: deceasedDateStr, birth: birthDateStr, join: joinDateStr, isBaptized, baptism: baptismDateStr
+      }, todayIso));
+      errors.push(...validateDiscipline({
+        inDiscipline, isBaptized, isDeceased, category: categoryVal, start: disciplineDateStr,
+        end: document.getElementById('disciplineEndDate').value,
+        months: document.getElementById('disciplineMonths').value,
+        indefinite: document.getElementById('disciplineIndefinite').checked,
+        birth: birthDateStr, baptism: baptismDateStr
+      }, todayIso));
 
-      if (isDeceased) {
-        if (!deceasedDateStr) errors.push("Debe indicar la fecha exacta de defunción.");
-        const decDate = parseDateSafe(deceasedDateStr);
-        if (decDate && decDate > today) errors.push("La fecha de defunción no puede ser futura.");
-        if (decDate && birthDate && decDate < birthDate) errors.push("La fecha de defunción no puede ser anterior al nacimiento.");
-        // Nada de la vida en la iglesia puede ocurrir después de la defunción
-        if (decDate && joinDate && joinDate > decDate) errors.push("La fecha de ingreso no puede ser posterior a la defunción.");
-        if (decDate && isBaptized && baptismDateStr) {
-          const bapDec = parseDateSafe(baptismDateStr);
-          if (bapDec && bapDec > decDate) errors.push("La fecha de bautismo no puede ser posterior a la defunción.");
-        }
-      }
-
-      const categoryVal = document.getElementById('category').value;
-      if (inDiscipline) {
-        if (!isBaptized) errors.push("Un miembro no bautizado en agua no puede estar sujeto a disciplina eclesiástica.");
-        if (isDeceased) errors.push("Una persona fallecida no puede figurar en disciplina pastoral.");
-        if (categoryVal === 'Inactivo') errors.push("Un miembro en categoría Inactivo no puede figurar en disciplina pastoral.");
-        if (!disciplineDateStr) errors.push("Ingresa la fecha de inicio de la sanción pastoral.");
-        const discStart = parseDateSafe(disciplineDateStr);
-        if (discStart && discStart > today) errors.push("La fecha de inicio de disciplina no puede ser futura.");
-        if (discStart && birthDate && discStart < birthDate) errors.push("La fecha de disciplina no puede ser anterior al nacimiento.");
-        // La disciplina solo aplica a bautizados: no puede iniciar antes del bautismo
-        const bapForDisc = (isBaptized && baptismDateStr) ? parseDateSafe(baptismDateStr) : null;
-        if (discStart && bapForDisc && discStart < bapForDisc) errors.push("La fecha de inicio de disciplina no puede ser anterior a la fecha de bautismo.");
-        const isIndefCheck = document.getElementById('disciplineIndefinite').checked;
-        const discMonthsVal = parseInt(document.getElementById('disciplineMonths').value, 10);
-        const discEndStr = document.getElementById('disciplineEndDate').value;
-        if (!isIndefCheck) {
-          if (isNaN(discMonthsVal) || discMonthsVal < 1 || discMonthsVal > 120) {
-            errors.push("Indica los meses de sanción pastoral (entre 1 y 120 meses) o marca 'Indefinido'.");
-          }
-          if (!discEndStr) {
-            errors.push("La fecha de fin estimado de disciplina es obligatoria cuando no es indefinida.");
-          } else {
-            const discEnd = parseDateSafe(discEndStr);
-            if (discStart && discEnd && discEnd < discStart) {
-              errors.push("La fecha de fin de disciplina no puede ser anterior a la fecha de inicio.");
-            }
-          }
-        }
-      }
-
-      const cedRegex = /^\d{3}-\d{6}-\d{4}[A-Za-z]$/;
       if (type === 'Adulto' && birthDate && memberAgeYears < MIN_ADULT_MEMBER_AGE) {
         errors.push(`Solo las personas de ${MIN_ADULT_MEMBER_AGE} años o más pueden registrarse como Adulto. Esta persona tiene ${memberAgeYears} año(s): regístrala en "Menor / Joven".`);
       }
       if (type === 'Adulto') {
-        const idNumber = (memberAgeYears >= 16) ? document.getElementById('idNumber').value.trim().toUpperCase() : '';
-        if (memberAgeYears >= 16) {
-          if (!cedRegex.test(idNumber)) {
-            errors.push("Formato de cédula nicaragüense incompleto (Ejemplo: 001-150890-0002A).");
-          } else {
-            if (birthDateStr && !isCedulaMatchingBirthDate(idNumber, birthDateStr)) {
-              errors.push("La fecha codificada en la cédula (DDMMAA) no coincide con la fecha de nacimiento.");
-            }
+        const idNumber = (memberAgeYears >= MIN_CEDULA_AGE) ? document.getElementById('idNumber').value.trim().toUpperCase() : '';
+        if (memberAgeYears >= MIN_CEDULA_AGE) {
+          const cedErrors = validateCedula(idNumber, birthDateStr);
+          errors.push(...cedErrors);
+          if (CEDULA_REGEX.test(idNumber)) {
             const dupAdult = adults.find(a => (a.idNumber || a.cedula || '').toUpperCase() === idNumber && String(a.id).trim() !== String(id).trim());
             if (dupAdult) errors.push(`La cédula ya está registrada en Adultos a nombre de: ${dupAdult.fullName || dupAdult.nombreCompleto}`);
             const dupMinor = children.find(c => (c.idNumber || c.cedula || '').toUpperCase() === idNumber && String(c.id).trim() !== promotingChildIdCheck);
@@ -192,11 +98,11 @@
         }
         const textoNombre = (inputId, etiqueta, aplica) => {
           const v = aplica ? document.getElementById(inputId).value.trim() : '';
-          if (v && !isValidPersonName(v)) errors.push(`El nombre de ${etiqueta} solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).`);
+          errors.push(...validateOptionalName(v, etiqueta));
         };
-        textoNombre('spouseText', 'el cónyuge', isMarriedCheck && !document.getElementById('spouseIsMember').checked);
-        textoNombre('fatherText', 'el padre', !document.getElementById('fatherIsMember').checked);
-        textoNombre('motherText', 'la madre', !document.getElementById('motherIsMember').checked);
+        textoNombre('spouseText', 'del cónyuge', isMarriedCheck && !document.getElementById('spouseIsMember').checked);
+        textoNombre('fatherText', 'del padre', !document.getElementById('fatherIsMember').checked);
+        textoNombre('motherText', 'de la madre', !document.getElementById('motherIsMember').checked);
 
         // Padre y Madre: mismas reglas que las listas (no cónyuge, no hermano/a, no descendiente,
         // al menos 12 años mayor y género correcto)
@@ -237,14 +143,11 @@
           }
         }
       } else {
-        const idNumberMinor = (memberAgeYears >= 16) ? document.getElementById('idNumber').value.trim().toUpperCase() : '';
-        if (memberAgeYears >= 16 && idNumberMinor) {
-          if (!cedRegex.test(idNumberMinor)) {
-            errors.push("Formato de cédula nicaragüense incompleto (Ejemplo: 001-150890-0002A).");
-          } else {
-            if (birthDateStr && !isCedulaMatchingBirthDate(idNumberMinor, birthDateStr)) {
-              errors.push("La fecha codificada en la cédula (DDMMAA) no coincide con la fecha de nacimiento.");
-            }
+        const idNumberMinor = (memberAgeYears >= MIN_CEDULA_AGE) ? document.getElementById('idNumber').value.trim().toUpperCase() : '';
+        if (memberAgeYears >= MIN_CEDULA_AGE && idNumberMinor) {
+          const cedErrors = validateCedula(idNumberMinor, birthDateStr);
+          errors.push(...cedErrors);
+          if (CEDULA_REGEX.test(idNumberMinor)) {
             const dupAdult = adults.find(a => (a.idNumber || a.cedula || '').toUpperCase() === idNumberMinor);
             if (dupAdult) errors.push(`La cédula ya está registrada en Adultos a nombre de: ${dupAdult.fullName || dupAdult.nombreCompleto}`);
             const dupMinor = children.find(c => (c.idNumber || c.cedula || '').toUpperCase() === idNumberMinor && String(c.id).trim() !== String(id).trim());
@@ -254,11 +157,7 @@
 
         const isPresCheck = document.getElementById('presentedToChurch').checked;
         const presDateStr = document.getElementById('presentedDate').value;
-        if (isPresCheck && presDateStr) {
-          const presDate = parseDateSafe(presDateStr);
-          if (presDate && presDate > today) errors.push("La fecha de presentación no puede ser futura.");
-          if (presDate && birthDate && presDate < birthDate) errors.push("La fecha de presentación no puede ser anterior al nacimiento.");
-        }
+        errors.push(...validatePresentation({ isPresented: isPresCheck, date: presDateStr, birth: birthDateStr }, todayIso));
 
         const t1IsMemCheck = document.getElementById('tutor1IsMember').checked;
         const t1Id = document.getElementById('tutor1Select').value;
@@ -267,10 +166,10 @@
         const t2IsMemCheck = document.getElementById('tutor2IsMember').checked;
         if (t1IsMemCheck && !t1Id) errors.push("Selecciona al Tutor 1 (Miembro Adulto).");
         if (!t1IsMemCheck && !t1Txt) errors.push("Ingresa el nombre del Tutor 1.");
-        if (!t1IsMemCheck && t1Txt && !isValidPersonName(t1Txt)) errors.push("El nombre del Tutor 1 solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).");
+        if (!t1IsMemCheck) errors.push(...validateOptionalName(t1Txt, 'del Tutor 1'));
         if (t2IsMemCheck && !t2Id) errors.push("Marcaste que el Tutor 2 es miembro: búscalo y elígelo en la lista, o desmarca la casilla.");
         const t2Txt = document.getElementById('tutor2Text').value.trim();
-        if (!t2IsMemCheck && t2Txt && !isValidPersonName(t2Txt)) errors.push("El nombre del Tutor 2 solo puede contener letras, espacios, puntos, apóstrofos o guiones (mínimo 3 letras).");
+        if (!t2IsMemCheck) errors.push(...validateOptionalName(t2Txt, 'del Tutor 2'));
         if (t1IsMemCheck && t2IsMemCheck && t1Id && t2Id && t1Id === t2Id) {
           errors.push("Tutor 1 y Tutor 2 no pueden ser el mismo miembro.");
         }

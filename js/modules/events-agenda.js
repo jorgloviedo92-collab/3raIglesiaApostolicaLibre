@@ -446,36 +446,13 @@
       const status = document.getElementById('evStatusInput').value;
       const notes = document.getElementById('evNotesInput').value.trim();
 
-      if (!title || !date) {
-        showToast('Completa el título y la fecha del evento.', 'error');
+      const eventError = validateEvent(
+        { title, date, startTime, endTime, location, responsible, notes, status },
+        getTodayLocalIsoDate(), NICARAGUA_HHMM_FORMATTER.format(new Date())
+      );
+      if (eventError) {
+        showToast(eventError, 'error');
         return;
-      }
-      if (title.length < 3 || title.length > 120) {
-        showToast('El título del evento debe tener entre 3 y 120 caracteres.', 'error');
-        return;
-      }
-      if (!parseDateSafe(date)) {
-        showToast('La fecha del evento no es válida.', 'error');
-        return;
-      }
-      if (location.length > 120 || responsible.length > 100 || notes.length > 400) {
-        showToast('Lugar (120), responsable (100) o notas (400) exceden el largo permitido.', 'error');
-        return;
-      }
-      if (endTime && !startTime) {
-        showToast('Indica la hora de inicio antes de la hora de fin.', 'error');
-        return;
-      }
-      if (startTime && endTime && endTime <= startTime) {
-        showToast('La hora de fin debe ser posterior a la hora de inicio.', 'error');
-        return;
-      }
-      if (status === 'Realizado') {
-        const blockReason = getEventDoneBlockReason(date, startTime);
-        if (blockReason) {
-          showToast(blockReason, 'error');
-          return;
-        }
       }
 
       const payloadData = {
@@ -565,13 +542,7 @@
 
     // Devuelve el motivo por el que un evento NO puede marcarse como Realizado, o '' si sí puede.
     function getEventDoneBlockReason(date, startTime) {
-      if (!date) return 'Indica la fecha del evento antes de marcarlo como realizado.';
-      const todayIso = getTodayLocalIsoDate();
-      if (date > todayIso) return 'Solo se puede marcar como realizado un evento cuya fecha ya llegó.';
-      if (date === todayIso && startTime && startTime > NICARAGUA_HHMM_FORMATTER.format(new Date())) {
-        return 'Este evento todavía no ha comenzado; podrás marcarlo como realizado a partir de su hora de inicio.';
-      }
-      return '';
+      return eventDoneBlockReason(date, startTime, getTodayLocalIsoDate(), NICARAGUA_HHMM_FORMATTER.format(new Date()));
     }
 
     // En el formulario, la opción "Realizado" solo está disponible si la fecha/hora ya llegó

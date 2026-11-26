@@ -6,6 +6,7 @@ Sistema de gestión eclesiástica (miembros, aportes, caja, eventos y reportes).
 
 ```
 index.html                  Marcado HTML y orden de carga
+tests/                      Pruebas automáticas de las validaciones
 css/
   base.css                  Tipografía y estilos generales
   login.css                 Pantalla de acceso
@@ -14,7 +15,7 @@ css/
   events-agenda.css         Agenda de eventos
   pro-layer.css             Capa de refinamiento visual
 js/
-  core/      state.js (estado global) · utils.js (fechas, montos, escape) · ui.js (diálogos, avisos) · api.js (login, fetchAPI, sincronización)
+  core/      validators.js (reglas de validación, funciones puras) · state.js (estado global) · utils.js (fechas, montos, escape) · ui.js (diálogos, avisos) · api.js (login, fetchAPI, sincronización)
   members/   form-logic.js · save.js (guardado y validación de fichas) · trash.js (papelera) · expediente.js
   finance/   finance.js (aportes y caja)
   views/     directory.js (directorio) · dashboard.js (resumen y gráficos)
@@ -24,7 +25,15 @@ js/
   main.js    Arranque: eventos de la página
 ```
 
+## Validaciones
+
+Todas las reglas están en `js/core/validators.js` como funciones puras (sin DOM, sin red y sin reloj: la fecha de hoy llega por parámetro). Los formularios solo leen los campos, llaman a `validate*` y muestran los mensajes. Para cambiar una regla se edita ese archivo y su prueba.
+
+```
+npm test        # Node 18+, sin dependencias
+```
+
 ## Importante
 
-- Son scripts clásicos (no módulos ES) que comparten el ámbito global: **el orden de los `<script>` en `index.html` importa**. `core/` va primero y `main.js` al final de ese bloque.
+- Son scripts clásicos (no módulos ES) que comparten el ámbito global: **el orden de los `<script>` en `index.html` importa**. `core/validators.js` va primero (los demás archivos usan sus funciones) y `main.js` al final de ese bloque.
 - Funciona igual abierto con `file://` y desde un servidor web.
