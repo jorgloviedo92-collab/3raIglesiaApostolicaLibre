@@ -128,7 +128,7 @@ test('validatePresentation y validateOptionalName', () => {
 });
 
 test('validateContribution', () => {
-  const c = { memberFound: true, date: '2026-06-01', amount: '150.50', type: 'Diezmo', notes: '', memberBirth: '1990-01-01', memberDeceasedDate: '' };
+  const c = { memberFound: true, date: '2026-06-01', amount: '150.50', type: 'Diezmo', notes: '', memberBirth: '1990-01-01', memberDeceased: false };
   assert.deepEqual(V.validateContribution(c, TODAY), { error: '', amount: 150.5 });
   const err = (o) => V.validateContribution({ ...c, ...o }, TODAY).error;
   assert.match(err({ memberFound: false }), /miembro válido/);
@@ -140,7 +140,7 @@ test('validateContribution', () => {
   assert.match(err({ type: '' }), /tipo/);
   assert.match(err({ notes: 'x'.repeat(201) }), /200/);
   assert.match(err({ date: '1980-01-01' }), /nacimiento/);
-  assert.match(err({ memberDeceasedDate: '2020-01-01' }), /defunción/);
+  assert.match(err({ memberDeceased: true }), /fallecido/);
 });
 
 test('validateCashMovement', () => {

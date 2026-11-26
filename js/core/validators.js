@@ -220,10 +220,12 @@
         : { error: '', amount };
     }
 
-    // f: { memberFound, date, amount, type, notes, memberBirth, memberDeceasedDate }
+    // f: { memberFound, memberDeceased, date, amount, type, notes, memberBirth }
     // Devuelve { error, amount }; error = primer problema encontrado ('' si todo es válido).
     function validateContribution(f, todayIso) {
       if (!f.memberFound) return { error: 'Selecciona un miembro válido.', amount: null };
+      // El servidor rechaza aportes de personas fallecidas
+      if (f.memberDeceased) return { error: 'El miembro contribuyente figura como fallecido.', amount: null };
       if (!f.date) return { error: 'Indica la fecha de la contribución.', amount: null };
       if (!parseDateSafe(f.date)) return { error: 'La fecha de la contribución no es válida.', amount: null };
       if (f.date > todayIso) return { error: 'La fecha de la contribución no puede ser futura.', amount: null };
@@ -233,8 +235,6 @@
       if (String(f.notes || '').trim().length > MAX_NOTES_LENGTH) return { error: 'Las notas no pueden superar ' + MAX_NOTES_LENGTH + ' caracteres.', amount: null };
       const nac = String(f.memberBirth || '').split('T')[0];
       if (nac && f.date < nac) return { error: 'La fecha de la contribución no puede ser anterior al nacimiento del miembro.', amount: null };
-      const def = String(f.memberDeceasedDate || '').split('T')[0];
-      if (def && f.date > def) return { error: 'La fecha de la contribución no puede ser posterior a la defunción del miembro.', amount: null };
       return m;
     }
 

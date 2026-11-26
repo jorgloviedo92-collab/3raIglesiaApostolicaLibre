@@ -11,12 +11,12 @@
       const contribDateVal = document.getElementById('contributionDateInput').value;
       const { error: contribError, amount: amt } = validateContribution({
         memberFound: true,
+        memberDeceased: member.isDeceased === 'Sí' || member.fallecido === 'Sí',
         date: contribDateVal,
         amount: document.getElementById('contributionAmountInput').value,
         type: document.getElementById('contributionTypeSelect').value,
         notes: document.getElementById('contributionNotesInput').value,
-        memberBirth: member.birthDate || member.fechaNacimiento,
-        memberDeceasedDate: (member.isDeceased === 'Sí' || member.fallecido === 'Sí') ? (member.deceasedDate || member.fechaDefuncion) : ''
+        memberBirth: member.birthDate || member.fechaNacimiento
       }, getTodayLocalIsoDate());
       if (contribError) { showToast(contribError, "error"); return; }
 
