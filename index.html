@@ -1214,58 +1214,118 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
   .auth-gate .auth-btn { color: #fbf3dc !important; }
 }
 
-/* ═══════════ Corrección de renderizado para Tablet y Móvil (Chrome Android GPU) ═══════════
-   Evita que el compositor recorte la tarjeta del login al abrir/cerrar el teclado virtual
-   (provocado por perspective 3D, isolation, overflow:clip y capas GPU en fixed). */
+/* ═══════════ Corrección definitiva de compositor GPU para Tablet y Móvil (Chrome Android) ═══════════
+   En tablets Android (Chrome/Skia), las capas animadas gigantes con blur/mask/conic-gradient
+   (.auth-bg::before/after, .auth-rays, .auth-contour-glow::before, canvas y body::before/after)
+   agotan o corrompen los tiles GPU y hacen que .auth-card se recorte a la mitad o desaparezca. */
+.auth-bg { z-index: 0; }
+.auth-wrap { z-index: 10; }
+html.gate-open body::before,
+html.gate-open body::after {
+  display: none !important;
+}
+
 @media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  body::before,
+  body::after {
+    animation: none !important;
+    will-change: auto !important;
+    transform: none !important;
+    width: 100vw !important;
+  }
+
   .auth-gate {
     height: 100%;
     height: 100dvh;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    transition: opacity .35s ease !important;
+    transition: opacity .25s ease !important;
   }
   .auth-gate.auth-leaving {
     transform: none !important;
     filter: none !important;
-    transition: opacity .35s ease !important;
+    transition: opacity .25s ease !important;
   }
-  .auth-wrap {
-    overflow: visible !important;
-    min-height: 100%;
+
+  /* Fondo de cielo y nubes estáticas (sin texturas animadas de 200% ni will-change) */
+  .auth-bg::before,
+  .auth-bg::after {
+    animation: none !important;
+    will-change: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    background-size: 100% 100% !important;
+  }
+  .auth-aurora,
+  .auth-motes,
+  .auth-rays,
+  .auth-orbit,
+  .auth-shine,
+  .auth-contour-glow::before,
+  .auth-btn:disabled::after {
+    display: none !important;
+  }
+
+  /* Escenario del logo: halo dorado limpio y estático, sin filtros drop-shadow ni animaciones infinitas */
+  .auth-halo {
+    animation: none !important;
+    transform: none !important;
+    opacity: .9 !important;
   }
   .auth-tilt {
     transform-style: flat !important;
     transform: none !important;
     transition: none !important;
   }
-  .auth-motes {
+  .auth-float {
+    animation: none !important;
     transform: none !important;
-    will-change: auto !important;
+  }
+  .auth-logo {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  .auth-contour-glow {
+    animation: none !important;
+    box-shadow: 0 0 18px 2px rgba(246, 220, 146, .48), 0 8px 24px rgba(6, 45, 95, .35) !important;
+  }
+
+  /* Contenedor y tarjeta del login en 2D plano (inmune a recortes de tiles GPU) */
+  .auth-wrap {
+    overflow: visible !important;
+    min-height: 100%;
+    z-index: 10;
   }
   .auth-cardwrap {
     perspective: none !important;
     isolation: auto !important;
-    z-index: 3;
+    z-index: 10;
     transform: none !important;
     will-change: auto !important;
+    animation: none !important;
   }
   .auth-cardwrap::before { z-index: 0 !important; transform: translate(4px, 4px) !important; }
   .auth-cardwrap::after  { z-index: 0 !important; transform: translate(8px, 8px) !important; }
   .bible-page-ribbon     { z-index: 1 !important; filter: none !important; animation: none !important; }
+
   .auth-gate .auth-card {
     z-index: 2;
     transform: none !important;
     transform-origin: center !important;
     animation: none !important;
     filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     -webkit-backface-visibility: visible !important;
     backface-visibility: visible !important;
     will-change: auto !important;
     contain: none !important;
   }
   .auth-gate .auth-card::before { display: none !important; }
+
   .auth-gate .auth-input,
   .auth-gate #authStatusBanner,
   .auth-gate .auth-rise {
@@ -1277,6 +1337,22 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
     backface-visibility: visible !important;
     will-change: auto !important;
   }
+
+  /* Centrar íconos sin transform: translateY(-50%) para no promover sub-capas sueltas */
+  .auth-gate .auth-ico,
+  .auth-gate .auth-eye {
+    top: 0 !important;
+    bottom: 0 !important;
+    margin: auto 0 !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .auth-gate .auth-ico {
+    height: 20px;
+  }
+
   .auth-gate.auth-leaving .auth-card,
   .auth-gate.auth-leaving .auth-cardwrap {
     animation: none !important;
@@ -1933,7 +2009,7 @@ html.gate-open, html.gate-open body { overflow: hidden; height: 100%; }
       requestAnimationFrame(frame);
     }
     function start() {
-      if (running || !ctx || reduce.matches) return;
+      if (running || !ctx || reduce.matches || !fine.matches || window.innerWidth < 1024) return;
       running = true; last = performance.now(); requestAnimationFrame(frame);
     }
     window.addEventListener('resize', resize);
