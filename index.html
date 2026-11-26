@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- App instalable (PWA): manifiesto, color de la barra e íconos para pantalla de inicio -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="EcclesiaSoft" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <title>EcclesiaSoft Pro V3.2 - Gestión Eclesiástica y Reportes</title>
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; img-src 'self' data: https://lh3.googleusercontent.com https://drive.google.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; connect-src 'self' https://script.google.com https://*.script.googleusercontent.com https://*.googleusercontent.com;" />
@@ -1461,6 +1468,7 @@
 
   <script src="js/modules/events-agenda.js"></script>
   <script src="js/ui/inline-handlers.js"></script>
+  <script src="js/pwa.js"></script>
 
 </body>
 </html>
