@@ -1,0 +1,8 @@
+{
+  "name": "ecclesiasoft-pro",
+  "private": true,
+  "description": "Sistema de gestión eclesiástica (aplicación web estática)",
+  "scripts": {
+    "test": "node --test"
+  }
+}
