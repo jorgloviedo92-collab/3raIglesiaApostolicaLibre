@@ -14,33 +14,43 @@ function loadBackend() {
   const cacheStore = new Map();
   const props = new Map();
   const cache = {
-    get: k => (cacheStore.has(k) ? cacheStore.get(k) : null),
-    put: (k, v) => { cacheStore.set(k, String(v)); },
-    remove: k => { cacheStore.delete(k); },
-    putAll: o => Object.entries(o).forEach(([k, v]) => cacheStore.set(k, v))
+    get: (k) => (cacheStore.has(k) ? cacheStore.get(k) : null),
+    put: (k, v) => {
+      cacheStore.set(k, String(v));
+    },
+    remove: (k) => {
+      cacheStore.delete(k);
+    },
+    putAll: (o) => Object.entries(o).forEach(([k, v]) => cacheStore.set(k, v))
   };
-  const toSigned = buf => Array.from(buf, b => (b > 127 ? b - 256 : b));
+  const toSigned = (buf) => Array.from(buf, (b) => (b > 127 ? b - 256 : b));
   const sandbox = {
     CacheService: { getScriptCache: () => cache },
-    PropertiesService: { getScriptProperties: () => ({
-      getProperty: k => (props.has(k) ? props.get(k) : null),
-      setProperty: (k, v) => { props.set(k, v); }
-    }) },
+    PropertiesService: {
+      getScriptProperties: () => ({
+        getProperty: (k) => (props.has(k) ? props.get(k) : null),
+        setProperty: (k, v) => {
+          props.set(k, v);
+        }
+      })
+    },
     Utilities: {
       getUuid: () => crypto.randomUUID(),
       sleep: () => {},
-      computeHmacSha256Signature: (value, key) => toSigned(crypto.createHmac('sha256', key).update(String(value)).digest()),
-      base64Encode: bytes => Buffer.from(bytes.map(b => (b + 256) % 256)).toString('base64'),
-      base64EncodeWebSafe: x => Buffer.from(typeof x === 'string' ? x : x.map(b => (b + 256) % 256)).toString('base64url'),
-      base64Decode: s => toSigned(Buffer.from(s, 'base64')),
-      newBlob: bytes => ({ getDataAsString: () => Buffer.from(bytes.map(b => (b + 256) % 256)).toString('utf8') })
+      computeHmacSha256Signature: (value, key) =>
+        toSigned(crypto.createHmac('sha256', key).update(String(value)).digest()),
+      base64Encode: (bytes) => Buffer.from(bytes.map((b) => (b + 256) % 256)).toString('base64'),
+      base64EncodeWebSafe: (x) =>
+        Buffer.from(typeof x === 'string' ? x : x.map((b) => (b + 256) % 256)).toString('base64url'),
+      base64Decode: (s) => toSigned(Buffer.from(s, 'base64')),
+      newBlob: (bytes) => ({ getDataAsString: () => Buffer.from(bytes.map((b) => (b + 256) % 256)).toString('utf8') })
     },
     Logger: { log: () => {} }
   };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(file, 'utf8'), sandbox);
   vm.runInContext('logAuditEvent_ = function () {};', sandbox); // la auditoría va a Firestore: aquí no se prueba
-  return { sandbox, cache, props, run: code => vm.runInContext(code, sandbox) };
+  return { sandbox, cache, props, run: (code) => vm.runInContext(code, sandbox) };
 }
 
 const GLOBAL_SLOT_KEY = () => 'FAIL_GLOBAL_SYSTEM_' + Math.floor(Date.now() / (10 * 60 * 1000));
@@ -69,7 +79,9 @@ test('Code.js: el bloqueo global no deja fuera a un dispositivo que ya inició s
   assert.equal(run("verifyLoginPin_('Adm1n-Segura-2026', 'dispositivoA').ok"), true);
 });
 
-test('Code.js: el límite de 5 intentos por dispositivo sigue vigente incluso para dispositivos conocidos', { skip: !present }, () => {
+test('Code.js: el límite de 5 intentos por dispositivo sigue vigente incluso para dispositivos conocidos', {
+  skip: !present
+}, () => {
   const { run } = loadBackend();
   run("initializeAuthPins('Adm1n-Segura-2026', 'Cons1lta-Segura-2026')");
   assert.equal(run("verifyLoginPin_('Adm1n-Segura-2026', 'dispositivoA').ok"), true);

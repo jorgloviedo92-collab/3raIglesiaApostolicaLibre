@@ -13,15 +13,18 @@ vm.createContext(sandbox);
 vm.runInContext(code, sandbox);
 
 const persona = (id, extra = {}) => ({ id, birthDate: '1960-01-01', gender: 'Masculino', ...extra });
-const mapa = (lista, override = null) => { sandbox.adults = lista; return sandbox.buildAdultsKinshipMap(override); };
+const mapa = (lista, override = null) => {
+  sandbox.adults = lista;
+  return sandbox.buildAdultsKinshipMap(override);
+};
 const motivoPadre = (cand, ctx) => sandbox.getInvalidParentReason(cand, { rol: 'padre', ...ctx });
 const motivoMadre = (cand, ctx) => sandbox.getInvalidParentReason(cand, { rol: 'madre', ...ctx });
 
 test('isAncestorOf: encuentra abuelos y no entra en ciclos', () => {
   const lista = [
-    persona('A'),                                                             // abuelo
-    persona('B', { fatherIsMember: true, fatherId: 'A' }),                    // padre
-    persona('C', { fatherIsMember: true, fatherId: 'B' })                     // nieto
+    persona('A'), // abuelo
+    persona('B', { fatherIsMember: true, fatherId: 'A' }), // padre
+    persona('C', { fatherIsMember: true, fatherId: 'B' }) // nieto
   ];
   const m = mapa(lista);
   assert.equal(sandbox.isAncestorOf('B', 'C', m), true);
@@ -49,10 +52,10 @@ test('areSiblings: comparten padre o madre (también medios hermanos)', () => {
     persona('H3', { fatherIsMember: true, fatherId: 'Q' }),
     persona('H4')
   ]);
-  assert.equal(sandbox.areSiblings('H1', 'H2', m), true);   // medio hermano por el padre
+  assert.equal(sandbox.areSiblings('H1', 'H2', m), true); // medio hermano por el padre
   assert.equal(sandbox.areSiblings('H1', 'H3', m), false);
   assert.equal(sandbox.areSiblings('H1', 'H4', m), false);
-  assert.equal(sandbox.areSiblings('H1', 'H1', m), false);  // consigo mismo no
+  assert.equal(sandbox.areSiblings('H1', 'H1', m), false); // consigo mismo no
   assert.equal(sandbox.areSiblings('H1', 'NOEXISTE', m), false);
 });
 
@@ -89,21 +92,33 @@ test('getInvalidParentReason: cónyuge, descendiente y hermano no pueden ser pad
   assert.match(motivoPadre(lista[1], ctx), /hermano/);
   assert.match(motivoMadre(lista[2], ctx), /cónyuge/);
   // la ficha de la candidata ya dice que está casada con este miembro
-  assert.match(motivoMadre(persona('OTRA', { gender: 'Femenino', idConyuge: 'YO' }), { ...ctx, spouseId: '' }), /cónyuge/);
+  assert.match(
+    motivoMadre(persona('OTRA', { gender: 'Femenino', idConyuge: 'YO' }), { ...ctx, spouseId: '' }),
+    /cónyuge/
+  );
 });
 
 test('getInvalidParentReason: no repetir al otro progenitor', () => {
   const m = mapa([]);
   const ctx = { selfId: 'YO', birthDate: '2000-01-01', map: m, motherId: 'X' };
   assert.match(motivoPadre(persona('X'), ctx), /ya es la madre/);
-  assert.match(motivoMadre(persona('Y', { gender: 'Femenino' }), { ...ctx, motherId: '', fatherId: 'Y' }), /ya es el padre/);
+  assert.match(
+    motivoMadre(persona('Y', { gender: 'Femenino' }), { ...ctx, motherId: '', fatherId: 'Y' }),
+    /ya es el padre/
+  );
 });
 
 test('getInvalidSpouseReason: reglas de cónyuge', () => {
   const lista = [
     persona('PAPA'),
     persona('MAMA', { gender: 'Femenino' }),
-    persona('YO', { fatherIsMember: true, fatherId: 'PAPA', motherIsMember: true, motherId: 'MAMA', gender: 'Masculino' }),
+    persona('YO', {
+      fatherIsMember: true,
+      fatherId: 'PAPA',
+      motherIsMember: true,
+      motherId: 'MAMA',
+      gender: 'Masculino'
+    }),
     persona('HIJA', { gender: 'Femenino', fatherIsMember: true, fatherId: 'YO' }),
     persona('HERMANA', { gender: 'Femenino', fatherIsMember: true, fatherId: 'PAPA' })
   ];

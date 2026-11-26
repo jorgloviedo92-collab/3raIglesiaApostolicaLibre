@@ -3,6 +3,11 @@
   "private": true,
   "description": "Sistema de gestión eclesiástica (aplicación web estática)",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "format": "biome format --write .",
+    "format:check": "biome format ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.9"
   }
 }

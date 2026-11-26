@@ -1,229 +1,277 @@
-    // ────────────────────────────────────────────────────────────────────
-    // REPORTES HISTÓRICOS Y PROTECCIÓN DE DATOS (LEY 787)
-    // ────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────
+// REPORTES HISTÓRICOS Y PROTECCIÓN DE DATOS (LEY 787)
+// ────────────────────────────────────────────────────────────────────
 
-    function buildHistoricalReport(year, qVal, author) {
-      const isAdmin = getCurrentRole() === 'admin';
-      
-      // Función para obtener las fechas exactas de cualquier trimestre o año
-      const getQDef = (y, q) => {
-        if (q === 'ALL') return { name: 'Año Consolidado', short: 'Anual', start: new Date(y, 0, 1), end: new Date(y, 11, 31, 23, 59, 59) };
-        if (q == 1) return { name: 'Primer Trimestre', short: 'T1', start: new Date(y, 0, 1), end: new Date(y, 2, 31, 23, 59, 59) };
-        if (q == 2) return { name: 'Segundo Trimestre', short: 'T2', start: new Date(y, 3, 1), end: new Date(y, 5, 30, 23, 59, 59) };
-        if (q == 3) return { name: 'Tercer Trimestre', short: 'T3', start: new Date(y, 6, 1), end: new Date(y, 8, 30, 23, 59, 59) };
-        if (q == 4) return { name: 'Cuarto Trimestre', short: 'T4', start: new Date(y, 9, 1), end: new Date(y, 11, 31, 23, 59, 59) };
+function buildHistoricalReport(year, qVal, author) {
+  const isAdmin = getCurrentRole() === 'admin';
+
+  // Función para obtener las fechas exactas de cualquier trimestre o año
+  const getQDef = (y, q) => {
+    if (q === 'ALL')
+      return {
+        name: 'Año Consolidado',
+        short: 'Anual',
+        start: new Date(y, 0, 1),
+        end: new Date(y, 11, 31, 23, 59, 59)
       };
+    if (q == 1)
+      return { name: 'Primer Trimestre', short: 'T1', start: new Date(y, 0, 1), end: new Date(y, 2, 31, 23, 59, 59) };
+    if (q == 2)
+      return { name: 'Segundo Trimestre', short: 'T2', start: new Date(y, 3, 1), end: new Date(y, 5, 30, 23, 59, 59) };
+    if (q == 3)
+      return { name: 'Tercer Trimestre', short: 'T3', start: new Date(y, 6, 1), end: new Date(y, 8, 30, 23, 59, 59) };
+    if (q == 4)
+      return { name: 'Cuarto Trimestre', short: 'T4', start: new Date(y, 9, 1), end: new Date(y, 11, 31, 23, 59, 59) };
+  };
 
-      const q = getQDef(year, qVal);
-      
-      // Determinar el PERÍODO ANTERIOR
-      let prevQ;
-      let prevYear = year;
-      
-      if (qVal === 'ALL') {
-        prevYear = year - 1;
-        prevQ = getQDef(prevYear, 'ALL');
-      } else {
-        let prevQVal = parseInt(qVal) - 1;
-        if (prevQVal === 0) { 
-          prevQVal = 4;
-          prevYear = year - 1;
-        }
-        prevQ = getQDef(prevYear, prevQVal);
-      }
+  const q = getQDef(year, qVal);
 
-      // Función interna para calcular métricas
-      const calcMetrics = (start, end) => {
-        const newJoins = adults.filter(a => {
-          const j = parseDateSafe(a.joinDate || a.fechaIngreso);
-          return j && j >= start && j <= end;
-        }).length + children.filter(c => {
-          const j = parseDateSafe(c.joinDate || c.fechaIngreso);
-          return j && j >= start && j <= end;
-        }).length;
+  // Determinar el PERÍODO ANTERIOR
+  let prevQ;
+  let prevYear = year;
 
-        const baptisms = adults.filter(a => {
-          if (a.isBaptized !== 'Sí' && a.bautizado !== 'Sí') return false;
-          const b = parseDateSafe(a.baptismDate || a.fechaBautismo);
-          return b && b >= start && b <= end;
-        }).length + children.filter(c => {
-          if (c.isBaptized !== 'Sí' && c.bautizado !== 'Sí') return false;
-          const b = parseDateSafe(c.baptismDate || c.fechaBautismo);
-          return b && b >= start && b <= end;
-        }).length;
+  if (qVal === 'ALL') {
+    prevYear = year - 1;
+    prevQ = getQDef(prevYear, 'ALL');
+  } else {
+    let prevQVal = parseInt(qVal) - 1;
+    if (prevQVal === 0) {
+      prevQVal = 4;
+      prevYear = year - 1;
+    }
+    prevQ = getQDef(prevYear, prevQVal);
+  }
 
-        const presented = children.filter(c => {
-          if (!c.presentedToChurch && !c.presentado) return false;
-          const p = parseDateSafe(c.presentedDate || c.fechaPresentacion || c.joinDate || c.fechaIngreso);
-          return p && p >= start && p <= end;
-        }).length;
-
-        const deaths = adults.filter(a => {
-          if (a.isDeceased !== 'Sí' && a.fallecido !== 'Sí') return false;
-          const d = parseDateSafe(a.deceasedDate || a.fechaDefuncion);
-          return d && d >= start && d <= end;
-        }).length + children.filter(c => {
-          if (c.isDeceased !== 'Sí' && c.fallecido !== 'Sí') return false;
-          const d = parseDateSafe(c.deceasedDate || c.fechaDefuncion);
-          return d && d >= start && d <= end;
-        }).length;
-
-        const disciplined = adults.filter(a => {
-          if (a.inDiscipline !== 'Sí' && a.enDisciplina !== 'Sí') return false;
-          const discDate = parseDateSafe(a.disciplineDate || a.inicioDisciplina);
-          return discDate && discDate >= start && discDate <= end;
-        }).length + children.filter(c => {
-          if (c.inDiscipline !== 'Sí' && c.enDisciplina !== 'Sí') return false;
-          const discDate = parseDateSafe(c.disciplineDate || c.inicioDisciplina);
-          return discDate && discDate >= start && discDate <= end;
-        }).length;
-        
-        const isAliveAtEnd = (m) => {
-          const j = parseDateSafe(m.joinDate || m.fechaIngreso);
-          const d = (m.isDeceased === 'Sí' || m.fallecido === 'Sí') ? parseDateSafe(m.deceasedDate || m.fechaDefuncion) : null;
-          return j && j <= end && (!d || d > end);
-        };
-
-        // Para que el conteo de edades coincida exactamente con el Directorio en el trimestre en curso,
-        // si el fin del trimestre (end) es posterior a la fecha actual de Nicaragua (hoy), se evalúa la edad cumplida HOY.
-        const todayLocal = parseDateSafe(getTodayLocalIsoDate()) || new Date();
-        const effectiveAgeCutoff = (end > todayLocal) ? todayLocal : end;
-
-        const ageAtDate = (birthDateStr, cutoffDate) => {
-          const b = parseDateSafe(birthDateStr);
-          if (!b || !cutoffDate) return 0;
-          let yrs = cutoffDate.getFullYear() - b.getFullYear();
-          const mDiff = cutoffDate.getMonth() - b.getMonth();
-          if (mDiff < 0 || (mDiff === 0 && cutoffDate.getDate() < b.getDate())) yrs--;
-          return Math.max(0, yrs);
-        };
-
-        // Conteo al corte del trimestre y nuevos ingresos del trimestre para Niños (0-10), Adolescentes (11-15) y Jóvenes (16+)
-        const aliveMinorsAtEnd = children.filter(c => isAliveAtEnd(c));
-        const ninosCutoff = aliveMinorsAtEnd.filter(c => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) <= 10).length;
-        const adolescentesCutoff = aliveMinorsAtEnd.filter(c => {
-          const y = ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff);
-          return y >= 11 && y <= 15;
-        }).length;
-        const jovenesCutoff = aliveMinorsAtEnd.filter(c => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) >= 16).length;
-        const totalMinorsCutoff = ninosCutoff + adolescentesCutoff + jovenesCutoff;
-
-        const minorsJoinedInPeriod = children.filter(c => {
-          const j = parseDateSafe(c.joinDate || c.fechaIngreso);
-          return j && j >= start && j <= end;
-        });
-        const newNinos = minorsJoinedInPeriod.filter(c => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) <= 10).length;
-        const newAdolescentes = minorsJoinedInPeriod.filter(c => {
-          const y = ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff);
-          return y >= 11 && y <= 15;
-        }).length;
-        const newJovenes = minorsJoinedInPeriod.filter(c => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) >= 16).length;
-
-        const countCategoryAtEnd = (catName) => {
-          const aCount = adults.filter(a => isAliveAtEnd(a) && (a.category || a.categoria) === catName).length;
-          const cCount = children.filter(c => isAliveAtEnd(c) && (c.category || c.categoria) === catName).length;
-          return aCount + cCount;
-        };
-
-        const catActivos = countCategoryAtEnd('Activo');
-        const catDirectivos = countCategoryAtEnd('Directivo');
-        const inactives = countCategoryAtEnd('Inactivo');
-        const catNuevosCreyentes = countCategoryAtEnd('Nuevo Creyente');
-
-        const countConversionInPeriod = (convName) => {
-          const aCount = adults.filter(a => {
-            const j = parseDateSafe(a.joinDate || a.fechaIngreso);
-            return j && j >= start && j <= end && (a.conversionType || a.tipoConversion) === convName;
-          }).length;
-          const cCount = children.filter(c => {
-            const j = parseDateSafe(c.joinDate || c.fechaIngreso);
-            return j && j >= start && j <= end && (c.conversionType || c.tipoConversion) === convName;
-          }).length;
-          return aCount + cCount;
-        };
-
-        const aceptaciones = countConversionInPeriod('Aceptación');
-        const reconcilios = countConversionInPeriod('Reconcilio');
-
-        let contribSum = 0;
-        let cashNet = 0;
-        let expenses = 0;
-        if (isAdmin) {
-          contribSum = contributions.filter(c => {
-            const dt = parseDateSafe(c.date || c.fecha);
-            return dt && dt >= start && dt <= end;
-          }).reduce((acc, curr) => acc + (parseFloat(curr.amount || curr.monto) || 0), 0);
-
-          let cashIn = 0;
-          let cashOut = 0;
-          cashFlow.forEach(cf => {
-            const dt = parseDateSafe(cf.date || cf.fecha);
-            if (dt && dt >= start && dt <= end) {
-              const amt = parseFloat(cf.amount || cf.monto) || 0;
-              const movType = cf.movementType || cf.tipoMovimiento;
-              if (movType === 'Entrada') cashIn += amt;
-              else cashOut += amt;
-            }
-          });
-          expenses = cashOut;
-          cashNet = (contribSum + cashIn) - cashOut;
-        }
-        return {
-          newJoins, aceptaciones, reconcilios, baptisms, presented, deaths, disciplined,
-          ninosCutoff, adolescentesCutoff, jovenesCutoff, totalMinorsCutoff,
-          newNinos, newAdolescentes, newJovenes,
-          catActivos, catDirectivos, inactives, catNuevosCreyentes,
-          contribSum, expenses, cashNet
-        };
-      };
-
-      const currStats = calcMetrics(q.start, q.end);
-      const prevStats = calcMetrics(prevQ.start, prevQ.end);
-
-      const adultsAtCutoff = adults.filter(a => {
+  // Función interna para calcular métricas
+  const calcMetrics = (start, end) => {
+    const newJoins =
+      adults.filter((a) => {
         const j = parseDateSafe(a.joinDate || a.fechaIngreso);
-        const d = (a.isDeceased === 'Sí' || a.fallecido === 'Sí') ? parseDateSafe(a.deceasedDate || a.fechaDefuncion) : null;
-        return j && j <= q.end && (!d || d > q.end);
+        return j && j >= start && j <= end;
+      }).length +
+      children.filter((c) => {
+        const j = parseDateSafe(c.joinDate || c.fechaIngreso);
+        return j && j >= start && j <= end;
+      }).length;
+
+    const baptisms =
+      adults.filter((a) => {
+        if (a.isBaptized !== 'Sí' && a.bautizado !== 'Sí') return false;
+        const b = parseDateSafe(a.baptismDate || a.fechaBautismo);
+        return b && b >= start && b <= end;
+      }).length +
+      children.filter((c) => {
+        if (c.isBaptized !== 'Sí' && c.bautizado !== 'Sí') return false;
+        const b = parseDateSafe(c.baptismDate || c.fechaBautismo);
+        return b && b >= start && b <= end;
+      }).length;
+
+    const presented = children.filter((c) => {
+      if (!c.presentedToChurch && !c.presentado) return false;
+      const p = parseDateSafe(c.presentedDate || c.fechaPresentacion || c.joinDate || c.fechaIngreso);
+      return p && p >= start && p <= end;
+    }).length;
+
+    const deaths =
+      adults.filter((a) => {
+        if (a.isDeceased !== 'Sí' && a.fallecido !== 'Sí') return false;
+        const d = parseDateSafe(a.deceasedDate || a.fechaDefuncion);
+        return d && d >= start && d <= end;
+      }).length +
+      children.filter((c) => {
+        if (c.isDeceased !== 'Sí' && c.fallecido !== 'Sí') return false;
+        const d = parseDateSafe(c.deceasedDate || c.fechaDefuncion);
+        return d && d >= start && d <= end;
+      }).length;
+
+    const disciplined =
+      adults.filter((a) => {
+        if (a.inDiscipline !== 'Sí' && a.enDisciplina !== 'Sí') return false;
+        const discDate = parseDateSafe(a.disciplineDate || a.inicioDisciplina);
+        return discDate && discDate >= start && discDate <= end;
+      }).length +
+      children.filter((c) => {
+        if (c.inDiscipline !== 'Sí' && c.enDisciplina !== 'Sí') return false;
+        const discDate = parseDateSafe(c.disciplineDate || c.inicioDisciplina);
+        return discDate && discDate >= start && discDate <= end;
+      }).length;
+
+    const isAliveAtEnd = (m) => {
+      const j = parseDateSafe(m.joinDate || m.fechaIngreso);
+      const d =
+        m.isDeceased === 'Sí' || m.fallecido === 'Sí' ? parseDateSafe(m.deceasedDate || m.fechaDefuncion) : null;
+      return j && j <= end && (!d || d > end);
+    };
+
+    // Para que el conteo de edades coincida exactamente con el Directorio en el trimestre en curso,
+    // si el fin del trimestre (end) es posterior a la fecha actual de Nicaragua (hoy), se evalúa la edad cumplida HOY.
+    const todayLocal = parseDateSafe(getTodayLocalIsoDate()) || new Date();
+    const effectiveAgeCutoff = end > todayLocal ? todayLocal : end;
+
+    const ageAtDate = (birthDateStr, cutoffDate) => {
+      const b = parseDateSafe(birthDateStr);
+      if (!b || !cutoffDate) return 0;
+      let yrs = cutoffDate.getFullYear() - b.getFullYear();
+      const mDiff = cutoffDate.getMonth() - b.getMonth();
+      if (mDiff < 0 || (mDiff === 0 && cutoffDate.getDate() < b.getDate())) yrs--;
+      return Math.max(0, yrs);
+    };
+
+    // Conteo al corte del trimestre y nuevos ingresos del trimestre para Niños (0-10), Adolescentes (11-15) y Jóvenes (16+)
+    const aliveMinorsAtEnd = children.filter((c) => isAliveAtEnd(c));
+    const ninosCutoff = aliveMinorsAtEnd.filter(
+      (c) => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) <= 10
+    ).length;
+    const adolescentesCutoff = aliveMinorsAtEnd.filter((c) => {
+      const y = ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff);
+      return y >= 11 && y <= 15;
+    }).length;
+    const jovenesCutoff = aliveMinorsAtEnd.filter(
+      (c) => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) >= 16
+    ).length;
+    const totalMinorsCutoff = ninosCutoff + adolescentesCutoff + jovenesCutoff;
+
+    const minorsJoinedInPeriod = children.filter((c) => {
+      const j = parseDateSafe(c.joinDate || c.fechaIngreso);
+      return j && j >= start && j <= end;
+    });
+    const newNinos = minorsJoinedInPeriod.filter(
+      (c) => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) <= 10
+    ).length;
+    const newAdolescentes = minorsJoinedInPeriod.filter((c) => {
+      const y = ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff);
+      return y >= 11 && y <= 15;
+    }).length;
+    const newJovenes = minorsJoinedInPeriod.filter(
+      (c) => ageAtDate(c.birthDate || c.fechaNacimiento, effectiveAgeCutoff) >= 16
+    ).length;
+
+    const countCategoryAtEnd = (catName) => {
+      const aCount = adults.filter((a) => isAliveAtEnd(a) && (a.category || a.categoria) === catName).length;
+      const cCount = children.filter((c) => isAliveAtEnd(c) && (c.category || c.categoria) === catName).length;
+      return aCount + cCount;
+    };
+
+    const catActivos = countCategoryAtEnd('Activo');
+    const catDirectivos = countCategoryAtEnd('Directivo');
+    const inactives = countCategoryAtEnd('Inactivo');
+    const catNuevosCreyentes = countCategoryAtEnd('Nuevo Creyente');
+
+    const countConversionInPeriod = (convName) => {
+      const aCount = adults.filter((a) => {
+        const j = parseDateSafe(a.joinDate || a.fechaIngreso);
+        return j && j >= start && j <= end && (a.conversionType || a.tipoConversion) === convName;
+      }).length;
+      const cCount = children.filter((c) => {
+        const j = parseDateSafe(c.joinDate || c.fechaIngreso);
+        return j && j >= start && j <= end && (c.conversionType || c.tipoConversion) === convName;
+      }).length;
+      return aCount + cCount;
+    };
+
+    const aceptaciones = countConversionInPeriod('Aceptación');
+    const reconcilios = countConversionInPeriod('Reconcilio');
+
+    let contribSum = 0;
+    let cashNet = 0;
+    let expenses = 0;
+    if (isAdmin) {
+      contribSum = contributions
+        .filter((c) => {
+          const dt = parseDateSafe(c.date || c.fecha);
+          return dt && dt >= start && dt <= end;
+        })
+        .reduce((acc, curr) => acc + (parseFloat(curr.amount || curr.monto) || 0), 0);
+
+      let cashIn = 0;
+      let cashOut = 0;
+      cashFlow.forEach((cf) => {
+        const dt = parseDateSafe(cf.date || cf.fecha);
+        if (dt && dt >= start && dt <= end) {
+          const amt = parseFloat(cf.amount || cf.monto) || 0;
+          const movType = cf.movementType || cf.tipoMovimiento;
+          if (movType === 'Entrada') cashIn += amt;
+          else cashOut += amt;
+        }
       });
+      expenses = cashOut;
+      cashNet = contribSum + cashIn - cashOut;
+    }
+    return {
+      newJoins,
+      aceptaciones,
+      reconcilios,
+      baptisms,
+      presented,
+      deaths,
+      disciplined,
+      ninosCutoff,
+      adolescentesCutoff,
+      jovenesCutoff,
+      totalMinorsCutoff,
+      newNinos,
+      newAdolescentes,
+      newJovenes,
+      catActivos,
+      catDirectivos,
+      inactives,
+      catNuevosCreyentes,
+      contribSum,
+      expenses,
+      cashNet
+    };
+  };
 
-      const getDisciplinedAtCutoff = (list, typeLabel) => {
-        return list.filter(m => {
-          if (m.inDiscipline !== 'Sí' && m.enDisciplina !== 'Sí') return false;
-          const discStart = parseDateSafe(m.disciplineDate || m.inicioDisciplina);
-          if (!discStart || discStart > q.end) return false;
-          
-          if (!(m.disciplineIndefinite || m.disciplinaIndefinida)) {
-            const discEnd = parseDateSafe(m.disciplineEndDate || m.finDisciplina);
-            if (discEnd && discEnd < q.start) return false;
-          }
-          
-          const j = parseDateSafe(m.joinDate || m.fechaIngreso);
-          const d = (m.isDeceased === 'Sí' || m.fallecido === 'Sí') ? parseDateSafe(m.deceasedDate || m.fechaDefuncion) : null;
-          return j && j <= q.end && (!d || d > q.end);
-        }).map(m => ({ ...m, _typeLabel: typeLabel }));
-      };
+  const currStats = calcMetrics(q.start, q.end);
+  const prevStats = calcMetrics(prevQ.start, prevQ.end);
 
-      const disciplinedMembers = [
-        ...getDisciplinedAtCutoff(adults, 'Adulto'),
-        ...getDisciplinedAtCutoff(children, 'Menor')
-      ];
+  const adultsAtCutoff = adults.filter((a) => {
+    const j = parseDateSafe(a.joinDate || a.fechaIngreso);
+    const d = a.isDeceased === 'Sí' || a.fallecido === 'Sí' ? parseDateSafe(a.deceasedDate || a.fechaDefuncion) : null;
+    return j && j <= q.end && (!d || d > q.end);
+  });
 
-      const getDiff = (curr, prev, isCurrency, inverseColors = false) => {
-        const diff = curr - prev;
-        if (diff === 0) return '<span style="color:#64748b; font-weight:normal;">= Igual</span>';
-        const isPositive = diff > 0;
-        const color = isPositive ? (inverseColors ? '#e11d48' : '#059669') : (inverseColors ? '#059669' : '#e11d48');
-        const icon = isPositive ? '▲' : '▼';
-        const valText = isCurrency ? formatCurrency(Math.abs(diff)) : Math.abs(diff);
-        return `<span style="color:${color}; font-weight: 600;">${icon} ${isPositive ? '+' : '-'}${valText}</span>`;
-      };
+  const getDisciplinedAtCutoff = (list, typeLabel) => {
+    return list
+      .filter((m) => {
+        if (m.inDiscipline !== 'Sí' && m.enDisciplina !== 'Sí') return false;
+        const discStart = parseDateSafe(m.disciplineDate || m.inicioDisciplina);
+        if (!discStart || discStart > q.end) return false;
 
-      const currentHeader = `${q.short} ${year}`;
-      const prevHeader = `${prevQ.short} ${prevYear}`;
+        if (!(m.disciplineIndefinite || m.disciplinaIndefinida)) {
+          const discEnd = parseDateSafe(m.disciplineEndDate || m.finDisciplina);
+          if (discEnd && discEnd < q.start) return false;
+        }
 
-      let disciplineTableHtml = '';
-      if (disciplinedMembers.length > 0) {
-        disciplineTableHtml = `
+        const j = parseDateSafe(m.joinDate || m.fechaIngreso);
+        const d =
+          m.isDeceased === 'Sí' || m.fallecido === 'Sí' ? parseDateSafe(m.deceasedDate || m.fechaDefuncion) : null;
+        return j && j <= q.end && (!d || d > q.end);
+      })
+      .map((m) => ({ ...m, _typeLabel: typeLabel }));
+  };
+
+  const disciplinedMembers = [
+    ...getDisciplinedAtCutoff(adults, 'Adulto'),
+    ...getDisciplinedAtCutoff(children, 'Menor')
+  ];
+
+  const getDiff = (curr, prev, isCurrency, inverseColors = false) => {
+    const diff = curr - prev;
+    if (diff === 0) return '<span style="color:#64748b; font-weight:normal;">= Igual</span>';
+    const isPositive = diff > 0;
+    const color = isPositive ? (inverseColors ? '#e11d48' : '#059669') : inverseColors ? '#059669' : '#e11d48';
+    const icon = isPositive ? '▲' : '▼';
+    const valText = isCurrency ? formatCurrency(Math.abs(diff)) : Math.abs(diff);
+    return `<span style="color:${color}; font-weight: 600;">${icon} ${isPositive ? '+' : '-'}${valText}</span>`;
+  };
+
+  const currentHeader = `${q.short} ${year}`;
+  const prevHeader = `${prevQ.short} ${prevYear}`;
+
+  let disciplineTableHtml = '';
+  if (disciplinedMembers.length > 0) {
+    disciplineTableHtml = `
           <div style="margin-top: 25px; page-break-inside: avoid;">
             <h3 style="font-size: 9pt; font-weight: 600; margin-bottom: 6px; color: #9f1239; border-bottom: 1px solid #fda4af; padding-bottom: 3px;">
               Auditoría: Miembros en Disciplina Pastoral al Corte (${disciplinedMembers.length})
@@ -239,11 +287,12 @@
                 </tr>
               </thead>
               <tbody>
-                ${disciplinedMembers.map(m => {
-                  const isIndef = m.disciplineIndefinite || m.disciplinaIndefinida;
-                  const endStr = m.disciplineEndDate || m.finDisciplina;
-                  const statusText = isIndef ? 'Indefinido' : escapeHtml(formatDisplayDate(endStr));
-                  return `
+                ${disciplinedMembers
+                  .map((m) => {
+                    const isIndef = m.disciplineIndefinite || m.disciplinaIndefinida;
+                    const endStr = m.disciplineEndDate || m.finDisciplina;
+                    const statusText = isIndef ? 'Indefinido' : escapeHtml(formatDisplayDate(endStr));
+                    return `
                   <tr style="background-color: #fffafb;">
                     <td style="padding: 5px; border: 1px solid #fecdd3; font-weight: 600; color: #881337;">${escapeHtml(m.fullName || m.nombreCompleto)}</td>
                     <td style="padding: 5px; border: 1px solid #fecdd3; color: #9f1239;">${m._typeLabel}</td>
@@ -252,14 +301,15 @@
                     <td style="padding: 5px; border: 1px solid #fecdd3; color: #9f1239; font-style: italic;">${escapeHtml(m.disciplineReason || m.motivoDisciplina || 'Sin especificar')}</td>
                   </tr>
                   `;
-                }).join('')}
+                  })
+                  .join('')}
               </tbody>
             </table>
           </div>
         `;
-      }
+  }
 
-      return `
+  return `
         <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 12px; color: #0f172a;">
           <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -391,7 +441,9 @@
                 <td style="padding: 5px; border: 1px solid #cbd5e1; text-align: center; color: #334155; font-weight: 600;">${prevStats.deaths}</td>
                 <td style="padding: 5px; border: 1px solid #cbd5e1; text-align: center;">${getDiff(currStats.deaths, prevStats.deaths, false, true)}</td>
               </tr>
-              ${isAdmin ? `
+              ${
+                isAdmin
+                  ? `
               <tr style="background-color: #fffbeb;">
                 <td style="padding: 5px; border: 1px solid #e2e8f0; font-weight: 600; color: #b45309;">Ingresos por Aportes (C$)</td>
                 <td style="padding: 5px; border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #b45309;">${formatCurrency(currStats.contribSum)}</td>
@@ -409,7 +461,9 @@
                 <td style="padding: 5px; border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #047857;">${formatCurrency(currStats.cashNet)}</td>
                 <td style="padding: 5px; border: 1px solid #e2e8f0; text-align: center; color: #64748b;">${formatCurrency(prevStats.cashNet)}</td>
                 <td style="padding: 5px; border: 1px solid #e2e8f0; text-align: center;">${getDiff(currStats.cashNet, prevStats.cashNet, true)}</td>
-              </tr>` : ''}
+              </tr>`
+                  : ''
+              }
             </tbody>
           </table>
         </div>
@@ -480,7 +534,9 @@
               </tr>
             </thead>
             <tbody>
-              ${adultsAtCutoff.map(a => `
+              ${adultsAtCutoff
+                .map(
+                  (a) => `
                 <tr>
                   <td style="padding: 5px; border: 1px solid #cbd5e1; font-weight: 600; color: #0f172a;">${escapeHtml(a.fullName || a.nombreCompleto)}</td>
                   ${isAdmin ? `<td style="padding: 5px; border: 1px solid #cbd5e1; color: #1e293b; font-family: monospace;">${escapeHtml(a.idNumber || a.cedula || 'S/N')}</td>` : ''}
@@ -489,7 +545,9 @@
                   <td style="padding: 5px; border: 1px solid #cbd5e1; color: #1e293b;">${escapeHtml(a.conversionType || a.tipoConversion || '-')}</td>
                   <td style="padding: 5px; border: 1px solid #cbd5e1; color: #1e293b;">${escapeHtml(formatDisplayDate(a.joinDate || a.fechaIngreso))}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
@@ -509,69 +567,73 @@
           </div>
         </div>
       `;
-    }
+}
 
-    // Años del reporte: desde el dato más antiguo registrado (ingresos, bautismos,
-    // aportes o caja) hasta el año actual. Conserva el año elegido si sigue disponible.
-    function populateReportYears() {
-      const sel = document.getElementById('reportYearSelect');
-      if (!sel) return;
-      const previous = sel.value;
-      const thisYear = parseInt(getTodayLocalIsoDate().slice(0, 4), 10);
-      let minYear = Math.min(thisYear, 2023);
-      const consider = (d) => {
-        const y = parseInt(String(d || '').slice(0, 4), 10);
-        if (y >= 1950 && y < minYear) minYear = y;
-      };
-      [...adults, ...children].forEach(m => {
-        consider(m.joinDate || m.fechaIngreso);
-        consider(m.baptismDate || m.fechaBautismo);
-      });
-      contributions.forEach(c => consider(c.date || c.fecha));
-      cashFlow.forEach(c => consider(c.date || c.fecha));
-      const wanted = [];
-      for (let y = thisYear; y >= minYear; y--) wanted.push(String(y));
-      if ([...sel.options].map(o => o.value).join() !== wanted.join()) {
-        sel.innerHTML = wanted.map(y => `<option value="${y}">${y}</option>`).join('');
-      }
-      sel.value = wanted.includes(previous) ? previous : String(thisYear);
-    }
+// Años del reporte: desde el dato más antiguo registrado (ingresos, bautismos,
+// aportes o caja) hasta el año actual. Conserva el año elegido si sigue disponible.
+function populateReportYears() {
+  const sel = document.getElementById('reportYearSelect');
+  if (!sel) return;
+  const previous = sel.value;
+  const thisYear = parseInt(getTodayLocalIsoDate().slice(0, 4), 10);
+  let minYear = Math.min(thisYear, 2023);
+  const consider = (d) => {
+    const y = parseInt(String(d || '').slice(0, 4), 10);
+    if (y >= 1950 && y < minYear) minYear = y;
+  };
+  [...adults, ...children].forEach((m) => {
+    consider(m.joinDate || m.fechaIngreso);
+    consider(m.baptismDate || m.fechaBautismo);
+  });
+  contributions.forEach((c) => consider(c.date || c.fecha));
+  cashFlow.forEach((c) => consider(c.date || c.fecha));
+  const wanted = [];
+  for (let y = thisYear; y >= minYear; y--) wanted.push(String(y));
+  if ([...sel.options].map((o) => o.value).join() !== wanted.join()) {
+    sel.innerHTML = wanted.map((y) => `<option value="${y}">${y}</option>`).join('');
+  }
+  sel.value = wanted.includes(previous) ? previous : String(thisYear);
+}
 
-    function getLogoSrc() {
-      const img = document.querySelector('.auth-logo') || document.getElementById('headerLogo');
-      return img ? img.src : '';
-    }
+function getLogoSrc() {
+  const img = document.querySelector('.auth-logo') || document.getElementById('headerLogo');
+  return img ? img.src : '';
+}
 
-    // Generar el informe cuesta ~150 ms con bases grandes: en los campos de texto se espera
-    // a que el usuario deje de escribir (300 ms) en lugar de regenerarlo en cada tecla.
-    let pausaReporte = null;
-    function debouncedRenderOnScreenReport() {
-      clearTimeout(pausaReporte);
-      pausaReporte = setTimeout(renderOnScreenReport, 300);
-    }
+// Generar el informe cuesta ~150 ms con bases grandes: en los campos de texto se espera
+// a que el usuario deje de escribir (300 ms) en lugar de regenerarlo en cada tecla.
+let pausaReporte = null;
+function debouncedRenderOnScreenReport() {
+  clearTimeout(pausaReporte);
+  pausaReporte = setTimeout(renderOnScreenReport, 300);
+}
 
-    function renderOnScreenReport() {
-      const year = parseInt(document.getElementById('reportYearSelect').value, 10);
-      const qVal = document.getElementById('reportQuarterSelect').value;
-      const author = document.getElementById('reportAuthorInput').value.trim() || 'Administración';
-      document.getElementById('onScreenReportContainer').innerHTML = buildHistoricalReport(year, qVal, author);
+function renderOnScreenReport() {
+  const year = parseInt(document.getElementById('reportYearSelect').value, 10);
+  const qVal = document.getElementById('reportQuarterSelect').value;
+  const author = document.getElementById('reportAuthorInput').value.trim() || 'Administración';
+  document.getElementById('onScreenReportContainer').innerHTML = buildHistoricalReport(year, qVal, author);
 
-      // Marca de agua como fondo fijo: detrás del texto y siempre centrada en la pantalla
-      const sheet = document.getElementById('reportSheet');
-      const logo = getLogoSrc();
-      if (sheet && logo && !sheet.dataset.wm) {
-        sheet.style.backgroundImage = `linear-gradient(rgba(255,255,255,.93), rgba(255,255,255,.93)), url("${logo}")`;
-        sheet.style.backgroundSize = 'auto, min(380px, 55vw)';
-        sheet.dataset.wm = '1';
-      }
-    }
+  // Marca de agua como fondo fijo: detrás del texto y siempre centrada en la pantalla
+  const sheet = document.getElementById('reportSheet');
+  const logo = getLogoSrc();
+  if (sheet && logo && !sheet.dataset.wm) {
+    sheet.style.backgroundImage = `linear-gradient(rgba(255,255,255,.93), rgba(255,255,255,.93)), url("${logo}")`;
+    sheet.style.backgroundSize = 'auto, min(380px, 55vw)';
+    sheet.dataset.wm = '1';
+  }
+}
 
-    function printReport() {
-      const year = parseInt(document.getElementById('reportYearSelect').value, 10);
-      const qVal = document.getElementById('reportQuarterSelect').value;
-      const author = document.getElementById('reportAuthorInput').value.trim() || 'Administración';
-      const printArea = document.getElementById('printOfficialReportArea');
-      printArea.innerHTML = (window.AuthUI ? window.AuthUI.getPrintWatermarkHtml() : '') + `<div class="print-content">${buildHistoricalReport(year, qVal, author)}</div>`;
-      setTimeout(() => { window.print(); printArea.innerHTML = ''; }, 250);
-    }
-
+function printReport() {
+  const year = parseInt(document.getElementById('reportYearSelect').value, 10);
+  const qVal = document.getElementById('reportQuarterSelect').value;
+  const author = document.getElementById('reportAuthorInput').value.trim() || 'Administración';
+  const printArea = document.getElementById('printOfficialReportArea');
+  printArea.innerHTML =
+    (window.AuthUI ? window.AuthUI.getPrintWatermarkHtml() : '') +
+    `<div class="print-content">${buildHistoricalReport(year, qVal, author)}</div>`;
+  setTimeout(() => {
+    window.print();
+    printArea.innerHTML = '';
+  }, 250);
+}

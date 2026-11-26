@@ -1,230 +1,246 @@
-  /* ═══════════ Glassy Sidebar V10 · Integración EcclesiaSoft Pro ═══════════ */
-  @media (min-width: 1024px) {
-    /* Ocultar el botón hamburguesa duplicado en la barra superior (queda solo el del menú) */
-    #btnSidebarToggle {
-      display: none !important;
-    }
-
-    /* Barra superior flotante en armonía con el menú cristal (sin línea vertical brusca) */
-    #topBar {
-      top: 14px !important;
-      margin: 14px 2rem 0 2rem;
-      border-radius: 20px !important;
-      border: 1px solid rgba(255, 255, 255, 0.75) !important;
-      background: rgba(255, 255, 255, 0.76) !important;
-      backdrop-filter: blur(18px) saturate(150%) !important;
-      -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
-      box-shadow:
-        0 14px 32px -20px rgba(11, 37, 64, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-    }
-
-    /* Contenedor flotante tipo cristal con borde suave y luminoso */
-    #mainHeader {
-      position: sticky;
-      top: 14px;
-      height: calc(100vh - 28px) !important;
-      margin: 14px 0 14px 14px;
-      width: 17.25rem !important;
-      border-radius: 28px !important;
-      background: linear-gradient(165deg, rgba(16, 86, 158, 0.74) 0%, rgba(10, 54, 108, 0.82) 55%, rgba(7, 36, 78, 0.90) 100%) !important;
-      background-clip: padding-box;
-      backdrop-filter: blur(22px) saturate(165%);
-      -webkit-backdrop-filter: blur(22px) saturate(165%);
-      border: 1px solid rgba(255, 255, 255, 0.36) !important;
-      box-shadow:
-        0 24px 48px -18px rgba(6, 34, 74, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35),
-        inset 0 0 24px rgba(255, 255, 255, 0.06) !important;
-      overflow: hidden;
-      transition:
-        width 0.48s cubic-bezier(0.34, 1.25, 0.64, 1),
-        border-radius 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.35s ease !important;
-    }
-
-    /* Estado colapsado: píldora vertical estilizada */
-    body.sidebar-collapsed #mainHeader {
-      width: 4.85rem !important;
-      border-radius: 40px !important;
-    }
-
-    /* Botón circular de expandir/contraer dentro del menú */
-    .glass-toggle-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px !important;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      background: rgba(255, 255, 255, 0.14);
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
-    }
-    .glass-toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.26);
-      transform: scale(1.06);
-    }
-    .glass-toggle-btn i {
-      font-size: 12px;
-      transition: transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1);
-    }
-    body.sidebar-collapsed .glass-toggle-btn i {
-      transform: rotate(180deg);
-    }
-    body.sidebar-collapsed #mainHeader .brand-row {
-      flex-direction: column;
-      gap: 10px;
-      padding-top: 14px;
-      padding-bottom: 12px;
-    }
-
-    /* Navegación y píldora activa líquida */
-    #navSection {
-      padding-right: 12px !important;
-      padding-left: 12px !important;
-      transition: padding 0.35s ease;
-    }
-    body.sidebar-collapsed #navSection {
-      padding-right: 10px !important;
-      padding-left: 10px !important;
-    }
-
-    #navSection nav {
-      position: relative;
-      gap: 6px !important;
-      overflow: visible !important;
-    }
-
-    /* Indicador blanco deslizante redondeado */
-    .glass-active-pill {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: 44px;
-      z-index: 0;
-      pointer-events: none;
-      background: #ffffff;
-      border-radius: 14px;
-      box-shadow: 0 10px 26px -10px rgba(6, 30, 68, 0.45);
-      opacity: 0;
-      will-change: top, height, left, width, border-radius;
-      transition:
-        top 0.44s cubic-bezier(0.34, 1.32, 0.64, 1),
-        height 0.34s cubic-bezier(0.34, 1.28, 0.64, 1),
-        left 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-        width 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-        border-radius 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.22s ease;
-    }
-    .glass-active-pill.is-ready {
-      opacity: 1;
-    }
-
-    /* Píldora en modo colapsado: círculo blanco centrado */
-    body.sidebar-collapsed .glass-active-pill {
-      left: 50%;
-      right: auto;
-      width: 44px;
-      transform: translateX(-50%);
-      border-radius: 999px;
-      box-shadow: 0 8px 20px -6px rgba(6, 30, 68, 0.55), 0 0 0 4px rgba(255, 255, 255, 0.14);
-    }
-
-    /* Botones de navegación sobre la píldora */
-    #mainHeader nav button {
-      position: relative;
-      z-index: 2;
-      height: 44px;
-      border-radius: 14px !important;
-      border: 1px solid transparent !important;
-      color: rgba(232, 244, 255, 0.9) !important;
-      transition: color 0.25s ease, background-color 0.22s ease, transform 0.22s ease !important;
-    }
-    #mainHeader nav button:not(.tab-active):hover {
-      background: rgba(255, 255, 255, 0.13) !important;
-      color: #ffffff !important;
-      transform: translateX(3px);
-    }
-    body.sidebar-collapsed #mainHeader nav button:not(.tab-active):hover {
-      transform: scale(1.06);
-      border-radius: 999px !important;
-    }
-
-    /* Pestaña activa: fondo transparente (el blanco lo dibuja .glass-active-pill) y texto oscuro */
-    #mainHeader nav button.tab-active {
-      background: transparent !important;
-      box-shadow: none !important;
-      border-color: transparent !important;
-      color: #0a3f78 !important;
-      font-weight: 700 !important;
-    }
-    #mainHeader nav button.tab-active i {
-      color: #0f5fa8 !important;
-      transform: scale(1.08);
-      transition: transform 0.28s cubic-bezier(0.34, 1.5, 0.64, 1), color 0.2s ease;
-    }
-    #mainHeader nav button.tab-active #navTotalCount {
-      background: #e6f2ff !important;
-      color: #0f5fa8 !important;
-      border-color: #bfdbfe !important;
-    }
-
-    /* Animación suave de etiquetas al expandir/contraer */
-    #mainHeader .nav-label,
-    #mainHeader .brand-text,
-    #mainHeader .ctl-label {
-      transition: opacity 0.22s ease, transform 0.28s ease;
-    }
-    body.sidebar-collapsed #mainHeader #navTotalCount {
-      top: 2px;
-      right: 4px;
-    }
-
-    /* Área superior desplazable si la altura de pantalla es reducida (evita ocultar el pie al contraer) */
-    #mainHeader > div:first-child {
-      min-height: 0;
-      overflow-y: auto;
-      scrollbar-width: none;
-    }
-    #mainHeader > div:first-child::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Pie del sidebar integrado al estilo cristal */
-    #sidebarControls {
-      position: relative;
-      z-index: 2;
-      flex-shrink: 0;
-      background: rgba(5, 26, 58, 0.34) !important;
-      border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
-    }
-    #sidebarControls .ctl-grid {
-      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    }
-    body.sidebar-collapsed #sidebarControls .ctl-grid {
-      grid-template-columns: 1fr;
-    }
-    body.sidebar-collapsed #btnHeaderSync {
-      flex: none !important;
-      width: 100%;
-      height: 2.25rem !important;
-      min-height: 2.25rem;
-      padding: 0 !important;
-    }
+/* ═══════════ Glassy Sidebar V10 · Integración EcclesiaSoft Pro ═══════════ */
+@media (min-width: 1024px) {
+  /* Ocultar el botón hamburguesa duplicado en la barra superior (queda solo el del menú) */
+  #btnSidebarToggle {
+    display: none !important;
   }
 
-  /* Accesibilidad: respeta preferencia de movimiento reducido */
-  @media (prefers-reduced-motion: reduce) {
-    #mainHeader,
-    .glass-active-pill,
-    .glass-toggle-btn,
-    .glass-toggle-btn i,
-    #mainHeader nav button {
-      transition: none !important;
-    }
+  /* Barra superior flotante en armonía con el menú cristal (sin línea vertical brusca) */
+  #topBar {
+    top: 14px !important;
+    margin: 14px 2rem 0 2rem;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.75) !important;
+    background: rgba(255, 255, 255, 0.76) !important;
+    backdrop-filter: blur(18px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+    box-shadow:
+      0 14px 32px -20px rgba(11, 37, 64, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
   }
+
+  /* Contenedor flotante tipo cristal con borde suave y luminoso */
+  #mainHeader {
+    position: sticky;
+    top: 14px;
+    height: calc(100vh - 28px) !important;
+    margin: 14px 0 14px 14px;
+    width: 17.25rem !important;
+    border-radius: 28px !important;
+    background: linear-gradient(
+      165deg,
+      rgba(16, 86, 158, 0.74) 0%,
+      rgba(10, 54, 108, 0.82) 55%,
+      rgba(7, 36, 78, 0.9) 100%
+    ) !important;
+    background-clip: padding-box;
+    backdrop-filter: blur(22px) saturate(165%);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    border: 1px solid rgba(255, 255, 255, 0.36) !important;
+    box-shadow:
+      0 24px 48px -18px rgba(6, 34, 74, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 0 24px rgba(255, 255, 255, 0.06) !important;
+    overflow: hidden;
+    transition:
+      width 0.48s cubic-bezier(0.34, 1.25, 0.64, 1),
+      border-radius 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s ease !important;
+  }
+
+  /* Estado colapsado: píldora vertical estilizada */
+  body.sidebar-collapsed #mainHeader {
+    width: 4.85rem !important;
+    border-radius: 40px !important;
+  }
+
+  /* Botón circular de expandir/contraer dentro del menú */
+  .glass-toggle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .glass-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.26);
+    transform: scale(1.06);
+  }
+  .glass-toggle-btn i {
+    font-size: 12px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+  body.sidebar-collapsed .glass-toggle-btn i {
+    transform: rotate(180deg);
+  }
+  body.sidebar-collapsed #mainHeader .brand-row {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+    padding-bottom: 12px;
+  }
+
+  /* Navegación y píldora activa líquida */
+  #navSection {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+    transition: padding 0.35s ease;
+  }
+  body.sidebar-collapsed #navSection {
+    padding-right: 10px !important;
+    padding-left: 10px !important;
+  }
+
+  #navSection nav {
+    position: relative;
+    gap: 6px !important;
+    overflow: visible !important;
+  }
+
+  /* Indicador blanco deslizante redondeado */
+  .glass-active-pill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 44px;
+    z-index: 0;
+    pointer-events: none;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 26px -10px rgba(6, 30, 68, 0.45);
+    opacity: 0;
+    will-change: top, height, left, width, border-radius;
+    transition:
+      top 0.44s cubic-bezier(0.34, 1.32, 0.64, 1),
+      height 0.34s cubic-bezier(0.34, 1.28, 0.64, 1),
+      left 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+      border-radius 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.22s ease;
+  }
+  .glass-active-pill.is-ready {
+    opacity: 1;
+  }
+
+  /* Píldora en modo colapsado: círculo blanco centrado */
+  body.sidebar-collapsed .glass-active-pill {
+    left: 50%;
+    right: auto;
+    width: 44px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    box-shadow:
+      0 8px 20px -6px rgba(6, 30, 68, 0.55),
+      0 0 0 4px rgba(255, 255, 255, 0.14);
+  }
+
+  /* Botones de navegación sobre la píldora */
+  #mainHeader nav button {
+    position: relative;
+    z-index: 2;
+    height: 44px;
+    border-radius: 14px !important;
+    border: 1px solid transparent !important;
+    color: rgba(232, 244, 255, 0.9) !important;
+    transition:
+      color 0.25s ease,
+      background-color 0.22s ease,
+      transform 0.22s ease !important;
+  }
+  #mainHeader nav button:not(.tab-active):hover {
+    background: rgba(255, 255, 255, 0.13) !important;
+    color: #ffffff !important;
+    transform: translateX(3px);
+  }
+  body.sidebar-collapsed #mainHeader nav button:not(.tab-active):hover {
+    transform: scale(1.06);
+    border-radius: 999px !important;
+  }
+
+  /* Pestaña activa: fondo transparente (el blanco lo dibuja .glass-active-pill) y texto oscuro */
+  #mainHeader nav button.tab-active {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+    color: #0a3f78 !important;
+    font-weight: 700 !important;
+  }
+  #mainHeader nav button.tab-active i {
+    color: #0f5fa8 !important;
+    transform: scale(1.08);
+    transition:
+      transform 0.28s cubic-bezier(0.34, 1.5, 0.64, 1),
+      color 0.2s ease;
+  }
+  #mainHeader nav button.tab-active #navTotalCount {
+    background: #e6f2ff !important;
+    color: #0f5fa8 !important;
+    border-color: #bfdbfe !important;
+  }
+
+  /* Animación suave de etiquetas al expandir/contraer */
+  #mainHeader .nav-label,
+  #mainHeader .brand-text,
+  #mainHeader .ctl-label {
+    transition:
+      opacity 0.22s ease,
+      transform 0.28s ease;
+  }
+  body.sidebar-collapsed #mainHeader #navTotalCount {
+    top: 2px;
+    right: 4px;
+  }
+
+  /* Área superior desplazable si la altura de pantalla es reducida (evita ocultar el pie al contraer) */
+  #mainHeader > div:first-child {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  #mainHeader > div:first-child::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Pie del sidebar integrado al estilo cristal */
+  #sidebarControls {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    background: rgba(5, 26, 58, 0.34) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+  }
+  #sidebarControls .ctl-grid {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+  body.sidebar-collapsed #sidebarControls .ctl-grid {
+    grid-template-columns: 1fr;
+  }
+  body.sidebar-collapsed #btnHeaderSync {
+    flex: none !important;
+    width: 100%;
+    height: 2.25rem !important;
+    min-height: 2.25rem;
+    padding: 0 !important;
+  }
+}
+
+/* Accesibilidad: respeta preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  #mainHeader,
+  .glass-active-pill,
+  .glass-toggle-btn,
+  .glass-toggle-btn i,
+  #mainHeader nav button {
+    transition: none !important;
+  }
+}

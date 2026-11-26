@@ -11,22 +11,46 @@
 (function () {
   var ACTIONS = {
     click: {
-      'cert-open': function () { toggleCertificatesModal(true); },
-      'cert-close': function () { toggleCertificatesModal(false); },
-      'cert-logo-clear': function () { clearCertLogo(); },
-      'cert-print': function () { printCurrentCertificate(); },
-      'logout': function () { logoutSystem(true); }
+      'cert-open': function () {
+        toggleCertificatesModal(true);
+      },
+      'cert-close': function () {
+        toggleCertificatesModal(false);
+      },
+      'cert-logo-clear': function () {
+        clearCertLogo();
+      },
+      'cert-print': function () {
+        printCurrentCertificate();
+      },
+      logout: function () {
+        logoutSystem(true);
+      }
     },
     change: {
-      'cert-type-change': function () { updateCertificateSelectors(); },
-      'cert-member-change': function () { fillCertificateFromMember(); },
-      'cert-logo-upload': function (e) { handleCertLogoUpload(e); },
-      'cert-preview': function () { renderCertificatePreview(); },
-      'rpt-render': function () { renderOnScreenReport(); }
+      'cert-type-change': function () {
+        updateCertificateSelectors();
+      },
+      'cert-member-change': function () {
+        fillCertificateFromMember();
+      },
+      'cert-logo-upload': function (e) {
+        handleCertLogoUpload(e);
+      },
+      'cert-preview': function () {
+        renderCertificatePreview();
+      },
+      'rpt-render': function () {
+        renderOnScreenReport();
+      }
     },
     input: {
-      'cert-preview': function () { renderCertificatePreview(); },
-      'rpt-render-debounced': function () { debouncedRenderOnScreenReport(); }
+      'cert-preview': function () {
+        renderCertificatePreview();
+      },
+      'rpt-render-debounced': function () {
+        debouncedRenderOnScreenReport();
+      }
     }
   };
 

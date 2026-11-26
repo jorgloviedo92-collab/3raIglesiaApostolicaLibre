@@ -33,6 +33,18 @@ Todas las reglas están en `js/core/validators.js` como funciones puras (sin DOM
 npm test        # Node 18+, sin dependencias
 ```
 
+## Formato del código
+
+Se usa [Biome](https://biomejs.dev) (el equivalente web de `ruff format`; Ruff solo formatea Python). Configuración en `biome.json`: 2 espacios, comillas simples, punto y coma, 120 columnas.
+
+```
+npm install          # una sola vez
+npm run format       # da formato a js/, css/ y tests/
+npm run format:check # solo revisa, no modifica
+```
+
+No se formatean `index.html`, `css/tailwind.css` (generado) ni `Code.js`.
+
 ## Seguridad
 
 - La política de seguridad (CSP) de `index.html` **no permite scripts incrustados** (`'unsafe-inline'` solo se mantiene para estilos). Por eso no se usan atributos `onclick="..."` en el HTML: se escribe `data-on-click="nombre"` y se registra la acción en `js/ui/inline-handlers.js`.
