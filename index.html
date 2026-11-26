@@ -1853,7 +1853,11 @@ html.gate-open body::after {
     }
     .dash-card { border-radius: 12px !important; }
     .dash-card:hover { box-shadow: var(--corp-shadow-hover) !important; }
-    .dash-balance { border-radius: 12px !important; box-shadow: 0 8px 24px -16px rgba(8, 20, 40, .6) !important; }
+    .dash-balance {
+      background: linear-gradient(160deg, var(--corp-navy-800) 0%, var(--corp-navy-700) 100%) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 8px 24px -16px rgba(8, 20, 40, .6) !important;
+    }
     .dash-chip { border-radius: 8px !important; }
     section[id^="view-"] .shadow-sm, section[id^="view-"] .shadow, section[id^="view-"] .shadow-md, section[id^="view-"] .shadow-lg {
       box-shadow: var(--corp-shadow) !important;
