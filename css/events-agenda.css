@@ -1,0 +1,171 @@
+  /* ═══════════ Módulo Agenda de Eventos ═══════════ */
+  #view-eventos { color: #0f172a; }
+  #view-eventos input:not([type="checkbox"]),
+  #view-eventos select,
+  #view-eventos textarea {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    font-weight: 500;
+  }
+  #view-eventos input::placeholder,
+  #view-eventos textarea::placeholder { color: #64748b !important; opacity: 1; }
+  #view-eventos input:focus,
+  #view-eventos select:focus,
+  #view-eventos textarea:focus {
+    outline: none;
+    border-color: #1b82d1 !important;
+    box-shadow: 0 0 0 3px rgba(27, 130, 209, .16);
+  }
+
+  /* Badge del menú lateral en modo colapsado y activo */
+  #mainHeader nav button.tab-active #navEventsCount {
+    background: #e6f2ff !important;
+    color: #0f5fa8 !important;
+    border-color: #bfdbfe !important;
+  }
+  @media (min-width: 1024px) {
+    body.sidebar-collapsed #navEventsCount {
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      padding: 0 5px;
+      font-size: 9px;
+      line-height: 15px;
+    }
+  }
+
+  /* Calendario mensual interactivo */
+  .ev-cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+  }
+  .ev-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .ev-cal-day {
+    position: relative;
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, transform .12s ease;
+    font-variant-numeric: tabular-nums;
+  }
+  .ev-cal-day:hover {
+    background: #eef6ff;
+    border-color: #bfdbfe;
+  }
+  .ev-cal-day.ev-cal-muted {
+    background: transparent;
+    color: #cbd5e1;
+    cursor: default;
+  }
+  .ev-cal-day.ev-cal-muted:hover {
+    background: transparent;
+    border-color: transparent;
+  }
+  .ev-cal-day.ev-cal-today {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #0f5fa8;
+    font-weight: 700;
+  }
+  .ev-cal-day.ev-cal-selected {
+    background: #0f5fa8 !important;
+    border-color: #0a3f78 !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 14px -8px rgba(15, 95, 168, .75);
+  }
+  .ev-cal-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 6px;
+  }
+  .ev-cal-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .ev-cal-day.ev-cal-selected .ev-cal-dot {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .75);
+  }
+
+  /* Tarjetas cronológicas de eventos */
+  .ev-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  }
+  .ev-card:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 10px 24px -18px rgba(15, 95, 168, .45);
+  }
+  .ev-date-box {
+    width: 58px;
+    min-width: 58px;
+    border-radius: 12px;
+    background: linear-gradient(160deg, #0f5fa8 0%, #1b82d1 100%);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    align-self: flex-start;
+  }
+  .ev-date-box.ev-past {
+    background: linear-gradient(160deg, #64748b 0%, #94a3b8 100%);
+  }
+  .ev-date-box.ev-today {
+    background: linear-gradient(160deg, #059669 0%, #10b981 100%);
+  }
+  .ev-date-box.ev-cancelled {
+    background: linear-gradient(160deg, #9f1239 0%, #e11d48 100%);
+  }
+  .ev-date-month {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    opacity: .9;
+    line-height: 1;
+  }
+  .ev-date-day {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 2px 0;
+  }
+  .ev-date-year {
+    font-size: 10px;
+    opacity: .85;
+    line-height: 1;
+  }
