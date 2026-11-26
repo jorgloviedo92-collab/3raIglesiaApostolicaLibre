@@ -1412,3 +1412,18 @@ th[data-sort][aria-sort="descending"]::after {
   padding-top: 4px;
   font-weight: 600;
 }
+
+/* ── Tabletas (768–1150 px): Contribuciones y Caja ──
+   En ese ancho el formulario quedaba en una columna de ~200 px y los desplegables cortaban su
+   texto. Se apila: el formulario arriba a todo el ancho (campos en dos columnas) y la tabla debajo. */
+@media (min-width: 768px) and (max-width: 1150px) {
+  .fin-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .fin-layout > * {
+    grid-column: auto !important;
+  }
+  .fin-layout .fin-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

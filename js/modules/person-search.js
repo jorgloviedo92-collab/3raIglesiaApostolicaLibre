@@ -113,10 +113,14 @@
     }
     function sincronizar() {
       var vacio = sel.options[0] && sel.options[0].value === '' ? sel.options[0].text : '';
+      // Texto completo para lectores de pantalla y al pasar el mouse; en el campo, uno corto que
+      // cabe aun en columnas angostas (tableta)
       placeholder = vacio
         ? vacio.replace(/^Selecciona?r?e?\s*/i, 'Buscar ').replace(/\.\.\.$/, '') + ' por nombre o cédula…'
         : 'Buscar por nombre o cédula…';
-      input.placeholder = placeholder;
+      input.placeholder = 'Nombre o cédula…';
+      input.title = placeholder;
+      input.setAttribute('aria-label', placeholder);
       if (document.activeElement !== input) input.value = textoSeleccionado();
       box.classList.toggle('person-picker-has-value', !!valueDesc.get.call(sel));
       box.hidden = sel.classList.contains('hidden');
