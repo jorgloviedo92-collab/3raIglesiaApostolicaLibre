@@ -1309,7 +1309,8 @@ th[data-sort][aria-sort="descending"]::after {
   }
 }
 @page certificado {
-  margin: 12mm;
+  size: letter landscape;
+  margin: 0;
   @bottom-left {
     content: none;
   }
@@ -1319,6 +1320,145 @@ th[data-sort][aria-sort="descending"]::after {
 }
 .cert-doc {
   page: certificado;
+}
+
+/* ── Certificados: marco diseñado en Canva (img/cert-marco.jpg) con los textos encima ──
+   Los tamaños usan "cqw" (1 % del ancho de la hoja): la vista previa y la hoja impresa
+   se ven iguales, solo cambia la escala. */
+.cert-preview {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.cert-sheet {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2200 / 1700;
+  container-type: inline-size;
+  overflow: hidden;
+  background: #fbf6ea;
+  color: #1e293b;
+  font-family: Georgia, "Times New Roman", serif;
+  text-align: center;
+}
+.cert-sheet-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+}
+.cert-sheet-watermark {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 34cqw;
+  height: 34cqw;
+  object-fit: contain;
+  opacity: 0.07;
+  z-index: 1;
+  pointer-events: none;
+}
+.cert-sheet-body {
+  position: absolute;
+  inset: 10.5% 13% 9% 13%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+.cert-sheet-head,
+.cert-sheet-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cert-sheet-logo {
+  height: 6.5cqw;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 0.7cqw;
+}
+.cert-sheet-church {
+  margin: 0;
+  font-size: 1.55cqw;
+  font-weight: 700;
+  letter-spacing: 0.25cqw;
+  text-transform: uppercase;
+  color: #0a3f78;
+}
+.cert-sheet-address {
+  margin: 0.3cqw 0 0;
+  font-size: 1.05cqw;
+  color: #64748b;
+}
+.cert-sheet-kicker {
+  margin: 0;
+  font-size: 1.35cqw;
+  font-weight: 600;
+  letter-spacing: 0.35cqw;
+  text-transform: uppercase;
+  color: #9a7414;
+}
+.cert-sheet-title {
+  margin: 0.2cqw 0 1.5cqw;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 5cqw;
+  line-height: 1.05;
+  font-weight: 700;
+  color: #0a3f78;
+}
+.cert-sheet-text {
+  margin: 0;
+  max-width: 60cqw;
+  font-size: 1.7cqw;
+  line-height: 1.65;
+  color: #1e293b;
+}
+.cert-sheet-text strong {
+  color: #0a3f78;
+}
+.cert-sheet-verse {
+  margin: 1.3cqw 0 0;
+  max-width: 54cqw;
+  font-size: 1.3cqw;
+  font-style: italic;
+  color: #8a6a12;
+}
+.cert-sheet-signatures {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  gap: 6cqw;
+}
+.cert-sheet-signatures > div {
+  width: 22cqw;
+}
+.cert-sheet-sign-name {
+  border-top: max(1px, 0.12cqw) solid #0a3f78;
+  padding-top: 0.6cqw;
+  font-size: 1.25cqw;
+  font-weight: 700;
+  color: #0f172a;
+}
+.cert-sheet-sign-role {
+  font-size: 0.95cqw;
+  color: #64748b;
+}
+@media print {
+  /* El contenedor principal tiene relleno; al imprimir un certificado la hoja va de borde a borde
+     (si no, se corre y pasa a una segunda página). Medio milímetro menos evita una hoja en blanco. */
+  main:has(#printOfficialReportArea .cert-doc) {
+    padding: 0 !important;
+  }
+  .cert-doc .cert-sheet {
+    width: 279mm;
+    height: 215.4mm;
+    aspect-ratio: auto;
+    break-inside: avoid;
+  }
 }
 .doc-head {
   display: flex;

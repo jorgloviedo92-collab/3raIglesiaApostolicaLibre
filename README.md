@@ -50,6 +50,10 @@ No se formatean `index.html`, `css/tailwind.css` (generado) ni `Code.js`.
 - La política de seguridad (CSP) de `index.html` **no permite scripts incrustados** (`'unsafe-inline'` solo se mantiene para estilos). Por eso no se usan atributos `onclick="..."` en el HTML: se escribe `data-on-click="nombre"` y se registra la acción en `js/ui/inline-handlers.js`.
 - Todo texto que viene de los datos se inserta con `escapeHtml(...)` al armar HTML.
 
+## Certificados
+
+`img/cert-marco.jpg` es el marco de los certificados de Bautismo y Matrimonio, diseñado en Canva (diseño "Marco para certificado eclesiástico" en la cuenta de la iglesia) y exportado a 2200×1700 px. El sistema escribe encima los datos (`buildCertificateHtml` en `js/modules/reports-certificates.js`, estilos `.cert-sheet` en `css/base.css`) y se imprime en carta horizontal, una sola hoja. Para cambiar el marco: editarlo en Canva, exportarlo como JPG del mismo tamaño y reemplazar el archivo.
+
 ## App instalable (PWA)
 
 La página se puede instalar como aplicación en tabletas, celulares y computadoras (ícono propio, pantalla completa). Sigue funcionando igual desde el navegador.

@@ -223,38 +223,48 @@ function buildCertificateHtml() {
     : true;
 
   const isMarriage = type === 'MATRIMONIO';
-  const title = isMarriage ? 'CERTIFICADO ECLESIÁSTICO DE MATRIMONIO' : 'CERTIFICADO OFICIAL DE BAUTISMO EN AGUA';
+  const kicker = isMarriage ? 'Certificado Eclesiástico de' : 'Certificado Oficial de';
+  const title = isMarriage ? 'Santo Matrimonio' : 'Bautismo en Agua';
   const bodyText = isMarriage
     ? `Por cuanto <strong>${escapeHtml(memberName)}</strong> y <strong>${escapeHtml(spouseName)}</strong> han comparecido ante Dios y esta congregación para unir sus vidas en Santo Matrimonio conforme a las Sagradas Escrituras, el día <strong>${escapeHtml(dateFormatted)}</strong> en <strong>${escapeHtml(place)}</strong>.`
     : `Hacemos constar que <strong>${escapeHtml(memberName)}</strong> ha dado testimonio público de su fe en Jesucristo, siendo bautizado(a) en agua en el nombre del Padre, del Hijo y del Espíritu Santo, el día <strong>${escapeHtml(dateFormatted)}</strong> en <strong>${escapeHtml(place)}</strong>.`;
 
+  // Marco diseñado en Canva (img/cert-marco.jpg, carta horizontal). Los textos se escriben encima
+  // y sus tamaños son proporcionales al ancho de la hoja (estilos .cert-sheet en css/base.css),
+  // así la vista previa y la hoja impresa se ven iguales.
   const topLogoHtml = currentCertLogoBase64
-    ? `<img src="${currentCertLogoBase64}" alt="Logo" style="height: 75px; width: auto; object-fit: contain; margin: 0 auto 10px auto; display: block;" />`
+    ? `<img class="cert-sheet-logo" src="${currentCertLogoBase64}" alt="Logo" />`
     : '';
 
   const watermarkHtml =
     currentCertLogoBase64 && useWatermark
-      ? `<img src="${currentCertLogoBase64}" alt="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; object-fit: contain; opacity: 0.08; pointer-events: none; z-index: 0;" />`
+      ? `<img class="cert-sheet-watermark" src="${currentCertLogoBase64}" alt="" />`
       : '';
 
   return `
-      <div style="border: 8px double #1e3a8a; padding: 32px; background-color: #ffffff; text-align: center; font-family: Georgia, serif; color: #0f172a; position: relative; overflow: hidden;">
+      <div class="cert-sheet">
+        <img class="cert-sheet-frame" src="img/cert-marco.jpg" alt="" />
         ${watermarkHtml}
-        <div style="border: 2px solid #b45309; padding: 26px; position: relative; z-index: 1;">
-          ${topLogoHtml}
-          <p style="font-size: 11pt; font-weight: 600; color: #1d4ed8; letter-spacing: 2px; text-transform: uppercase; margin: 0;">${escapeHtml(churchConfig.name || 'IGLESIA CRISTIANA')}</p>
-          <p style="font-size: 8.5pt; color: #64748b; margin-top: 2px;">${escapeHtml(churchConfig.address || 'Nicaragua')}</p>
-          <h1 style="font-size: 20pt; font-weight: 700; color: #0f172a; margin: 16px 0 12px 0; letter-spacing: 1px;">${title}</h1>
-          <p style="font-size: 12pt; line-height: 1.8; max-width: 650px; margin: 0 auto 18px auto;">${bodyText}</p>
-          <p style="font-size: 10pt; font-style: italic; color: #92400e; margin: 16px auto; max-width: 580px;">${escapeHtml(verse)}</p>
-          <div style="margin-top: 50px; display: flex; justify-content: space-around; align-items: flex-end;">
-            <div style="width: 210px;">
-              <div style="border-top: 1px solid #0f172a; padding-top: 6px; font-weight: 600; font-size: 10pt;">${escapeHtml(churchConfig.pastor || 'Pastor Oficiante')}</div>
-              <div style="font-size: 8pt; color: #64748b;">Pastor General</div>
+        <div class="cert-sheet-body">
+          <div class="cert-sheet-head">
+            ${topLogoHtml}
+            <p class="cert-sheet-church">${escapeHtml(churchConfig.name || 'IGLESIA CRISTIANA')}</p>
+            <p class="cert-sheet-address">${escapeHtml(churchConfig.address || 'Nicaragua')}</p>
+          </div>
+          <div class="cert-sheet-main">
+            <p class="cert-sheet-kicker">${kicker}</p>
+            <h1 class="cert-sheet-title">${title}</h1>
+            <p class="cert-sheet-text">${bodyText}</p>
+            ${verse ? `<p class="cert-sheet-verse">${escapeHtml(verse)}</p>` : ''}
+          </div>
+          <div class="cert-sheet-signatures">
+            <div>
+              <div class="cert-sheet-sign-name">${escapeHtml(churchConfig.pastor || 'Pastor Oficiante')}</div>
+              <div class="cert-sheet-sign-role">Pastor General</div>
             </div>
-            <div style="width: 210px;">
-              <div style="border-top: 1px solid #0f172a; padding-top: 6px; font-weight: 600; font-size: 10pt;">${escapeHtml(churchConfig.secretary || 'Secretaría General')}</div>
-              <div style="font-size: 8pt; color: #64748b;">Secretario(a) General</div>
+            <div>
+              <div class="cert-sheet-sign-name">${escapeHtml(churchConfig.secretary || 'Secretaría General')}</div>
+              <div class="cert-sheet-sign-role">Secretario(a) General</div>
             </div>
           </div>
         </div>
