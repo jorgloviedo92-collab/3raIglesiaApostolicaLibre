@@ -66,7 +66,7 @@ icons/                      Íconos 192/512 (normales y adaptables) y apple-touc
 ```
 
 - **Instalar:** Android/Chrome → menú ⋮ → "Instalar aplicación". iPad/iPhone (Safari) → Compartir → "Agregar a pantalla de inicio". Computadora (Chrome/Edge) → ícono de instalar en la barra de direcciones.
-- **Actualizaciones:** no hay que hacer nada. Lo que se publica en GitHub Pages llega a la app la próxima vez que se abre con internet.
+- **Actualizaciones:** lo que se publica en GitHub Pages llega a la app la próxima vez que se abre con internet. Si la app quedó abierta en segundo plano (el celular la "reanuda" sin recargarla), `js/pwa.js` compara la fecha de publicación (encabezado Last-Modified de GitHub Pages) al volver a la app y cada 15 minutos, y muestra el aviso "Hay una versión nueva del sistema" con el botón Actualizar (no recarga solo, para no perder un formulario a medio llenar; la sesión se mantiene).
 - **Datos:** el service worker no intercepta ni guarda las llamadas al servidor (Apps Script). Sin internet la app abre, pero para ver o guardar datos necesita conexión.
 - Si se agrega un archivo que la app deba tener sin conexión, no hace falta listarlo: se guarda solo la primera vez que se carga.
 

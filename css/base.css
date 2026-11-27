@@ -1588,3 +1588,56 @@ th[data-sort][aria-sort="descending"]::after {
 #filterCategory {
   padding-right: 0.45rem;
 }
+
+/* Aviso de versión nueva de la app (js/pwa.js) */
+.app-update-banner {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 2100;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  background: #0a3f78;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 14px 34px -12px rgba(6, 34, 74, 0.6);
+}
+.app-update-banner i {
+  color: #f5c451;
+}
+/* En celular el mensaje ocupa su propia línea y los botones quedan debajo */
+@media (max-width: 520px) {
+  .app-update-banner {
+    width: calc(100vw - 24px);
+  }
+  .app-update-banner span {
+    flex: 1 1 calc(100% - 30px);
+  }
+  .app-update-banner button {
+    flex: 1 1 0;
+  }
+}
+.app-update-banner button {
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.app-update-ok {
+  background: #f5c451;
+  color: #0a3f78;
+}
+.app-update-later {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
