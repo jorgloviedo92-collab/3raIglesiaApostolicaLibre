@@ -1335,7 +1335,7 @@ th[data-sort][aria-sort="descending"]::after {
   aspect-ratio: 2200 / 1700;
   container-type: inline-size;
   overflow: hidden;
-  background: #fbf6ea;
+  background: #fdfcf9;
   color: #1e293b;
   font-family: Georgia, "Times New Roman", serif;
   text-align: center;
@@ -1397,10 +1397,10 @@ th[data-sort][aria-sort="descending"]::after {
 .cert-sheet-kicker {
   margin: 0;
   font-size: 1.35cqw;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.35cqw;
   text-transform: uppercase;
-  color: #9a7414;
+  color: #7a5a0c; /* dorado oscuro: contraste 6:1 sobre el fondo claro */
 }
 .cert-sheet-title {
   margin: 0.2cqw 0 1.5cqw;
@@ -1425,7 +1425,7 @@ th[data-sort][aria-sort="descending"]::after {
   max-width: 54cqw;
   font-size: 1.3cqw;
   font-style: italic;
-  color: #8a6a12;
+  color: #6b4f0a; /* dorado oscuro: contraste 7:1 sobre el fondo claro */
 }
 .cert-sheet-signatures {
   width: 100%;
