@@ -1375,6 +1375,10 @@ th[data-sort][aria-sort="descending"]::after {
   flex-direction: column;
   align-items: center;
 }
+/* Separación entre la paloma del marco y el nombre de la iglesia */
+.cert-sheet-head {
+  margin-top: 2.8cqw;
+}
 .cert-sheet-logo {
   height: 6.5cqw;
   width: auto;
